@@ -104,7 +104,7 @@ export function AdminShell({
       >
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
-            <p className="mb-1.5 px-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[#787872]">
+            <p className="mb-1.5 px-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[#64748b]">
               {group.label}
             </p>
             <ul className="space-y-0.5">
@@ -123,14 +123,14 @@ export function AdminShell({
                       className={cn(
                         "relative flex min-h-[40px] items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
                         active
-                          ? "border border-[#e5e5e0] bg-white text-[#111113] shadow-[0_1px_2px_rgba(17,17,19,0.04)] before:absolute before:inset-y-2 before:left-0 before:w-[2.5px] before:rounded-r before:bg-[#111113]"
-                          : "border border-transparent text-[#52524e] hover:bg-[#ededeb] hover:text-[#111113]",
+                          ? "border border-[#cbd5e1] bg-white text-[#1e3a5f] shadow-[0_1px_2px_rgba(15,23,42,0.04)] before:absolute before:inset-y-2 before:left-0 before:w-[2.5px] before:rounded-r before:bg-[#1e3a5f]"
+                          : "border border-transparent text-[#475569] hover:bg-[#e2e8f0]/60 hover:text-[#1e293b]",
                       )}
                     >
                       <Icon
                         className={cn(
                           "h-4 w-4 shrink-0",
-                          active ? "text-[#111113]" : "text-[#787872]",
+                          active ? "text-[#1e3a5f]" : "text-[#64748b]",
                         )}
                         aria-hidden="true"
                       />
@@ -147,18 +147,18 @@ export function AdminShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f5] text-[#111113]">
+    <div className="min-h-screen bg-[#f8fafc] text-[#1e293b]">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#e5e5e0] bg-[#f7f7f5] lg:flex">
-        <div className="flex h-16 items-center gap-2.5 border-b border-[#e5e5e0] bg-white px-5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#111113] font-mono text-xs font-bold tracking-tight text-white">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#e2e8f0] bg-[#f1f5f9]/85 lg:flex">
+        <div className="flex h-16 items-center gap-2.5 border-b border-[#e2e8f0] bg-white px-5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#1e3a5f] font-mono text-xs font-bold tracking-tight text-white">
             LM
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold tracking-[-0.02em] text-[#111113]">
+            <p className="truncate text-sm font-semibold tracking-[-0.02em] text-[#1e293b]">
               LaptopMatch
             </p>
-            <p className="truncate font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+            <p className="truncate font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
               Panel Peneliti
             </p>
           </div>
@@ -166,10 +166,10 @@ export function AdminShell({
 
         {renderNav()}
 
-        <div className="space-y-2.5 border-t border-[#e5e5e0] bg-white/70 p-3">
-          <div className="rounded-lg border border-[#e5e5e0] bg-white px-3 py-2.5">
-            <p className="truncate text-xs font-semibold text-[#111113]">{adminName}</p>
-            <p className="truncate font-mono text-[11px] text-[#787872]">{adminEmail}</p>
+        <div className="space-y-2.5 border-t border-[#e2e8f0] bg-white/80 p-3">
+          <div className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2.5">
+            <p className="truncate text-xs font-semibold text-[#1e293b]">{adminName}</p>
+            <p className="truncate font-mono text-[11px] text-[#64748b]">{adminEmail}</p>
           </div>
           <Button
             variant="outline"
@@ -185,16 +185,16 @@ export function AdminShell({
       </aside>
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#e5e5e0] bg-white/95 px-4 backdrop-blur lg:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#e2e8f0] bg-white/95 px-4 backdrop-blur lg:hidden">
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#111113] font-mono text-xs font-bold text-white">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#1e3a5f] font-mono text-xs font-bold text-white">
             LM
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold tracking-[-0.015em] text-[#111113]">
+            <p className="truncate text-sm font-semibold tracking-[-0.015em] text-[#1e293b]">
               {activeLabel}
             </p>
-            <p className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+            <p className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
               LaptopMatch Admin
             </p>
           </div>
@@ -203,7 +203,7 @@ export function AdminShell({
           type="button"
           aria-label="Buka menu navigasi admin"
           onClick={() => setMobileOpen(true)}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#e5e5e0] bg-white text-[#111113] hover:bg-[#f2f2ee]"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] hover:bg-[#f1f5f9]"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -213,16 +213,16 @@ export function AdminShell({
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <div
-            className="fixed inset-0 bg-[#111113]/45"
+            className="fixed inset-0 bg-[#0f172a]/35"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#e5e5e0] bg-[#f7f7f5] shadow-2xl">
-            <div className="flex h-14 items-center justify-between border-b border-[#e5e5e0] bg-white px-4">
+          <div className="fixed inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-[#e2e8f0] bg-[#f8fafc] shadow-2xl">
+            <div className="flex h-14 items-center justify-between border-b border-[#e2e8f0] bg-white px-4">
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded bg-[#111113] font-mono text-[11px] font-bold text-white">
+                <span className="flex h-7 w-7 items-center justify-center rounded bg-[#1e3a5f] font-mono text-[11px] font-bold text-white">
                   LM
                 </span>
-                <span className="text-sm font-semibold tracking-[-0.015em]">
+                <span className="text-sm font-semibold tracking-[-0.015em] text-[#1e293b]">
                   Menu Peneliti
                 </span>
               </div>
@@ -230,24 +230,24 @@ export function AdminShell({
                 type="button"
                 aria-label="Tutup menu"
                 onClick={() => setMobileOpen(false)}
-                className="flex h-11 w-11 items-center justify-center rounded-lg text-[#52524e] hover:bg-[#f2f2ee]"
+                className="flex h-11 w-11 items-center justify-center rounded-lg text-[#475569] hover:bg-[#f1f5f9]"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
             {renderNav(() => setMobileOpen(false))}
-            <div className="space-y-2 border-t border-[#e5e5e0] bg-white p-3">
-              <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] px-3 py-2">
-                <p className="truncate text-xs font-semibold text-[#111113]">{adminName}</p>
-                <p className="truncate font-mono text-[11px] text-[#787872]">{adminEmail}</p>
+            <div className="space-y-2 border-t border-[#e2e8f0] bg-white p-3">
+              <div className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2">
+                <p className="truncate text-xs font-semibold text-[#1e293b]">{adminName}</p>
+                <p className="truncate font-mono text-[11px] text-[#64748b]">{adminEmail}</p>
               </div>
               <Link
                 href="/"
                 onClick={() => setMobileOpen(false)}
-                className="flex min-h-[44px] items-center justify-between rounded-lg border border-[#e5e5e0] px-3 text-sm font-medium text-[#111113] hover:bg-[#f2f2ee]"
+                className="flex min-h-[44px] items-center justify-between rounded-lg border border-[#e2e8f0] px-3 text-sm font-medium text-[#1e293b] hover:bg-[#f1f5f9]"
               >
                 <span>Website Publik</span>
-                <ArrowUpRight className="h-4 w-4 text-[#787872]" aria-hidden="true" />
+                <ArrowUpRight className="h-4 w-4 text-[#64748b]" aria-hidden="true" />
               </Link>
               <Button
                 variant="outline"
@@ -267,18 +267,18 @@ export function AdminShell({
       {/* Main workspace */}
       <div className="lg:pl-64">
         {/* Desktop slim breadcrumb header */}
-        <header className="sticky top-0 z-20 hidden h-16 items-center justify-between border-b border-[#e5e5e0] bg-white/95 px-8 backdrop-blur lg:flex">
-          <div className="flex items-center gap-2 text-xs text-[#787872]">
+        <header className="sticky top-0 z-20 hidden h-16 items-center justify-between border-b border-[#e2e8f0] bg-white/95 px-8 backdrop-blur lg:flex">
+          <div className="flex items-center gap-2 text-xs text-[#64748b]">
             <span className="font-mono uppercase tracking-[0.12em]">Panel Peneliti</span>
             <span aria-hidden="true">/</span>
-            <span className="font-medium text-[#111113]">{activeLabel}</span>
+            <span className="font-medium text-[#1e293b]">{activeLabel}</span>
           </div>
           <Link
             href="/"
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] px-3 text-xs font-medium text-[#111113] transition-colors hover:border-[#111113]/30 hover:bg-white"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 text-xs font-medium text-[#1e293b] transition-colors hover:border-[#1e3a5f]/40 hover:bg-white hover:text-[#1e3a5f]"
           >
             <span>Website Publik</span>
-            <ArrowUpRight className="h-3.5 w-3.5 text-[#787872]" aria-hidden="true" />
+            <ArrowUpRight className="h-3.5 w-3.5 text-[#64748b]" aria-hidden="true" />
           </Link>
         </header>
 

@@ -208,7 +208,7 @@ export function AhpWorkbench({
           </div>
 
           {runs.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 border-t border-[#e5e5e0] pt-4">
+            <div className="flex flex-wrap items-center gap-3 border-t border-[#e2e8f0] pt-4">
               <Label htmlFor="ahp-history-select" className="mb-0">
                 Tampilkan hasil run tersimpan:
               </Label>
@@ -241,47 +241,47 @@ export function AhpWorkbench({
           description="Pilih batch responden yang sudah diimpor lalu klik Hitung AHP Sekarang untuk menjalankan algoritma eigenvector dan agregasi geometrik."
         />
       ) : loadingDetail || !runDetail ? (
-        <p className="py-8 text-center text-sm text-[#787872]">
+        <p className="py-8 text-center text-sm text-[#64748b]">
           Memuat detail matriks dan audit konsistensi AHP...
         </p>
       ) : (
         <>
           {/* 5-Column Hairline Metrics Strip */}
-          <div className="grid gap-px overflow-hidden rounded-lg border border-[#e5e5e0] bg-[#e5e5e0] sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] sm:grid-cols-2 lg:grid-cols-5">
             <div className="bg-white p-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
                 Disertakan / Eksklusi
               </p>
-              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#111113]">
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#1e293b]">
                 {runDetail.run.includedIds.length} / {runDetail.run.excludedIds.length}
               </p>
             </div>
             <div className="bg-white p-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
                 Lambda Maksimum
               </p>
-              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#111113]">
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#1e293b]">
                 {formatDecimal(runDetail.run.lambdaMax, 8)}
               </p>
             </div>
             <div className="bg-white p-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
                 Consistency Index (CI)
               </p>
-              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#111113]">
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#1e293b]">
                 {formatDecimal(runDetail.run.ci, 8)}
               </p>
             </div>
-            <div className="bg-[#111113] p-4 text-white">
-              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+            <div className="bg-[#eff4fa] p-4 text-[#1e293b]">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-[#1e3a5f]">
                 Consistency Ratio (CR)
               </p>
-              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-white">
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#1e3a5f]">
                 {formatDecimal(runDetail.run.cr, 8)}
               </p>
             </div>
             <div className="bg-white p-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
                 Status (RI = 1,24)
               </p>
               <div className="mt-1.5">
@@ -289,7 +289,7 @@ export function AhpWorkbench({
                   {runDetail.run.passesCr ? "Konsisten (CR ≤ 0,10)" : "Tidak Konsisten"}
                 </Badge>
               </div>
-              <p className="mt-1.5 font-mono text-[11px] text-[#787872]">
+              <p className="mt-1.5 font-mono text-[11px] text-[#64748b]">
                 Konvergen: {runDetail.run.iterations} iterasi
               </p>
             </div>
@@ -318,7 +318,7 @@ export function AhpWorkbench({
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                      <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                         <th className="px-4 py-2.5">Prioritas</th>
                         <th className="px-4 py-2.5">Kriteria</th>
                         <th className="px-4 py-2.5 text-right">Bobot</th>
@@ -328,18 +328,18 @@ export function AhpWorkbench({
                         )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e5e5e0]/80">
+                    <tbody className="divide-y divide-[#e2e8f0]/80">
                       {sortedWeights.map((row, idx) => (
-                        <tr key={row.criterion.code} className="hover:bg-[#f7f7f5]/60">
-                          <td className="px-4 py-3 font-mono text-xs font-semibold text-[#111113]">
+                        <tr key={row.criterion.code} className="hover:bg-[#f8fafc]/60">
+                          <td className="px-4 py-3 font-mono text-xs font-semibold text-[#1e293b]">
                             #{idx + 1}
                           </td>
                           <td className="px-4 py-3">
                             <div>
-                              <span className="mr-1.5 font-mono text-xs text-[#787872]">
+                              <span className="mr-1.5 font-mono text-xs text-[#64748b]">
                                 {row.criterion.code}
                               </span>
-                              <span className="font-medium text-[#111113]">
+                              <span className="font-medium text-[#1e293b]">
                                 {row.criterion.name}
                               </span>
                             </div>
@@ -349,14 +349,14 @@ export function AhpWorkbench({
                               className="mt-1.5 max-w-[160px]"
                             />
                           </td>
-                          <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#52524e]">
+                          <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#475569]">
                             {formatDecimal(row.weight, 8)}
                           </td>
-                          <td className="px-4 py-3 text-right font-mono text-sm font-semibold tabular-nums text-[#111113]">
+                          <td className="px-4 py-3 text-right font-mono text-sm font-semibold tabular-nums text-[#1e293b]">
                             {formatWeightPercent(row.weight, 2)}
                           </td>
                           {comparisonRun && (
-                            <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#787872]">
+                            <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#64748b]">
                               {row.compWeight !== null
                                 ? formatWeightPercent(row.compWeight, 2)
                                 : "—"}
@@ -433,7 +433,7 @@ export function AhpWorkbench({
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[740px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                       <th className="px-4 py-2.5">Kode</th>
                       <th className="px-4 py-2.5 text-right">λmaks</th>
                       <th className="px-4 py-2.5 text-right">CR Individu</th>
@@ -442,18 +442,18 @@ export function AhpWorkbench({
                       <th className="px-4 py-2.5 text-right">Matriks</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e5e5e0]/80">
+                  <tbody className="divide-y divide-[#e2e8f0]/80">
                     {runDetail.individualResults.map((ir) => (
-                      <tr key={ir.id} className="transition-colors hover:bg-[#f7f7f5]/60">
-                        <td className="px-4 py-3 font-mono font-semibold text-[#111113]">
+                      <tr key={ir.id} className="transition-colors hover:bg-[#f8fafc]/60">
+                        <td className="px-4 py-3 font-mono font-semibold text-[#1e293b]">
                           {ir.responseCode}
                         </td>
-                        <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#52524e]">
+                        <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#475569]">
                           {ir.lambdaMax !== null ? formatDecimal(ir.lambdaMax, 6) : "—"}
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex flex-col items-end">
-                            <span className="font-mono text-xs font-medium tabular-nums text-[#111113]">
+                            <span className="font-mono text-xs font-medium tabular-nums text-[#1e293b]">
                               {ir.cr !== null ? formatDecimal(ir.cr, 6) : "—"}
                             </span>
                             <CrGaugeBar cr={ir.cr} />
@@ -464,7 +464,7 @@ export function AhpWorkbench({
                             {ir.passesCr ? "Lolos" : "Tidak lolos"}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-xs text-[#52524e]">{ir.reason}</td>
+                        <td className="px-4 py-3 text-xs text-[#475569]">{ir.reason}</td>
                         <td className="px-4 py-3 text-right">
                           {ir.matrix && (
                             <Button

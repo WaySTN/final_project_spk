@@ -36,12 +36,12 @@ export default async function AdminLaporanPage() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[#e5e5e0] pb-5">
+      <div className="border-b border-[#e2e8f0] pb-5">
         <p className="editorial-kicker">Ekspor Dokumentasi Akademik</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#111113]">
+        <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#1e293b]">
           Laporan &amp; Ekspor Workbook Excel (.xlsx)
         </h1>
-        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#787872]">
+        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#64748b]">
           Unduh workbook audit lengkap berisi 7 sheet terstruktur untuk verifikasi dosen
           pengampu dan lampiran laporan tugas akhir.
         </p>
@@ -50,25 +50,25 @@ export default async function AdminLaporanPage() {
       {/* 7-Sheet Manifest Ledger */}
       <div className="space-y-2.5">
         <p className="editorial-kicker">Struktur 7 Sheet Workbook Audit (.xlsx)</p>
-        <div className="grid gap-px overflow-hidden rounded-lg border border-[#e5e5e0] bg-[#e5e5e0] sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] sm:grid-cols-2 lg:grid-cols-4">
           {WORKBOOK_SHEETS.map((sheet) => (
             <div key={sheet.num} className="bg-white p-3.5">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] font-semibold text-[#787872]">
+                <span className="font-mono text-[10px] font-semibold text-[#64748b]">
                   {sheet.num}
                 </span>
-                <p className="text-xs font-semibold text-[#111113]">{sheet.name}</p>
+                <p className="text-xs font-semibold text-[#1e293b]">{sheet.name}</p>
               </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-[#787872]">
+              <p className="mt-1 text-[11px] leading-relaxed text-[#64748b]">
                 {sheet.desc}
               </p>
             </div>
           ))}
-          <div className="bg-[#f7f7f5] p-3.5 flex flex-col justify-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+          <div className="bg-[#f8fafc] p-3.5 flex flex-col justify-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
               Keamanan Ekspor
             </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-[#52524e]">
+            <p className="mt-1 text-[11px] leading-relaxed text-[#475569]">
               Formula-injection sanitized · tanpa baris mentah responden.
             </p>
           </div>
@@ -101,7 +101,7 @@ export default async function AdminLaporanPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                  <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                     <th className="px-4 py-3">Waktu Hitung</th>
                     <th className="px-4 py-3">Skenario</th>
                     <th className="px-4 py-3">Dataset &amp; Alternatif</th>
@@ -109,23 +109,23 @@ export default async function AdminLaporanPage() {
                     <th className="px-4 py-3 text-right">Unduh</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e5e5e0]/80">
+                <tbody className="divide-y divide-[#e2e8f0]/80">
                   {sawRuns.map((run) => {
                     const pub = pubBySawId.get(run.id);
                     return (
-                      <tr key={run.id} className="transition-colors hover:bg-[#f7f7f5]/60">
-                        <td className="px-4 py-3.5 font-mono text-xs whitespace-nowrap text-[#52524e]">
+                      <tr key={run.id} className="transition-colors hover:bg-[#f8fafc]/60">
+                        <td className="px-4 py-3.5 font-mono text-xs whitespace-nowrap text-[#475569]">
                           {formatDateTimeJakarta(run.createdAt)}
                         </td>
                         <td className="px-4 py-3.5">
-                          <p className="text-xs font-semibold text-[#111113]">
+                          <p className="text-xs font-semibold text-[#1e293b]">
                             {getScenarioLabel(run.scenario)}
                           </p>
-                          <p className="font-mono text-[11px] text-[#787872]">
+                          <p className="font-mono text-[11px] text-[#64748b]">
                             ID: {run.id.slice(0, 8)}…
                           </p>
                         </td>
-                        <td className="px-4 py-3.5 font-mono text-xs text-[#52524e]">
+                        <td className="px-4 py-3.5 font-mono text-xs text-[#475569]">
                           v{run.inputSnapshot.datasetVersion} ({run.inputSnapshot.observedAt}) ·{" "}
                           {run.inputSnapshot.alternativeCodes.length} kandidat
                         </td>
@@ -150,7 +150,7 @@ export default async function AdminLaporanPage() {
                         <td className="px-4 py-3.5 text-right">
                           <a
                             href={`/api/admin/export/${run.id}`}
-                            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#111113] px-3.5 text-xs font-medium text-white transition-colors hover:bg-[#27272a]"
+                            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#1e3a5f] px-3.5 text-xs font-medium text-white transition-colors hover:bg-[#162d4a]"
                           >
                             <Download className="h-3.5 w-3.5" aria-hidden="true" />
                             Unduh XLSX

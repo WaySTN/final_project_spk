@@ -44,13 +44,13 @@ export function NoPublicationState() {
         <div className="flex flex-wrap justify-center gap-3">
           <Link
             href="/metodologi"
-            className="inline-flex h-10 items-center rounded-lg border border-[#d0d0c8] bg-white px-4 text-sm font-medium text-[#111113] hover:bg-[#f7f7f5]"
+            className="inline-flex h-10 items-center rounded-lg border border-[#cbd5e1] bg-white px-4 text-sm font-medium text-[#1e293b] hover:bg-[#f8fafc]"
           >
             Pelajari Metodologi
           </Link>
           <Link
             href="/admin"
-            className="inline-flex h-10 items-center rounded-lg bg-[#111113] px-4 text-sm font-medium text-white hover:bg-[#27272a]"
+            className="inline-flex h-10 items-center rounded-lg bg-[#1e3a5f] px-4 text-sm font-medium text-white hover:bg-[#162d4a]"
           >
             Masuk Panel Admin
           </Link>

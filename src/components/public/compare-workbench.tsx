@@ -63,13 +63,13 @@ export function CompareWorkbench({
       </AlertBanner>
 
       {/* Selector Bar */}
-      <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-4 sm:p-5 space-y-3.5 no-print">
+      <div className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4 sm:p-5 space-y-3.5 no-print">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-[#52524e]">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-[#475569]">
               Pilih Kandidat ({selectedCodes.length}/3)
             </p>
-            <p className="text-xs text-[#787872]">
+            <p className="text-xs text-[#64748b]">
               Klik kode alternatif di bawah untuk menambah atau mengganti slot perbandingan.
             </p>
           </div>
@@ -94,8 +94,8 @@ export function CompareWorkbench({
                 onClick={() => toggleCode(item.code)}
                 className={`inline-flex min-h-[40px] items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
                   active
-                    ? "border-[#111113] bg-[#111113] text-white"
-                    : "border-[#d0d0c8] bg-white text-[#52524e] hover:border-[#111113]/50 hover:text-[#111113]"
+                    ? "border-[#1e3a5f] bg-[#1e3a5f] text-white"
+                    : "border-[#cbd5e1] bg-white text-[#475569] hover:border-[#1e3a5f]/50 hover:text-[#1e293b]"
                 }`}
               >
                 <span className="font-mono font-semibold">{item.code}</span>
@@ -108,25 +108,25 @@ export function CompareWorkbench({
       </div>
 
       {compared.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#d0d0c8] py-12 text-center text-sm text-[#787872]">
+        <div className="rounded-lg border border-dashed border-[#cbd5e1] py-12 text-center text-sm text-[#64748b]">
           Pilih minimal 1 laptop di atas untuk menampilkan tabel perbandingan.
         </div>
       ) : (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between sm:hidden">
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
               Perbandingan {compared.length} Kandidat
             </span>
-            <span className="font-mono text-[10px] text-[#787872]">
+            <span className="font-mono text-[10px] text-[#64748b]">
               Geser horizontal →
             </span>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
+          <div className="overflow-x-auto rounded-lg border border-[#e2e8f0] bg-white">
             <table className="w-full min-w-[620px] border-collapse text-sm">
               <thead>
-                <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left">
-                  <th className="sticky left-0 z-10 w-44 border-r border-[#e5e5e0] bg-[#f7f7f5] px-4 py-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#787872]">
+                <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left">
+                  <th className="sticky left-0 z-10 w-44 border-r border-[#e2e8f0] bg-[#f8fafc] px-4 py-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748b]">
                     Kriteria
                   </th>
                   {compared.map((item) => (
@@ -135,26 +135,26 @@ export function CompareWorkbench({
                         <Badge tone={item.rank === 1 ? "dark" : "neutral"}>
                           #{item.rank}
                         </Badge>
-                        <span className="font-mono text-xs text-[#787872]">
+                        <span className="font-mono text-xs text-[#64748b]">
                           {item.code}
                         </span>
                       </div>
                       <Link
                         href={`/laptop/${item.code}`}
-                        className="mt-1.5 block text-sm font-semibold text-[#111113] hover:underline"
+                        className="mt-1.5 block text-sm font-semibold text-[#1e293b] hover:underline"
                       >
                         {item.model}
                       </Link>
-                      <p className="text-xs font-normal text-[#787872]">{item.cpuName}</p>
+                      <p className="text-xs font-normal text-[#64748b]">{item.cpuName}</p>
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e5e5e0]/80 tabular-nums">
-                <tr className="bg-[#f7f7f5]/60">
+              <tbody className="divide-y divide-[#e2e8f0]/80 tabular-nums">
+                <tr className="bg-[#f8fafc]/60">
                   <th
                     scope="row"
-                    className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-[#f7f7f5] px-4 py-3.5 text-left text-xs font-semibold text-[#111113]"
+                    className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-[#f8fafc] px-4 py-3.5 text-left text-xs font-semibold text-[#1e293b]"
                   >
                     Skor SAW Resmi
                   </th>
@@ -163,12 +163,12 @@ export function CompareWorkbench({
                     return (
                       <td key={item.code} className="px-4 py-3.5 space-y-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-base font-bold text-[#111113]">
+                          <span className="font-mono text-base font-bold text-[#1e293b]">
                             {formatDecimal(item.score, 6)}
                           </span>
                           {isBest && (
                             <span
-                              className="h-2 w-2 rounded-full bg-[#111113]"
+                              className="h-2 w-2 rounded-full bg-[#1e3a5f]"
                               title="Tertinggi di perbandingan"
                             />
                           )}
@@ -229,10 +229,10 @@ export function CompareWorkbench({
                     }),
                   },
                 ].map((row) => (
-                  <tr key={row.label} className="hover:bg-[#f7f7f5]/50">
+                  <tr key={row.label} className="hover:bg-[#f8fafc]/50">
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-3 text-left text-xs font-medium text-[#52524e]"
+                      className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-white px-4 py-3 text-left text-xs font-medium text-[#475569]"
                     >
                       {row.label}
                     </th>
@@ -244,20 +244,20 @@ export function CompareWorkbench({
                             <span
                               className={`font-mono text-xs sm:text-[13px] ${
                                 info.best
-                                  ? "font-bold text-[#111113]"
-                                  : "font-medium text-[#52524e]"
+                                  ? "font-bold text-[#1e293b]"
+                                  : "font-medium text-[#475569]"
                               }`}
                             >
                               {info.val}
                             </span>
                             {info.best && (
                               <span
-                                className="h-1.5 w-1.5 rounded-full bg-[#111113]"
+                                className="h-1.5 w-1.5 rounded-full bg-[#1e3a5f]"
                                 title="Unggul pada perbandingan ini"
                               />
                             )}
                           </div>
-                          <p className="mt-0.5 font-mono text-[11px] text-[#787872]">
+                          <p className="mt-0.5 font-mono text-[11px] text-[#64748b]">
                             {info.sub}
                           </p>
                         </td>
@@ -269,7 +269,7 @@ export function CompareWorkbench({
                 <tr>
                   <th
                     scope="row"
-                    className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-3 text-left text-xs font-medium text-[#52524e]"
+                    className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-white px-4 py-3 text-left text-xs font-medium text-[#475569]"
                   >
                     Penjual & Status Stok
                   </th>
@@ -277,7 +277,7 @@ export function CompareWorkbench({
                     const sb = formatStockStatusLabel(item.stockStatus);
                     return (
                       <td key={item.code} className="px-4 py-3 space-y-1.5">
-                        <p className="text-xs font-medium text-[#111113]">{item.seller}</p>
+                        <p className="text-xs font-medium text-[#1e293b]">{item.seller}</p>
                         <Badge tone={sb.tone}>{sb.label}</Badge>
                       </td>
                     );
@@ -287,7 +287,7 @@ export function CompareWorkbench({
                 <tr>
                   <th
                     scope="row"
-                    className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-3 text-left text-xs font-medium text-[#52524e]"
+                    className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-white px-4 py-3 text-left text-xs font-medium text-[#475569]"
                   >
                     Tautan Sumber Audit
                   </th>
@@ -300,7 +300,7 @@ export function CompareWorkbench({
                             href={s.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-0.5 font-mono text-[11px] text-[#52524e] underline hover:text-[#111113]"
+                            className="inline-flex items-center gap-0.5 font-mono text-[11px] text-[#475569] underline hover:text-[#1e293b]"
                           >
                             {s.sourceType}
                             <ArrowUpRight className="h-3 w-3" aria-hidden="true" />

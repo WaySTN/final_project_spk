@@ -27,12 +27,12 @@ export default async function AdminKriteriaPage() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[#e5e5e0] pb-5">
+      <div className="border-b border-[#e2e8f0] pb-5">
         <p className="editorial-kicker">Kontrak Penelitian · Read-Only</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#111113]">
+        <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#1e293b]">
           Kriteria Keputusan (C1–C6)
         </h1>
-        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#787872]">
+        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#64748b]">
           Enam kriteria ditetapkan berdasarkan kajian literatur penelitian terdahulu. Bobot
           dihasilkan secara matematis dari perhitungan AHP, bukan diubah manual.
         </p>
@@ -55,17 +55,17 @@ export default async function AdminKriteriaPage() {
         </CardHeader>
         <CardContent className="p-0">
           {/* Mobile stacked specification cards */}
-          <div className="divide-y divide-[#e5e5e0] md:hidden">
+          <div className="divide-y divide-[#e2e8f0] md:hidden">
             {CRITERIA.map((c) => {
               const weight = latestPrimary?.weightsByCode[c.code] ?? null;
               return (
                 <div key={c.code} className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="rounded bg-[#111113] px-2 py-0.5 font-mono text-xs font-semibold text-white">
+                      <span className="rounded bg-[#1e3a5f] px-2 py-0.5 font-mono text-xs font-semibold text-white">
                         {c.code}
                       </span>
-                      <span className="text-sm font-semibold text-[#111113]">{c.name}</span>
+                      <span className="text-sm font-semibold text-[#1e293b]">{c.name}</span>
                     </div>
                     <Badge tone={c.attribute === "cost" ? "dark" : "neutral"}>
                       {c.attribute === "cost" ? "Cost" : "Benefit"}
@@ -73,29 +73,29 @@ export default async function AdminKriteriaPage() {
                   </div>
 
                   {weight !== null && (
-                    <div className="rounded-md border border-[#e5e5e0] bg-[#f7f7f5] p-3">
+                    <div className="rounded-md border border-[#e2e8f0] bg-[#f8fafc] p-3">
                       <div className="flex items-baseline justify-between">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
                           Bobot AHP ({c.unit})
                         </span>
-                        <span className="font-mono text-sm font-semibold tabular-nums text-[#111113]">
+                        <span className="font-mono text-sm font-semibold tabular-nums text-[#1e293b]">
                           {formatWeightPercent(weight, 2)}
                         </span>
                       </div>
                       <ScoreBar value={weight} max={maxWeight} className="mt-2" />
-                      <p className="mt-1 font-mono text-[11px] tabular-nums text-[#787872]">
+                      <p className="mt-1 font-mono text-[11px] tabular-nums text-[#64748b]">
                         {formatDecimal(weight, 8)}
                       </p>
                     </div>
                   )}
 
-                  <div className="space-y-1 text-xs leading-relaxed text-[#52524e]">
-                    <p className="text-[#111113]">{c.definition}</p>
+                  <div className="space-y-1 text-xs leading-relaxed text-[#475569]">
+                    <p className="text-[#1e293b]">{c.definition}</p>
                     <p>
-                      <span className="font-medium text-[#111113]">Sumber:</span>{" "}
+                      <span className="font-medium text-[#1e293b]">Sumber:</span>{" "}
                       {c.measurementSource}
                     </p>
-                    <p className="text-[#787872]">{c.notes}</p>
+                    <p className="text-[#64748b]">{c.notes}</p>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5">
@@ -108,7 +108,7 @@ export default async function AdminKriteriaPage() {
                           href={ref.doi}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded border border-[#e5e5e0] bg-[#f7f7f5] px-2 py-0.5 text-[11px] text-[#52524e] hover:border-[#111113]/40 hover:text-[#111113]"
+                          className="inline-flex items-center gap-1 rounded border border-[#e2e8f0] bg-[#f8fafc] px-2 py-0.5 text-[11px] text-[#475569] hover:border-[#1e3a5f]/40 hover:text-[#1e293b]"
                         >
                           {ref.authors.split(",")[0]} ({ref.year})
                           <ArrowUpRight className="h-2.5 w-2.5" aria-hidden="true" />
@@ -125,7 +125,7 @@ export default async function AdminKriteriaPage() {
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[780px] border-collapse text-sm">
               <thead>
-                <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                   <th className="px-4 py-3">Kode</th>
                   <th className="px-4 py-3">Kriteria</th>
                   <th className="px-4 py-3">Atribut</th>
@@ -134,45 +134,45 @@ export default async function AdminKriteriaPage() {
                   <th className="px-4 py-3">Definisi Operasional &amp; Sumber</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e5e5e0]/80">
+              <tbody className="divide-y divide-[#e2e8f0]/80">
                 {CRITERIA.map((c) => {
                   const weight = latestPrimary?.weightsByCode[c.code] ?? null;
                   return (
-                    <tr key={c.code} className="align-top transition-colors hover:bg-[#f7f7f5]/60">
-                      <td className="px-4 py-4 font-mono font-semibold text-[#111113]">
+                    <tr key={c.code} className="align-top transition-colors hover:bg-[#f8fafc]/60">
+                      <td className="px-4 py-4 font-mono font-semibold text-[#1e293b]">
                         {c.code}
                       </td>
-                      <td className="px-4 py-4 font-medium text-[#111113]">{c.name}</td>
+                      <td className="px-4 py-4 font-medium text-[#1e293b]">{c.name}</td>
                       <td className="px-4 py-4">
                         <Badge tone={c.attribute === "cost" ? "dark" : "neutral"}>
                           {c.attribute === "cost" ? "Cost (min/x)" : "Benefit (x/max)"}
                         </Badge>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-[#52524e]">
+                      <td className="px-4 py-4 whitespace-nowrap text-[#475569]">
                         {c.unit}
                       </td>
                       <td className="px-4 py-4 text-right tabular-nums whitespace-nowrap">
                         {weight !== null ? (
                           <div className="ml-auto w-28 space-y-1">
-                            <p className="font-mono text-sm font-semibold text-[#111113]">
+                            <p className="font-mono text-sm font-semibold text-[#1e293b]">
                               {formatWeightPercent(weight, 2)}
                             </p>
                             <ScoreBar value={weight} max={maxWeight} />
-                            <p className="font-mono text-[11px] text-[#787872]">
+                            <p className="font-mono text-[11px] text-[#64748b]">
                               {formatDecimal(weight, 8)}
                             </p>
                           </div>
                         ) : (
-                          <span className="text-[#9c9c95]">—</span>
+                          <span className="text-[#94a3b8]">—</span>
                         )}
                       </td>
-                      <td className="max-w-md space-y-1.5 px-4 py-4 text-xs text-[#52524e]">
-                        <p className="leading-relaxed text-[#111113]">{c.definition}</p>
+                      <td className="max-w-md space-y-1.5 px-4 py-4 text-xs text-[#475569]">
+                        <p className="leading-relaxed text-[#1e293b]">{c.definition}</p>
                         <p>
-                          <span className="font-medium text-[#111113]">Sumber:</span>{" "}
+                          <span className="font-medium text-[#1e293b]">Sumber:</span>{" "}
                           {c.measurementSource}
                         </p>
-                        <p className="text-[#787872]">{c.notes}</p>
+                        <p className="text-[#64748b]">{c.notes}</p>
                         <div className="flex flex-wrap gap-1.5 pt-1">
                           {c.referenceIds.map((refId) => {
                             const ref = refMap.get(refId);
@@ -183,7 +183,7 @@ export default async function AdminKriteriaPage() {
                                 href={ref.doi}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-0.5 rounded border border-[#e5e5e0] bg-[#f7f7f5] px-1.5 py-0.5 text-[11px] text-[#52524e] transition-colors hover:border-[#111113]/40 hover:text-[#111113]"
+                                className="inline-flex items-center gap-0.5 rounded border border-[#e2e8f0] bg-[#f8fafc] px-1.5 py-0.5 text-[11px] text-[#475569] transition-colors hover:border-[#1e3a5f]/40 hover:text-[#1e293b]"
                               >
                                 {ref.authors.split(",")[0]} ({ref.year})
                                 <ArrowUpRight className="h-2.5 w-2.5" aria-hidden="true" />

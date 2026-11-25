@@ -49,15 +49,15 @@ export default async function HomePage() {
           <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
             {/* Left 7 cols — Editorial Statement */}
             <div className="min-w-0 space-y-6 lg:col-span-7 lg:pt-2">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[#e5e5e0] pb-4">
-                <span className="inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[#111113]">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[#e2e8f0] pb-4">
+                <span className="inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[#1e293b]">
                   <span
                     className={`h-2 w-2 rounded-full ${
                       payload
                         ? payload.publicationStatus === "final"
                           ? "bg-emerald-600"
                           : "bg-amber-500"
-                        : "bg-[#a1a1aa]"
+                        : "bg-[#94a3b8]"
                     }`}
                     aria-hidden="true"
                   />
@@ -65,57 +65,57 @@ export default async function HomePage() {
                     ? `Audit ${formatDateJakarta(payload.observedAt)}`
                     : "Menunggu Snapshot"}
                 </span>
-                <span className="text-[#d0d0c8]" aria-hidden="true">
+                <span className="text-[#cbd5e1]" aria-hidden="true">
                   /
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-[#787872]">
+                <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-[#64748b]">
                   Anggaran Rp9.000.000–Rp11.000.000
                 </span>
               </div>
 
-              <h1 className="text-[2.2rem] font-semibold leading-[1.07] tracking-[-0.035em] text-[#111113] sm:text-5xl lg:text-[3.35rem]">
+              <h1 className="text-[2.2rem] font-semibold leading-[1.08] tracking-[-0.035em] text-[#1e293b] sm:text-5xl lg:text-[3.3rem]">
                 Pemilihan laptop mahasiswa yang terukur, transparan, dan dapat diaudit.
               </h1>
 
-              <p className="max-w-[58ch] text-[15px] leading-[1.68] text-[#52524e] sm:text-base">
-                <strong>LaptopMatch</strong> mengolah preferensi mahasiswa melalui{" "}
-                <em>Analytical Hierarchy Process</em> (AHP) dan memeringkat penawaran laptop
-                bersumber melalui <em>Simple Additive Weighting</em> (SAW) — tanpa bobot
-                subjektif peneliti dan tanpa kotak hitam AI.
+              <p className="max-w-[58ch] text-[15px] leading-[1.7] text-[#475569] sm:text-base">
+                <strong className="text-[#1e293b]">LaptopMatch</strong> mengolah preferensi
+                mahasiswa melalui <em>Analytical Hierarchy Process</em> (AHP) dan memeringkat
+                penawaran laptop bersumber melalui <em>Simple Additive Weighting</em> (SAW) —
+                tanpa bobot subjektif peneliti dan tanpa kotak hitam AI.
               </p>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-1">
                 <Link
                   href="/rekomendasi"
-                  className="inline-flex h-11 items-center gap-2.5 rounded-lg bg-[#111113] px-5 text-sm font-medium text-white transition-all hover:bg-[#27272a] active:scale-[0.99]"
+                  className="inline-flex h-11 items-center gap-2.5 rounded-lg bg-[#1e3a5f] px-5 text-sm font-medium text-white transition-all hover:bg-[#162d4a] active:scale-[0.99]"
                 >
                   Lihat Peringkat SAW
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="/metodologi"
-                  className="inline-flex h-11 items-center gap-1.5 border-b border-[#111113] text-sm font-medium text-[#111113] transition-opacity hover:opacity-70"
+                  className="inline-flex h-11 items-center gap-1.5 border-b border-[#1e3a5f] text-sm font-medium text-[#1e3a5f] transition-opacity hover:opacity-75"
                 >
                   Pelajari Metodologi
                   <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="/laptop"
-                  className="inline-flex h-11 items-center text-sm font-medium text-[#787872] transition-colors hover:text-[#111113]"
+                  className="inline-flex h-11 items-center text-sm font-medium text-[#64748b] transition-colors hover:text-[#1e293b]"
                 >
                   Katalog SKU
                 </Link>
               </div>
             </div>
 
-            {/* Right 5 cols — Obsidian Live Snapshot Dossier */}
+            {/* Right 5 cols — Airy Nordic Slate Live Snapshot Dossier */}
             <div className="min-w-0 lg:col-span-5">
-              <div className="rounded-xl border border-[#232327] bg-[#111113] p-5 text-white sm:p-6">
-                <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3.5">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-400">
+              <div className="rounded-xl border border-[#cbd5e1] border-t-[3px] border-t-[#1e3a5f] bg-[#f8fafc] p-5 text-[#1e293b] shadow-[0_1px_4px_rgba(15,23,42,0.04)] sm:p-6">
+                <div className="flex items-center justify-between gap-2 border-b border-[#e2e8f0] pb-3.5">
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[#64748b]">
                     Live Snapshot Dossier
                   </span>
-                  <span className="rounded border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-200">
+                  <span className="rounded border border-[#cbd5e1] bg-white px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[#1e3a5f]">
                     {payload ? payload.publicationStatus : "Belum Aktif"}
                   </span>
                 </div>
@@ -126,45 +126,45 @@ export default async function HomePage() {
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <span className="font-mono text-[11px] text-zinc-400">
+                          <span className="font-mono text-[11px] text-[#64748b]">
                             #01 · {topOne.code} · {topOne.cpuName}
                           </span>
-                          <p className="mt-0.5 truncate text-base font-semibold tracking-[-0.02em] text-white">
+                          <p className="mt-0.5 truncate text-base font-semibold tracking-[-0.02em] text-[#1e293b]">
                             {topOne.model}
                           </p>
-                          <p className="font-mono text-xs text-zinc-400 tabular-nums">
+                          <p className="font-mono text-xs text-[#64748b] tabular-nums">
                             {formatIdr(topOne.priceIdr)} · {topOne.ramGb} GB RAM ·{" "}
                             {formatDecimal(topOne.weightKg, 2)} kg
                           </p>
                         </div>
                         <div className="shrink-0 text-right">
-                          <span className="block font-mono text-[10px] uppercase text-zinc-400">
+                          <span className="block font-mono text-[10px] uppercase text-[#64748b]">
                             Skor V
                           </span>
-                          <span className="font-mono text-xl font-semibold tabular-nums text-white">
+                          <span className="font-mono text-xl font-semibold tabular-nums text-[#1e3a5f]">
                             {formatDecimal(topOne.score, 6)}
                           </span>
                         </div>
                       </div>
 
-                      <ScoreBar value={topOne.score} inverted />
+                      <ScoreBar value={topOne.score} />
 
                       {topTwo && (
-                        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs">
+                        <div className="flex min-w-0 items-center justify-between rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-xs">
                           <div className="min-w-0 truncate">
-                            <span className="font-mono text-zinc-400 mr-1.5">
+                            <span className="mr-1.5 font-mono text-[#64748b]">
                               #02 {topTwo.code}
                             </span>
-                            <span className="text-zinc-200">{topTwo.model}</span>
+                            <span className="font-medium text-[#1e293b]">{topTwo.model}</span>
                           </div>
-                          <span className="ml-2 shrink-0 font-mono text-zinc-300 tabular-nums">
+                          <span className="ml-2 shrink-0 font-mono font-medium text-[#475569] tabular-nums">
                             {formatDecimal(topTwo.score, 6)}
                           </span>
                         </div>
                       )}
 
                       {payload.saw.topMargin !== null && payload.saw.topMargin < 0.001 && (
-                        <p className="font-mono text-[11px] text-amber-300/90 tabular-nums">
+                        <p className="rounded-md border border-amber-200/80 bg-amber-50/80 px-2.5 py-1.5 font-mono text-[11px] text-amber-900 tabular-nums">
                           Δ Margin #1 vs #2: {formatDecimal(payload.saw.topMargin, 6)} (sangat
                           tipis — sensitif)
                         </p>
@@ -172,9 +172,11 @@ export default async function HomePage() {
                     </div>
 
                     {/* Mini AHP Weight Pulse */}
-                    <div className="border-t border-white/10 pt-4 space-y-2">
-                      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400">
-                        <span>Bobot AHP ({payload.researchSummary.consistentResponses} Konsisten)</span>
+                    <div className="space-y-2 border-t border-[#e2e8f0] pt-4">
+                      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.12em] text-[#64748b]">
+                        <span>
+                          Bobot AHP ({payload.researchSummary.consistentResponses} Konsisten)
+                        </span>
                         <span>CR {formatDecimal(payload.ahp.cr, 6)}</span>
                       </div>
                       <div className="space-y-1.5">
@@ -183,11 +185,11 @@ export default async function HomePage() {
                             key={criterion.code}
                             className="grid grid-cols-[78px_1fr_44px] items-center gap-2 text-[11px]"
                           >
-                            <span className="truncate font-mono text-zinc-300">
+                            <span className="truncate font-mono text-[#475569]">
                               {criterion.code} {criterion.shortName}
                             </span>
-                            <ScoreBar value={weight} max={0.3} inverted className="h-1" />
-                            <span className="text-right font-mono tabular-nums text-zinc-200">
+                            <ScoreBar value={weight} max={0.3} className="h-1" />
+                            <span className="text-right font-mono font-medium tabular-nums text-[#1e293b]">
                               {formatWeightPercent(weight, 2)}
                             </span>
                           </div>
@@ -195,35 +197,35 @@ export default async function HomePage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-white/10 pt-3.5 text-xs">
+                    <div className="flex items-center justify-between border-t border-[#e2e8f0] pt-3.5 text-xs">
                       <Link
                         href={`/laptop/${topOne.code}`}
-                        className="inline-flex items-center gap-1.5 font-medium text-white hover:underline"
+                        className="inline-flex items-center gap-1.5 font-semibold text-[#1e3a5f] hover:underline"
                       >
                         Inspeksi Detail {topOne.code}
                         <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                       </Link>
                       <Link
                         href="/bandingkan"
-                        className="font-mono text-[11px] text-zinc-400 hover:text-white"
+                        className="font-mono text-[11px] text-[#64748b] hover:text-[#1e3a5f]"
                       >
                         Bandingkan →
                       </Link>
                     </div>
                   </div>
                 ) : (
-                  <div className="py-8 space-y-3">
-                    <p className="text-sm font-medium text-zinc-200">
+                  <div className="space-y-3 py-8">
+                    <p className="text-sm font-semibold text-[#1e293b]">
                       Snapshot publikasi belum diaktifkan
                     </p>
-                    <p className="text-xs leading-relaxed text-zinc-400">
+                    <p className="text-xs leading-relaxed text-[#64748b]">
                       Panel ini otomatis menampilkan peringkat SAW dan bobot AHP presisi
                       penuh setelah administrator mempublikasikan hasil perhitungan dari
                       database.
                     </p>
                     <Link
                       href="/admin/login"
-                      className="inline-flex items-center gap-1.5 pt-1 text-xs font-medium text-white underline"
+                      className="inline-flex items-center gap-1.5 pt-1 text-xs font-semibold text-[#1e3a5f] underline"
                     >
                       Buka Panel Administrator
                       <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -237,14 +239,14 @@ export default async function HomePage() {
       </section>
 
       {/* Section 2: Full-Width Architectural Hairline Metric Ledger */}
-      <section className="border-y border-[#e5e5e0] bg-white">
-        <div className="mx-auto max-w-[1200px] grid grid-cols-2 divide-y divide-[#e5e5e0] sm:grid-cols-4 sm:divide-x sm:divide-y-0">
-          <div className="px-4 py-6 sm:px-6 sm:py-7 border-r border-[#e5e5e0] sm:border-r-0">
+      <section className="border-y border-[#e2e8f0] bg-white">
+        <div className="mx-auto grid max-w-[1200px] grid-cols-2 divide-y divide-[#e2e8f0] sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+          <div className="border-r border-[#e2e8f0] px-4 py-6 sm:border-r-0 sm:px-6 sm:py-7">
             <p className="editorial-kicker">01 / Alternatif</p>
-            <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[#111113] sm:text-4xl">
+            <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[#1e293b] sm:text-4xl">
               {payload ? payload.researchSummary.alternativeCount : "—"}
             </p>
-            <p className="mt-1 text-xs text-[#787872]">
+            <p className="mt-1 text-xs text-[#64748b]">
               {payload
                 ? `Audit ${formatDateJakarta(payload.observedAt)}`
                 : "Menunggu publikasi"}
@@ -253,30 +255,30 @@ export default async function HomePage() {
 
           <div className="px-4 py-6 sm:px-6 sm:py-7">
             <p className="editorial-kicker">02 / Kriteria Tetap</p>
-            <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[#111113] sm:text-4xl">
+            <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[#1e293b] sm:text-4xl">
               {CRITERIA.length}
             </p>
-            <p className="mt-1 text-xs text-[#787872]">
+            <p className="mt-1 text-xs text-[#64748b]">
               2 Cost (C1, C5) · 4 Benefit
             </p>
           </div>
 
-          <div className="px-4 py-6 sm:px-6 sm:py-7 border-r border-[#e5e5e0] sm:border-r-0">
+          <div className="border-r border-[#e2e8f0] px-4 py-6 sm:border-r-0 sm:px-6 sm:py-7">
             <p className="editorial-kicker">03 / Panel AHP</p>
-            <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[#111113] sm:text-4xl">
+            <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[#1e293b] sm:text-4xl">
               {payload
                 ? `${payload.researchSummary.consistentResponses}/${payload.researchSummary.totalResponses}`
                 : "—"}
             </p>
-            <p className="mt-1 text-xs text-[#787872]">Lolos uji CR ≤ 0,10</p>
+            <p className="mt-1 text-xs text-[#64748b]">Lolos uji CR ≤ 0,10</p>
           </div>
 
           <div className="px-4 py-6 sm:px-6 sm:py-7">
             <p className="editorial-kicker">04 / CR Gabungan</p>
-            <p className="mt-2 font-mono text-2xl font-semibold tracking-[-0.03em] tabular-nums text-[#111113] sm:text-3xl sm:leading-[2.5rem]">
+            <p className="mt-2 font-mono text-2xl font-semibold tracking-[-0.03em] tabular-nums text-[#1e3a5f] sm:text-3xl sm:leading-[2.5rem]">
               {payload ? formatDecimal(payload.ahp.cr, 6) : "—"}
             </p>
-            <p className="mt-1 text-xs text-[#787872]">
+            <p className="mt-1 text-xs text-[#64748b]">
               {payload
                 ? payload.ahp.passesCr
                   ? "Konsisten (RI = 1,24)"
@@ -287,20 +289,20 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Section 3: Top-3 Podium & AHP Breakdown on Warm Paper */}
-      <section className="bg-[#f7f7f5]">
-        <div className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6 space-y-8">
+      {/* Section 3: Top-3 Podium & AHP Breakdown on Cool Mist Paper */}
+      <section className="bg-[#f8fafc]">
+        <div className="mx-auto max-w-[1200px] space-y-8 px-4 py-14 sm:px-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-1">
               <p className="editorial-kicker">Hasil Pemeringkatan Terpublikasi</p>
-              <h2 className="text-2xl font-semibold tracking-[-0.025em] text-[#111113] sm:text-3xl">
+              <h2 className="text-2xl font-semibold tracking-[-0.025em] text-[#1e293b] sm:text-3xl">
                 Tiga Peringkat Teratas SAW
               </h2>
             </div>
             {payload && (
               <Link
                 href="/rekomendasi"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#111113] hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1e3a5f] hover:underline"
               >
                 Lihat seluruh {payload.saw.items.length} peringkat
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -330,7 +332,7 @@ export default async function HomePage() {
                   </span>
                   ). Peringkat sensitif terhadap perubahan bobot maupun ketersediaan stok —
                   tinjau analisis sensitivitas di halaman{" "}
-                  <Link href="/metodologi#sensitivitas" className="font-semibold underline">
+                  <Link href="/metodologi#sensitivitas" className="font-semibold text-[#1e3a5f] underline">
                     Metodologi
                   </Link>
                   .
@@ -345,10 +347,10 @@ export default async function HomePage() {
                   return (
                     <article
                       key={item.code}
-                      className={`flex flex-col justify-between rounded-lg border bg-white p-5 transition-colors hover:border-[#111113]/40 ${
+                      className={`min-w-0 flex flex-col justify-between rounded-lg border bg-white p-5 transition-colors hover:border-[#1e3a5f]/40 ${
                         isFirst
-                          ? "border-[#e5e5e0] border-t-2 border-t-[#111113]"
-                          : "border-[#e5e5e0]"
+                          ? "border-[#cbd5e1] border-t-[3px] border-t-[#1e3a5f]"
+                          : "border-[#e2e8f0]"
                       }`}
                     >
                       <div className="space-y-4">
@@ -357,28 +359,28 @@ export default async function HomePage() {
                             <Badge tone={isFirst ? "dark" : "neutral"}>
                               #{item.rank}
                             </Badge>
-                            <span className="font-mono text-xs font-semibold text-[#111113]">
+                            <span className="font-mono text-xs font-semibold text-[#1e293b]">
                               {item.code}
                             </span>
                           </div>
-                          <span className="font-mono text-[11px] text-[#787872]">
+                          <span className="font-mono text-[11px] text-[#64748b]">
                             SKU {item.sku}
                           </span>
                         </div>
 
                         <div>
-                          <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.015em] text-[#111113]">
+                          <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.015em] text-[#1e293b]">
                             {item.model}
                           </h3>
-                          <p className="mt-0.5 text-xs text-[#787872]">{item.cpuName}</p>
+                          <p className="mt-0.5 text-xs text-[#64748b]">{item.cpuName}</p>
                         </div>
 
-                        <div className="space-y-2 border-y border-[#e5e5e0]/80 py-3.5">
+                        <div className="space-y-2 border-y border-[#e2e8f0]/80 py-3.5">
                           <div className="flex items-baseline justify-between gap-2">
-                            <span className="text-lg font-semibold tracking-[-0.02em] tabular-nums text-[#111113]">
+                            <span className="text-lg font-semibold tracking-[-0.02em] tabular-nums text-[#1e293b]">
                               {formatIdr(item.priceIdr)}
                             </span>
-                            <span className="font-mono text-sm font-semibold tabular-nums text-[#111113]">
+                            <span className="font-mono text-sm font-semibold tabular-nums text-[#1e3a5f]">
                               {formatDecimal(item.score, 6)}
                             </span>
                           </div>
@@ -387,47 +389,47 @@ export default async function HomePage() {
 
                         <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
                           <div>
-                            <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                            <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                               CPU Mark
                             </dt>
-                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                               {formatInteger(item.cpuMark)}
                             </dd>
                           </div>
                           <div>
-                            <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                            <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                               RAM / SSD
                             </dt>
-                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                               {item.ramGb} / {item.ssdGb} GB
                             </dd>
                           </div>
                           <div>
-                            <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                            <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                               Berat
                             </dt>
-                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                               {formatDecimal(item.weightKg, 2)} kg
                             </dd>
                           </div>
                           <div>
-                            <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                            <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                               Video 1080p
                             </dt>
-                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                            <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                               {formatDecimal(item.batteryHours, 1)} jam
                             </dd>
                           </div>
                         </dl>
                       </div>
 
-                      <div className="mt-5 flex items-center justify-between gap-2 border-t border-[#e5e5e0]/80 pt-3.5">
+                      <div className="mt-5 flex items-center justify-between gap-2 border-t border-[#e2e8f0]/80 pt-3.5">
                         <Badge tone={stockBadge.tone}>{stockBadge.label}</Badge>
                         <Link
                           href={`/laptop/${item.code}`}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#111113] hover:underline"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#1e3a5f] hover:underline"
                         >
-                          Detail & Sumber
+                          Detail &amp; Sumber
                           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                         </Link>
                       </div>
@@ -438,30 +440,30 @@ export default async function HomePage() {
 
               {/* Asymmetric AHP Weights Section (5 / 7 split) */}
               <div className="grid gap-6 pt-4 lg:grid-cols-12">
-                <div className="min-w-0 rounded-lg border border-[#e5e5e0] bg-white lg:col-span-5">
-                  <div className="border-b border-[#e5e5e0] px-5 py-4">
+                <div className="min-w-0 rounded-lg border border-[#e2e8f0] bg-white lg:col-span-5">
+                  <div className="border-b border-[#e2e8f0] px-5 py-4">
                     <p className="editorial-kicker">Prioritas Kriteria</p>
-                    <h3 className="mt-1 text-[15px] font-semibold text-[#111113]">
+                    <h3 className="mt-1 text-[15px] font-semibold text-[#1e293b]">
                       Bobot Eigenvector AHP (C1–C6)
                     </h3>
                   </div>
-                  <div className="divide-y divide-[#e5e5e0]/70">
+                  <div className="divide-y divide-[#e2e8f0]/75">
                     {CRITERIA.map((c) => {
                       const w = payload.ahp.weightsByCode[c.code];
                       return (
-                        <div key={c.code} className="px-5 py-3 space-y-1.5">
+                        <div key={c.code} className="space-y-1.5 px-5 py-3">
                           <div className="flex items-center justify-between gap-2 text-xs">
-                            <span className="font-medium text-[#111113]">
-                              <span className="font-mono text-[#787872] mr-1.5">
+                            <span className="font-medium text-[#1e293b]">
+                              <span className="mr-1.5 font-mono text-[#64748b]">
                                 {c.code}
                               </span>
                               {c.name}
                             </span>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-[10px] uppercase text-[#787872]">
+                              <span className="font-mono text-[10px] uppercase text-[#64748b]">
                                 {c.attribute}
                               </span>
-                              <span className="font-mono font-semibold tabular-nums text-[#111113]">
+                              <span className="font-mono font-semibold tabular-nums text-[#1e3a5f]">
                                 {formatWeightPercent(w, 2)}
                               </span>
                             </div>
@@ -473,15 +475,15 @@ export default async function HomePage() {
                   </div>
                 </div>
 
-                <div className="min-w-0 rounded-lg border border-[#e5e5e0] bg-white p-5 lg:col-span-7">
+                <div className="min-w-0 rounded-lg border border-[#e2e8f0] bg-white p-5 lg:col-span-7">
                   <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <p className="editorial-kicker">Visualisasi Perbandingan</p>
-                      <h3 className="mt-1 text-[15px] font-semibold text-[#111113]">
+                      <h3 className="mt-1 text-[15px] font-semibold text-[#1e293b]">
                         Bobot Utama (17 Konsisten) vs Sensitivitas (33 Respons)
                       </h3>
                     </div>
-                    <span className="font-mono text-[11px] text-[#787872]">
+                    <span className="font-mono text-[11px] text-[#64748b]">
                       AIJ Geometric Mean
                     </span>
                   </div>
@@ -496,28 +498,28 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Section 4: Sculptural Obsidian 4-Step AHP-SAW Band */}
-      <section className="bg-[#111113] text-white">
-        <div className="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 space-y-10">
+      {/* Section 4: Airy Nordic Mist 4-Step AHP–SAW Band (Zero Heavy Black Block) */}
+      <section className="border-y border-[#e2e8f0] bg-[#f1f5f9]/70 text-[#1e293b]">
+        <div className="mx-auto max-w-[1200px] space-y-10 px-4 py-16 sm:px-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-400">
+              <p className="editorial-kicker text-[#1e3a5f]">
                 Arsitektur Matematis Deterministik
               </p>
-              <h2 className="text-2xl font-semibold tracking-[-0.025em] text-white sm:text-3xl">
+              <h2 className="text-2xl font-semibold tracking-[-0.025em] text-[#1e293b] sm:text-3xl">
                 Empat Tahap dari Kuesioner ke Peringkat
               </h2>
             </div>
             <Link
               href="/metodologi"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-200 hover:text-white hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1e3a5f] hover:underline"
             >
-              Lihat rumus & referensi DOI
+              Lihat rumus &amp; referensi DOI
               <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="grid divide-y divide-white/10 border-y border-white/10 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+          <div className="grid gap-px overflow-hidden rounded-xl border border-[#cbd5e1] bg-[#e2e8f0] sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 step: "01",
@@ -542,15 +544,15 @@ export default async function HomePage() {
             ].map((item) => (
               <div
                 key={item.step}
-                className="py-6 sm:px-5 lg:py-8 first:sm:pl-0 last:sm:pr-0 space-y-3"
+                className="space-y-3 bg-white p-6"
               >
-                <span className="font-mono text-2xl font-semibold tracking-tight text-zinc-500">
+                <span className="inline-flex rounded border border-[#c7d9ec] bg-[#eff4fa] px-2 py-0.5 font-mono text-xs font-semibold text-[#1e3a5f]">
                   {item.step}
                 </span>
-                <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-white">
+                <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-[#1e293b]">
                   {item.title}
                 </h3>
-                <p className="text-xs leading-relaxed text-zinc-400">{item.desc}</p>
+                <p className="text-xs leading-relaxed text-[#475569]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -560,13 +562,13 @@ export default async function HomePage() {
       {/* Section 5: Research Scope & Academic Disclaimer */}
       <section className="bg-white">
         <div className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6">
-          <div className="flex flex-col gap-6 rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-6 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="max-w-2xl space-y-2">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#111113]">
-                <ShieldCheck className="h-4 w-4 text-[#111113]" aria-hidden="true" />
-                Transparansi Sumber & Batasan Ruang Lingkup
+              <div className="flex items-center gap-2 text-sm font-semibold text-[#1e293b]">
+                <ShieldCheck className="h-4 w-4 text-[#1e3a5f]" aria-hidden="true" />
+                Transparansi Sumber &amp; Batasan Ruang Lingkup
               </div>
-              <p className="text-xs leading-relaxed text-[#52524e]">
+              <p className="text-xs leading-relaxed text-[#475569]">
                 Alternatif baseline terbatas pada tujuh konfigurasi Lenovo demi keseragaman
                 pengukuran daya tahan baterai (estimasi maksimum pemutaran video lokal 1080p
                 pada 150 nit dari Lenovo PSREF). Hasil merefleksikan preferensi panel
@@ -577,13 +579,13 @@ export default async function HomePage() {
             <div className="flex shrink-0 flex-wrap gap-3 text-xs font-medium">
               <Link
                 href="/bandingkan"
-                className="inline-flex h-10 items-center rounded-lg border border-[#d0d0c8] bg-white px-4 text-[#111113] hover:bg-[#f2f2ee]"
+                className="inline-flex h-10 items-center rounded-lg border border-[#cbd5e1] bg-white px-4 text-[#1e293b] hover:bg-[#f1f5f9]"
               >
                 Bandingkan Laptop
               </Link>
               <Link
                 href="/tentang"
-                className="inline-flex h-10 items-center rounded-lg bg-[#111113] px-4 text-white hover:bg-[#27272a]"
+                className="inline-flex h-10 items-center rounded-lg bg-[#1e3a5f] px-4 text-white hover:bg-[#162d4a]"
               >
                 Tentang Kelompok 13
               </Link>

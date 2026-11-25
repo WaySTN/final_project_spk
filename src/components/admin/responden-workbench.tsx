@@ -223,7 +223,7 @@ export function RespondenWorkbench({
           <CardTitle>Impor Data Respons Kuesioner (XLSX / CSV)</CardTitle>
           <CardDescription>
             Unggah berkas ekspor Google Forms (
-            <code className="rounded bg-[#f2f2ee] px-1 py-0.5 font-mono text-[11px] text-[#111113]">
+            <code className="rounded bg-[#f1f5f9] px-1 py-0.5 font-mono text-[11px] text-[#1e293b]">
               Jawaban Formulir 1
             </code>
             ). Urutan baris asli R01–Rn dipertahankan, hash SHA-256 dicek anti-duplikasi, dan
@@ -235,7 +235,7 @@ export function RespondenWorkbench({
             <AlertBanner tone={feedback.tone}>{feedback.message}</AlertBanner>
           )}
 
-          <div className="rounded-lg border border-dashed border-[#d0d0c8] bg-[#f7f7f5] p-4">
+          <div className="rounded-lg border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="sm:col-span-2">
                 <Label htmlFor="survey-file">Pilih berkas kuesioner (.xlsx atau .csv)</Label>
@@ -245,7 +245,7 @@ export function RespondenWorkbench({
                   type="file"
                   accept=".xlsx,.csv"
                   onChange={handleFileChange}
-                  className="h-10 w-full rounded-lg border border-[#d0d0c8] bg-white px-3 pt-2 text-sm text-[#111113] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10"
+                  className="h-10 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 pt-2 text-sm text-[#1e293b] transition-colors focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/10"
                 />
               </div>
               <div>
@@ -282,13 +282,13 @@ export function RespondenWorkbench({
 
           {/* Preview result */}
           {preview && (
-            <div className="space-y-3 rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-4">
+            <div className="space-y-3 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-[#111113]">
+                  <p className="text-sm font-semibold text-[#1e293b]">
                     Hasil Preview: {preview.filename} ({preview.sheetName})
                   </p>
-                  <p className="font-mono text-xs text-[#787872]">
+                  <p className="font-mono text-xs text-[#64748b]">
                     SHA-256: {preview.sha256.slice(0, 24)}…
                   </p>
                 </div>
@@ -311,25 +311,25 @@ export function RespondenWorkbench({
 
               {preview.ok && (
                 <>
-                  <div className="grid gap-px overflow-hidden rounded-lg border border-[#e5e5e0] bg-[#e5e5e0] text-xs sm:grid-cols-4">
+                  <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] text-xs sm:grid-cols-4">
                     <div className="bg-white p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                         Total baris
                       </p>
-                      <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-[#111113]">
+                      <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-[#1e293b]">
                         {preview.summary.totalRows}
                       </p>
                     </div>
                     <div className="bg-white p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                         Eligible
                       </p>
-                      <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-[#111113]">
+                      <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-[#1e293b]">
                         {preview.summary.eligibleRows}
                       </p>
                     </div>
                     <div className="bg-white p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                         Lolos CR ≤ 0,10
                       </p>
                       <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-emerald-700">
@@ -337,7 +337,7 @@ export function RespondenWorkbench({
                       </p>
                     </div>
                     <div className="bg-white p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                         Flag Audit
                       </p>
                       <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-amber-700">
@@ -419,21 +419,21 @@ export function RespondenWorkbench({
               />
             </div>
           ) : loadingRows ? (
-            <div className="p-8 text-center text-sm text-[#787872]">
+            <div className="p-8 text-center text-sm text-[#64748b]">
               Memuat data responden dan audit CR individual...
             </div>
           ) : (
             <>
               {/* Mobile vertical audit cards (< md) */}
-              <div className="divide-y divide-[#e5e5e0] md:hidden">
+              <div className="divide-y divide-[#e2e8f0] md:hidden">
                 {responses.map((row) => (
                   <div key={row.id} className="space-y-3 p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="font-mono text-sm font-semibold text-[#111113]">
+                        <span className="font-mono text-sm font-semibold text-[#1e293b]">
                           {row.code}
                         </span>
-                        <p className="mt-0.5 text-[11px] text-[#787872]">
+                        <p className="mt-0.5 text-[11px] text-[#64748b]">
                           {row.submittedAt
                             ? formatDateTimeJakarta(row.submittedAt)
                             : row.rawTimestamp || "—"}
@@ -449,18 +449,18 @@ export function RespondenWorkbench({
                     </div>
 
                     <div className="text-xs">
-                      <p className="font-medium text-[#111113]">
+                      <p className="font-medium text-[#1e293b]">
                         {row.programStudy || "(Prodi tidak diisi)"}
                       </p>
-                      <p className="text-[#787872]">{row.useCase}</p>
+                      <p className="text-[#64748b]">{row.useCase}</p>
                     </div>
 
-                    <div className="flex items-center justify-between gap-3 rounded-md border border-[#e5e5e0] bg-[#f7f7f5] px-3 py-2">
+                    <div className="flex items-center justify-between gap-3 rounded-md border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2">
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                           CR Individu
                         </p>
-                        <p className="font-mono text-xs font-semibold tabular-nums text-[#111113]">
+                        <p className="font-mono text-xs font-semibold tabular-nums text-[#1e293b]">
                           {row.cr !== null ? formatDecimal(row.cr, 6) : "—"}
                         </p>
                         <CrGaugeBar cr={row.cr} />
@@ -493,7 +493,7 @@ export function RespondenWorkbench({
               <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[840px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                       <th className="px-4 py-3">Kode</th>
                       <th className="px-4 py-3">Cap Waktu (WIB)</th>
                       <th className="px-4 py-3">Program Studi / Penggunaan</th>
@@ -503,26 +503,26 @@ export function RespondenWorkbench({
                       <th className="px-4 py-3 text-right">Inspeksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e5e5e0]/80">
+                  <tbody className="divide-y divide-[#e2e8f0]/80">
                     {responses.map((row) => (
-                      <tr key={row.id} className="transition-colors hover:bg-[#f7f7f5]/60">
-                        <td className="px-4 py-3 font-mono font-semibold text-[#111113]">
+                      <tr key={row.id} className="transition-colors hover:bg-[#f8fafc]/60">
+                        <td className="px-4 py-3 font-mono font-semibold text-[#1e293b]">
                           {row.code}
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap text-[#52524e]">
+                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap text-[#475569]">
                           {row.submittedAt
                             ? formatDateTimeJakarta(row.submittedAt)
                             : row.rawTimestamp || "-"}
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-xs font-medium text-[#111113]">
+                          <p className="text-xs font-medium text-[#1e293b]">
                             {row.programStudy || "(Prodi tidak diisi)"}
                           </p>
-                          <p className="text-xs text-[#787872]">{row.useCase}</p>
+                          <p className="text-xs text-[#64748b]">{row.useCase}</p>
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex flex-col items-end">
-                            <span className="font-mono text-xs font-medium tabular-nums text-[#111113]">
+                            <span className="font-mono text-xs font-medium tabular-nums text-[#1e293b]">
                               {row.cr !== null ? formatDecimal(row.cr, 6) : "-"}
                             </span>
                             <CrGaugeBar cr={row.cr} />
@@ -540,7 +540,7 @@ export function RespondenWorkbench({
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap gap-1">
                             {row.auditFlags.length === 0 ? (
-                              <span className="text-xs text-[#9c9c95]">—</span>
+                              <span className="text-xs text-[#94a3b8]">—</span>
                             ) : (
                               row.auditFlags.map((f) => (
                                 <Badge key={f} tone="warning">
@@ -585,43 +585,43 @@ export function RespondenWorkbench({
       >
         {inspected && (
           <div className="space-y-6">
-            <div className="grid gap-px overflow-hidden rounded-lg border border-[#e5e5e0] bg-[#e5e5e0] text-xs sm:grid-cols-3">
+            <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] text-xs sm:grid-cols-3">
               <div className="bg-white p-3">
-                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                   Program Studi
                 </p>
-                <p className="mt-1 font-medium text-[#111113]">
+                <p className="mt-1 font-medium text-[#1e293b]">
                   {inspected.programStudy || "-"}
                 </p>
               </div>
               <div className="bg-white p-3">
-                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                   Penggunaan Utama
                 </p>
-                <p className="mt-1 font-medium text-[#111113]">{inspected.useCase}</p>
+                <p className="mt-1 font-medium text-[#1e293b]">{inspected.useCase}</p>
               </div>
               <div className="bg-white p-3">
-                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#787872]">
+                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
                   Cap Waktu Mentah
                 </p>
-                <p className="mt-1 break-all font-mono text-[#52524e]">
+                <p className="mt-1 break-all font-mono text-[#475569]">
                   {inspected.rawTimestamp || "-"}
                 </p>
               </div>
             </div>
 
             {inspected.suggestion && (
-              <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-3.5 text-xs">
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-[#787872]">
+              <div className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-3.5 text-xs">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-[#64748b]">
                   Saran responden (admin-only)
                 </p>
-                <p className="mt-1 leading-relaxed text-[#111113]">{inspected.suggestion}</p>
+                <p className="mt-1 leading-relaxed text-[#1e293b]">{inspected.suggestion}</p>
               </div>
             )}
 
             {inspected.individualMatrix && (
               <div>
-                <h3 className="mb-2 text-sm font-semibold tracking-[-0.01em] text-[#111113]">
+                <h3 className="mb-2 text-sm font-semibold tracking-[-0.01em] text-[#1e293b]">
                   Matriks Perbandingan Berpasangan 6×6 ({inspected.code})
                 </h3>
                 <PairwiseMatrixTable
@@ -633,13 +633,13 @@ export function RespondenWorkbench({
             )}
 
             <div>
-              <h3 className="mb-2 text-sm font-semibold tracking-[-0.01em] text-[#111113]">
+              <h3 className="mb-2 text-sm font-semibold tracking-[-0.01em] text-[#1e293b]">
                 15 Jawaban Perbandingan Asli &amp; Hasil Konversi
               </h3>
-              <div className="overflow-x-auto rounded-lg border border-[#e5e5e0]">
+              <div className="overflow-x-auto rounded-lg border border-[#e2e8f0]">
                 <table className="w-full min-w-[540px] border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#787872]">
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#64748b]">
                       <th className="px-3 py-2.5">No</th>
                       <th className="px-3 py-2.5">Pasangan</th>
                       <th className="px-3 py-2.5">Jawaban Asli</th>
@@ -647,26 +647,26 @@ export function RespondenWorkbench({
                       <th className="px-3 py-2.5 text-right">Nilai Numerik</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e5e5e0]/80">
+                  <tbody className="divide-y divide-[#e2e8f0]/80">
                     {PAIRWISE_DEFINITIONS.map((def) => {
                       const ans = inspected.parsedAnswers.find(
                         (a) => a.questionNo === def.questionNo,
                       );
                       return (
                         <tr key={def.pairKey}>
-                          <td className="px-3 py-2 font-mono text-[#787872]">
+                          <td className="px-3 py-2 font-mono text-[#64748b]">
                             {def.questionNo}
                           </td>
-                          <td className="px-3 py-2 font-medium text-[#111113]">
+                          <td className="px-3 py-2 font-medium text-[#1e293b]">
                             {def.pairKey} ({def.leftLabel} vs {def.rightLabel})
                           </td>
-                          <td className="px-3 py-2 text-[#52524e]">
+                          <td className="px-3 py-2 text-[#475569]">
                             {inspected.rawAnswers[def.pairKey] || "-"}
                           </td>
-                          <td className="px-3 py-2 text-right font-mono font-semibold text-[#111113]">
+                          <td className="px-3 py-2 text-right font-mono font-semibold text-[#1e293b]">
                             {ans?.token ?? "-"}
                           </td>
-                          <td className="px-3 py-2 text-right font-mono tabular-nums text-[#52524e]">
+                          <td className="px-3 py-2 text-right font-mono tabular-nums text-[#475569]">
                             {ans ? formatDecimal(ans.numericValue, 6) : "-"}
                           </td>
                         </tr>

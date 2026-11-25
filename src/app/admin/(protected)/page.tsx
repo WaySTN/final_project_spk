@@ -80,10 +80,10 @@ export default async function AdminOverviewPage() {
   return (
     <div className="space-y-6">
       {/* Editorial Header */}
-      <div className="flex flex-col gap-3 border-b border-[#e5e5e0] pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-[#e2e8f0] pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="editorial-kicker">Dashboard Administrator</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#111113]">
+          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#1e293b]">
             Ringkasan Penelitian LaptopMatch
           </h1>
         </div>
@@ -123,36 +123,36 @@ export default async function AdminOverviewPage() {
       )}
 
       {/* 4-Column Hairline KPI Ledger */}
-      <div className="grid gap-px overflow-hidden rounded-lg border border-[#e5e5e0] bg-[#e5e5e0] sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-white p-5">
-          <div className="flex items-center justify-between text-[#787872]">
+          <div className="flex items-center justify-between text-[#64748b]">
             <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
               Responden Kuesioner
             </span>
             <Users className="h-4 w-4" aria-hidden="true" />
           </div>
-          <p className="mt-2.5 font-mono text-2xl font-semibold tabular-nums text-[#111113]">
+          <p className="mt-2.5 font-mono text-2xl font-semibold tabular-nums text-[#1e293b]">
             {stats.totalResponses}
           </p>
-          <p className="mt-1.5 text-xs tabular-nums text-[#787872]">
+          <p className="mt-1.5 text-xs tabular-nums text-[#64748b]">
             Eligible: {stats.eligibleResponses} · Lolos CR: {stats.consistentResponses} ·
             Tidak lolos: {stats.inconsistentResponses}
           </p>
         </div>
 
         <div className="bg-white p-5">
-          <div className="flex items-center justify-between text-[#787872]">
+          <div className="flex items-center justify-between text-[#64748b]">
             <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
               CR Gabungan AHP (Utama)
             </span>
             <Scale className="h-4 w-4" aria-hidden="true" />
           </div>
-          <p className="mt-2.5 font-mono text-2xl font-semibold tabular-nums text-[#111113]">
+          <p className="mt-2.5 font-mono text-2xl font-semibold tabular-nums text-[#1e293b]">
             {stats.latestAhpPrimary
               ? formatDecimal(stats.latestAhpPrimary.cr, 8)
               : "—"}
           </p>
-          <p className="mt-1.5 text-xs text-[#787872]">
+          <p className="mt-1.5 text-xs text-[#64748b]">
             {stats.latestAhpPrimary
               ? stats.latestAhpPrimary.passesCr
                 ? "Memenuhi ambang CR ≤ 0,10"
@@ -162,35 +162,35 @@ export default async function AdminOverviewPage() {
         </div>
 
         <div className="bg-white p-5">
-          <div className="flex items-center justify-between text-[#787872]">
+          <div className="flex items-center justify-between text-[#64748b]">
             <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
               Alternatif Laptop Aktif
             </span>
             <Laptop className="h-4 w-4" aria-hidden="true" />
           </div>
-          <p className="mt-2.5 font-mono text-2xl font-semibold tabular-nums text-[#111113]">
+          <p className="mt-2.5 font-mono text-2xl font-semibold tabular-nums text-[#1e293b]">
             {stats.activeAlternativesCount}
           </p>
-          <p className="mt-1.5 text-xs text-[#787872]">
+          <p className="mt-1.5 text-xs text-[#64748b]">
             {stats.latestDataset
               ? `Audit ${formatDateJakarta(stats.latestDataset.observedAt)} · Withdrawn: ${stats.withdrawnCount}`
               : "Belum ada dataset"}
           </p>
         </div>
 
-        <div className="bg-[#111113] p-5 text-white">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
+        <div className="bg-[#eff4fa] p-5 text-[#1e293b]">
+          <div className="flex items-center justify-between text-[#1e3a5f]">
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.12em]">
               Peringkat #1 Snapshot Aktif
             </span>
             <Calculator className="h-4 w-4" aria-hidden="true" />
           </div>
-          <p className="mt-2.5 truncate font-mono text-xl font-semibold tabular-nums text-white">
+          <p className="mt-2.5 truncate font-mono text-xl font-semibold tabular-nums text-[#1e3a5f]">
             {pubItems[0]
               ? `${pubItems[0].code} — ${formatDecimal(pubItems[0].score, 6)}`
               : "—"}
           </p>
-          <p className="mt-1.5 truncate text-xs text-zinc-400">
+          <p className="mt-1.5 truncate text-xs text-[#475569]">
             {pubItems[0]?.model ?? "Belum ada snapshot publik"}
           </p>
         </div>
@@ -212,19 +212,19 @@ export default async function AdminOverviewPage() {
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="divide-y divide-[#e5e5e0]/80 p-0">
+          <CardContent className="divide-y divide-[#e2e8f0]/80 p-0">
             {pipelineSteps.map((step, idx) => (
               <Link
                 key={step.label}
                 href={step.href}
-                className="group flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-[#f7f7f5]"
+                className="group flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-[#f8fafc]"
               >
                 <div className="flex min-w-0 items-start gap-3.5">
                   <div
                     className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-semibold ${
                       step.done
-                        ? "bg-[#111113] text-white"
-                        : "border border-[#d0d0c8] bg-white text-[#787872]"
+                        ? "bg-[#1e3a5f] text-white"
+                        : "border border-[#cbd5e1] bg-white text-[#64748b]"
                     }`}
                   >
                     {step.done ? (
@@ -234,12 +234,12 @@ export default async function AdminOverviewPage() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#111113]">{step.label}</p>
-                    <p className="truncate text-xs text-[#787872]">{step.detail}</p>
+                    <p className="text-sm font-medium text-[#1e293b]">{step.label}</p>
+                    <p className="truncate text-xs text-[#64748b]">{step.detail}</p>
                   </div>
                 </div>
                 <ArrowRight
-                  className="h-4 w-4 shrink-0 text-[#9c9c95] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111113]"
+                  className="h-4 w-4 shrink-0 text-[#94a3b8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
                   aria-hidden="true"
                 />
               </Link>
@@ -256,23 +256,23 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent className="p-0">
             {stats.recentAuditLogs.length === 0 ? (
-              <p className="px-5 py-10 text-center text-sm text-[#787872]">
+              <p className="px-5 py-10 text-center text-sm text-[#64748b]">
                 Belum ada aktivitas audit tercatat.
               </p>
             ) : (
-              <ul className="divide-y divide-[#e5e5e0]/80">
+              <ul className="divide-y divide-[#e2e8f0]/80">
                 {stats.recentAuditLogs.slice(0, 6).map((log) => (
                   <li key={log.id} className="px-5 py-3">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="rounded border border-[#e5e5e0] bg-[#f7f7f5] px-1.5 py-0.5 font-mono text-[11px] font-medium text-[#111113]">
+                      <span className="rounded border border-[#e2e8f0] bg-[#f8fafc] px-1.5 py-0.5 font-mono text-[11px] font-medium text-[#1e3a5f]">
                         {log.action}
                       </span>
-                      <span className="font-mono text-[10px] tabular-nums text-[#787872]">
+                      <span className="font-mono text-[10px] tabular-nums text-[#64748b]">
                         {formatDateTimeJakarta(log.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-xs text-[#787872]">
-                      Resource: <span className="text-[#52524e]">{log.resourceType}</span>
+                    <p className="mt-1.5 text-xs text-[#64748b]">
+                      Resource: <span className="text-[#475569]">{log.resourceType}</span>
                       {log.resourceId ? ` · ${log.resourceId.slice(0, 8)}…` : ""}
                     </p>
                   </li>
@@ -284,43 +284,43 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Shortcuts Ledger */}
-      <div className="grid gap-px overflow-hidden rounded-lg border border-[#e5e5e0] bg-[#e5e5e0] sm:grid-cols-3">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] sm:grid-cols-3">
         <Link
           href="/admin/perhitungan/ahp"
-          className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f7f7f5]"
+          className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f8fafc]"
         >
           <div className="flex items-center gap-3">
-            <Scale className="h-4 w-4 text-[#52524e]" aria-hidden="true" />
-            <span className="text-sm font-medium text-[#111113]">Audit &amp; Hitung AHP</span>
+            <Scale className="h-4 w-4 text-[#1e3a5f]" aria-hidden="true" />
+            <span className="text-sm font-medium text-[#1e293b]">Audit &amp; Hitung AHP</span>
           </div>
           <ArrowRight
-            className="h-4 w-4 text-[#9c9c95] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111113]"
+            className="h-4 w-4 text-[#94a3b8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
             aria-hidden="true"
           />
         </Link>
         <Link
           href="/admin/riwayat"
-          className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f7f7f5]"
+          className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f8fafc]"
         >
           <div className="flex items-center gap-3">
-            <History className="h-4 w-4 text-[#52524e]" aria-hidden="true" />
-            <span className="text-sm font-medium text-[#111113]">Riwayat &amp; Publikasi</span>
+            <History className="h-4 w-4 text-[#1e3a5f]" aria-hidden="true" />
+            <span className="text-sm font-medium text-[#1e293b]">Riwayat &amp; Publikasi</span>
           </div>
           <ArrowRight
-            className="h-4 w-4 text-[#9c9c95] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111113]"
+            className="h-4 w-4 text-[#94a3b8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
             aria-hidden="true"
           />
         </Link>
         <Link
           href="/admin/laporan"
-          className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f7f7f5]"
+          className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f8fafc]"
         >
           <div className="flex items-center gap-3">
-            <FileSpreadsheet className="h-4 w-4 text-[#52524e]" aria-hidden="true" />
-            <span className="text-sm font-medium text-[#111113]">Ekspor Laporan Excel</span>
+            <FileSpreadsheet className="h-4 w-4 text-[#1e3a5f]" aria-hidden="true" />
+            <span className="text-sm font-medium text-[#1e293b]">Ekspor Laporan Excel</span>
           </div>
           <ArrowRight
-            className="h-4 w-4 text-[#9c9c95] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111113]"
+            className="h-4 w-4 text-[#94a3b8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
             aria-hidden="true"
           />
         </Link>

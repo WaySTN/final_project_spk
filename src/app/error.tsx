@@ -19,10 +19,10 @@ export default function GlobalError({
       <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-red-700">
         Kesalahan Sistem
       </p>
-      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-[#111113]">
+      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-[#1e293b]">
         Halaman tidak dapat dimuat sementara waktu
       </h1>
-      <p className="mt-2 max-w-md text-sm leading-relaxed text-[#52524e]">
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-[#475569]">
         Terjadi kendala saat memproses data. Silakan muat ulang halaman atau hubungi
         administrator penelitian apabila masalah berlanjut.
       </p>

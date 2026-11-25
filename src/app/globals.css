@@ -2,19 +2,21 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #111113;
-  --paper: #f7f7f5;
-  --obsidian: #111113;
-  --ink-secondary: #52524e;
-  --muted: #f2f2ee;
-  --muted-foreground: #787872;
-  --border: #e5e5e0;
-  --border-strong: #d0d0c8;
-  --primary: #111113;
+  --foreground: #1e293b;
+  --paper: #f8fafc;
+  --surface-elevated: #f1f5f9;
+  --ink-secondary: #475569;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --primary: #1e3a5f;
+  --primary-hover: #162d4a;
+  --primary-soft: #eff4fa;
   --primary-foreground: #ffffff;
-  --secondary: #f2f2ee;
-  --secondary-foreground: #111113;
-  --ring: #111113;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e293b;
+  --ring: #1e3a5f;
 
   /* Semantic validation tokens (restrained, strictly for research status) */
   --status-success-bg: #f0fdf4;
@@ -34,7 +36,6 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-paper: var(--paper);
-  --color-obsidian: var(--obsidian);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);

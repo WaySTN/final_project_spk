@@ -47,30 +47,30 @@ export function CriteriaWeightsChart({
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 12, right: 12, left: -8, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="2 4" stroke="#e5e5e0" vertical={false} />
+          <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: "#52524e", fontSize: 11, fontFamily: "var(--font-mono)" }}
-            axisLine={{ stroke: "#d0d0c8" }}
+            tick={{ fill: "#475569", fontSize: 11, fontFamily: "var(--font-mono)" }}
+            axisLine={{ stroke: "#cbd5e1" }}
             tickLine={false}
           />
           <YAxis
             unit="%"
-            tick={{ fill: "#787872", fontSize: 11, fontFamily: "var(--font-mono)" }}
+            tick={{ fill: "#64748b", fontSize: 11, fontFamily: "var(--font-mono)" }}
             axisLine={false}
             tickLine={false}
             domain={[0, 30]}
           />
           <Tooltip
             formatter={(val) => `${formatDecimal(Number(val ?? 0), 2)}%`}
-            cursor={{ fill: "#f7f7f5" }}
+            cursor={{ fill: "#f8fafc" }}
             contentStyle={{
               backgroundColor: "#ffffff",
-              border: "1px solid #d0d0c8",
+              border: "1px solid #cbd5e1",
               borderRadius: "6px",
               fontSize: "12px",
               fontFamily: "var(--font-mono)",
-              boxShadow: "0 4px 12px rgba(17,17,19,0.06)",
+              boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
             }}
           />
           {comparisonWeightsByCode && (
@@ -78,23 +78,23 @@ export function CriteriaWeightsChart({
               wrapperStyle={{
                 fontSize: "11px",
                 paddingTop: "8px",
-                color: "#52524e",
+                color: "#475569",
               }}
             />
           )}
           <Bar
             dataKey="primary"
             name={primaryLabel}
-            fill="#111113"
-            radius={[2, 2, 0, 0]}
+            fill="#1e3a5f"
+            radius={[3, 3, 0, 0]}
             maxBarSize={36}
           />
           {comparisonWeightsByCode && (
             <Bar
               dataKey="comparison"
               name={comparisonLabel}
-              fill="#b8b8b0"
-              radius={[2, 2, 0, 0]}
+              fill="#94a3b8"
+              radius={[3, 3, 0, 0]}
               maxBarSize={36}
             />
           )}
@@ -112,12 +112,12 @@ export interface SawContributionItem {
 }
 
 const CRITERION_SHADES: Record<CriterionCode, string> = {
-  C1: "#111113",
-  C2: "#3a3a3d",
-  C3: "#5c5c58",
-  C4: "#82827c",
-  C5: "#abab9f",
-  C6: "#d4d4cc",
+  C1: "#1e3a5f",
+  C2: "#2f557f",
+  C3: "#4a739c",
+  C4: "#6c91b4",
+  C5: "#98b4cd",
+  C6: "#cbd5e1",
 };
 
 export function SawContributionChart({ items }: { items: SawContributionItem[] }) {
@@ -143,12 +143,12 @@ export function SawContributionChart({ items }: { items: SawContributionItem[] }
           layout="vertical"
           margin={{ top: 8, right: 16, left: 4, bottom: 8 }}
         >
-          <CartesianGrid strokeDasharray="2 4" stroke="#e5e5e0" horizontal={false} />
+          <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" horizontal={false} />
           <XAxis
             type="number"
             domain={[0, 1]}
-            tick={{ fill: "#787872", fontSize: 11, fontFamily: "var(--font-mono)" }}
-            axisLine={{ stroke: "#d0d0c8" }}
+            tick={{ fill: "#64748b", fontSize: 11, fontFamily: "var(--font-mono)" }}
+            axisLine={{ stroke: "#cbd5e1" }}
             tickLine={false}
           />
           <YAxis
@@ -156,7 +156,7 @@ export function SawContributionChart({ items }: { items: SawContributionItem[] }
             dataKey="code"
             width={36}
             tick={{
-              fill: "#111113",
+              fill: "#1e293b",
               fontSize: 12,
               fontWeight: 600,
               fontFamily: "var(--font-mono)",
@@ -166,14 +166,14 @@ export function SawContributionChart({ items }: { items: SawContributionItem[] }
           />
           <Tooltip
             formatter={(val) => formatDecimal(Number(val ?? 0), 6)}
-            cursor={{ fill: "#f7f7f5" }}
+            cursor={{ fill: "#f8fafc" }}
             contentStyle={{
               backgroundColor: "#ffffff",
-              border: "1px solid #d0d0c8",
+              border: "1px solid #cbd5e1",
               borderRadius: "6px",
               fontSize: "12px",
               fontFamily: "var(--font-mono)",
-              boxShadow: "0 4px 12px rgba(17,17,19,0.06)",
+              boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
             }}
           />
           <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />

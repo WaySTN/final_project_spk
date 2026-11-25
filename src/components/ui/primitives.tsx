@@ -27,13 +27,13 @@ export function Button({
 }: ButtonProps) {
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "bg-[#111113] text-white hover:bg-[#27272a] border border-[#111113] disabled:opacity-45",
+      "bg-[#1e3a5f] text-white hover:bg-[#162d4a] border border-[#1e3a5f] disabled:opacity-45",
     secondary:
-      "bg-[#f2f2ee] text-[#111113] hover:bg-[#e5e5e0] border border-[#e5e5e0] disabled:opacity-45",
+      "bg-[#f1f5f9] text-[#1e293b] hover:bg-[#e2e8f0] border border-[#e2e8f0] disabled:opacity-45",
     outline:
-      "bg-white text-[#111113] hover:bg-[#f7f7f5] border border-[#d0d0c8] hover:border-[#111113]/40 disabled:opacity-45",
+      "bg-white text-[#1e293b] hover:bg-[#f8fafc] border border-[#cbd5e1] hover:border-[#1e3a5f]/45 disabled:opacity-45",
     ghost:
-      "bg-transparent text-[#52524e] hover:bg-[#f2f2ee] hover:text-[#111113] border border-transparent disabled:opacity-45",
+      "bg-transparent text-[#475569] hover:bg-[#f1f5f9] hover:text-[#1e293b] border border-transparent disabled:opacity-45",
     danger:
       "bg-red-700 text-white hover:bg-red-800 border border-red-700 disabled:opacity-45",
   };
@@ -48,7 +48,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg transition-all duration-150 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111113] focus-visible:ring-offset-2 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap",
+        "inline-flex items-center justify-center gap-2 rounded-lg transition-all duration-150 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e3a5f] focus-visible:ring-offset-2 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap",
         variants[variant],
         sizes[size],
         className,
@@ -62,7 +62,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "rounded-lg border border-[#e5e5e0] bg-white text-[#111113]",
+        "rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b]",
         className,
       )}
       {...props}
@@ -74,7 +74,7 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        "flex flex-col gap-1 border-b border-[#e5e5e0]/80 px-5 py-4",
+        "flex flex-col gap-1 border-b border-[#e2e8f0]/80 px-5 py-4",
         className,
       )}
       {...props}
@@ -86,7 +86,7 @@ export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingEle
   return (
     <h3
       className={cn(
-        "text-[15px] font-semibold tracking-[-0.015em] text-[#111113]",
+        "text-[15px] font-semibold tracking-[-0.015em] text-[#1e293b]",
         className,
       )}
       {...props}
@@ -99,7 +99,10 @@ export function CardDescription({
   ...props
 }: HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-xs sm:text-[13px] leading-relaxed text-[#787872]", className)} {...props} />
+    <p
+      className={cn("text-xs sm:text-[13px] leading-relaxed text-[#64748b]", className)}
+      {...props}
+    />
   );
 }
 
@@ -119,8 +122,8 @@ export function Badge({
   className?: string;
 }) {
   const tones: Record<BadgeTone, string> = {
-    neutral: "bg-[#f2f2ee] text-[#52524e] border-[#e5e5e0]",
-    dark: "bg-[#111113] text-white border-[#111113]",
+    neutral: "bg-[#f1f5f9] text-[#475569] border-[#e2e8f0]",
+    dark: "bg-[#eff4fa] text-[#1e3a5f] border-[#c7d9ec] font-semibold",
     success: "bg-emerald-50/90 text-emerald-800 border-emerald-200/90",
     warning: "bg-amber-50/90 text-amber-900 border-amber-200/90",
     error: "bg-red-50/90 text-red-800 border-red-200/90",
@@ -142,7 +145,7 @@ export function Badge({
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
   return (
     <label
-      className={cn("block text-xs font-medium text-[#52524e] mb-1.5", className)}
+      className={cn("block text-xs font-medium text-[#475569] mb-1.5", className)}
       {...props}
     />
   );
@@ -152,7 +155,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   return (
     <input
       className={cn(
-        "h-10 w-full rounded-lg border border-[#d0d0c8] bg-white px-3 text-sm text-[#111113] placeholder:text-[#9c9c95] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10 disabled:bg-[#f7f7f5] disabled:text-[#787872]",
+        "h-10 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 text-sm text-[#1e293b] placeholder:text-[#94a3b8] transition-colors focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15 disabled:bg-[#f8fafc] disabled:text-[#64748b]",
         className,
       )}
       {...props}
@@ -164,7 +167,7 @@ export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectE
   return (
     <select
       className={cn(
-        "h-10 w-full rounded-lg border border-[#d0d0c8] bg-white px-3 text-sm text-[#111113] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10 disabled:bg-[#f7f7f5]",
+        "h-10 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 text-sm text-[#1e293b] transition-colors focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15 disabled:bg-[#f8fafc]",
         className,
       )}
       {...props}
@@ -179,7 +182,7 @@ export function Textarea({
   return (
     <textarea
       className={cn(
-        "w-full rounded-lg border border-[#d0d0c8] bg-white px-3 py-2.5 text-sm text-[#111113] placeholder:text-[#9c9c95] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10 disabled:bg-[#f7f7f5]",
+        "w-full rounded-lg border border-[#cbd5e1] bg-white px-3 py-2.5 text-sm text-[#1e293b] placeholder:text-[#94a3b8] transition-colors focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15 disabled:bg-[#f8fafc]",
         className,
       )}
       {...props}
@@ -199,10 +202,10 @@ export function AlertBanner({
   className?: string;
 }) {
   const styles = {
-    neutral: "border-[#e5e5e0] border-l-[#111113] bg-[#f7f7f5] text-[#111113]",
-    success: "border-emerald-200 border-l-emerald-700 bg-emerald-50/70 text-emerald-950",
+    neutral: "border-[#e2e8f0] border-l-[#1e3a5f] bg-[#f8fafc] text-[#1e293b]",
+    success: "border-emerald-200 border-l-emerald-600 bg-emerald-50/70 text-emerald-950",
     warning: "border-amber-200 border-l-amber-600 bg-amber-50/75 text-amber-950",
-    error: "border-red-200 border-l-red-700 bg-red-50/75 text-red-950",
+    error: "border-red-200 border-l-red-600 bg-red-50/75 text-red-950",
   };
 
   const Icon =
@@ -250,16 +253,16 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[#d0d0c8] bg-[#f7f7f5]/70 px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[#cbd5e1] bg-[#f8fafc] px-6 py-14 text-center">
       {icon && (
-        <div className="mb-3.5 flex h-11 w-11 items-center justify-center rounded-lg border border-[#e5e5e0] bg-white text-[#52524e]">
+        <div className="mb-3.5 flex h-11 w-11 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[#475569]">
           {icon}
         </div>
       )}
-      <h3 className="text-base font-semibold tracking-[-0.015em] text-[#111113]">
+      <h3 className="text-base font-semibold tracking-[-0.015em] text-[#1e293b]">
         {title}
       </h3>
-      <p className="mt-1.5 max-w-md text-sm leading-relaxed text-[#787872]">
+      <p className="mt-1.5 max-w-md text-sm leading-relaxed text-[#64748b]">
         {description}
       </p>
       {action && <div className="mt-6">{action}</div>}
@@ -268,7 +271,7 @@ export function EmptyState({
 }
 
 export function SkeletonBlock({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded-lg bg-[#ededeb]", className)} />;
+  return <div className={cn("animate-pulse rounded-lg bg-[#e2e8f0]/75", className)} />;
 }
 
 /**
@@ -290,7 +293,7 @@ export function ScoreBar({
     <div
       className={cn(
         "h-1.5 w-full overflow-hidden rounded-full",
-        inverted ? "bg-white/15" : "bg-[#e5e5e0]",
+        inverted ? "bg-white/20" : "bg-[#e2e8f0]",
         className,
       )}
       aria-hidden="true"
@@ -298,7 +301,7 @@ export function ScoreBar({
       <div
         className={cn(
           "h-full rounded-full transition-all duration-300",
-          inverted ? "bg-white" : "bg-[#111113]",
+          inverted ? "bg-white" : "bg-[#1e3a5f]",
         )}
         style={{ width: `${pct.toFixed(2)}%` }}
       />
@@ -317,16 +320,16 @@ export function CrGaugeBar({ cr }: { cr: number | null }) {
   const passes = cr <= 0.1 + 1e-12;
 
   return (
-    <div className="relative mt-1 h-1.5 w-24 rounded-full bg-[#e5e5e0]" aria-hidden="true">
+    <div className="relative mt-1 h-1.5 w-24 rounded-full bg-[#e2e8f0]" aria-hidden="true">
       <div
         className={cn(
           "h-full rounded-full",
-          passes ? "bg-emerald-700" : "bg-red-700",
+          passes ? "bg-emerald-600" : "bg-red-600",
         )}
         style={{ width: `${Math.max(pct, cr === 0 ? 3 : pct)}%` }}
       />
       <span
-        className="absolute -top-0.5 bottom-[-2px] w-[1.5px] bg-[#111113]/60"
+        className="absolute -top-0.5 bottom-[-2px] w-[1.5px] bg-[#1e3a5f]/60"
         style={{ left: `${thresholdPct}%` }}
         title="Ambang CR 0,10"
       />
@@ -356,7 +359,7 @@ export function SlideOverDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-[#111113]/45"
+      className="fixed inset-0 z-50 flex justify-end bg-[#0f172a]/35"
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel ?? title}
@@ -366,14 +369,14 @@ export function SlideOverDrawer({
         aria-hidden="true"
         onClick={onClose}
       />
-      <div className="animate-drawer-in relative z-10 flex h-full w-full max-w-2xl flex-col border-l border-[#e5e5e0] bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-[#e5e5e0] bg-[#f7f7f5] px-5 py-4">
+      <div className="animate-drawer-in relative z-10 flex h-full w-full max-w-2xl flex-col border-l border-[#e2e8f0] bg-white shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-[#e2e8f0] bg-[#f8fafc] px-5 py-4">
           <div className="min-w-0">
-            <h2 className="text-base font-semibold tracking-[-0.015em] text-[#111113]">
+            <h2 className="text-base font-semibold tracking-[-0.015em] text-[#1e293b]">
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-0.5 text-xs text-[#787872] leading-relaxed">
+              <p className="mt-0.5 text-xs text-[#64748b] leading-relaxed">
                 {subtitle}
               </p>
             )}
@@ -382,7 +385,7 @@ export function SlideOverDrawer({
             type="button"
             aria-label="Tutup panel"
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#d0d0c8] bg-white text-[#52524e] hover:bg-[#f2f2ee] hover:text-[#111113] cursor-pointer"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#cbd5e1] bg-white text-[#475569] hover:bg-[#f1f5f9] hover:text-[#1e293b] cursor-pointer"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>

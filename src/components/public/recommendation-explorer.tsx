@@ -50,9 +50,9 @@ export function RecommendationExplorer({
   return (
     <div className="space-y-8">
       {/* Integrated Editorial Filter Rail */}
-      <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-4 sm:p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5e5e0] pb-3">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-[#52524e]">
+      <div className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4 sm:p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e2e8f0] pb-3">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-[#475569]">
             Pencarian & Filter Tampilan · {filtered.length}/{items.length} Kandidat
           </p>
           <Badge tone="neutral">Filter tampilan, bukan perhitungan ulang</Badge>
@@ -63,7 +63,7 @@ export function RecommendationExplorer({
             <Label htmlFor="rec-search">Model, SKU, prosesor, atau kode</Label>
             <div className="relative">
               <Search
-                className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#787872]"
+                className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#64748b]"
                 aria-hidden="true"
               />
               <Input
@@ -105,18 +105,18 @@ export function RecommendationExplorer({
           </div>
         </div>
 
-        <p className="text-[11px] text-[#787872]">
+        <p className="text-[11px] text-[#64748b]">
           Menyaring tampilan tidak mengubah peringkat global maupun skor preferensi SAW dari
           snapshot resmi.
         </p>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#d0d0c8] bg-[#f7f7f5]/60 px-6 py-12 text-center">
-          <p className="text-sm font-medium text-[#111113]">
+        <div className="rounded-lg border border-dashed border-[#cbd5e1] bg-[#f8fafc]/60 px-6 py-12 text-center">
+          <p className="text-sm font-medium text-[#1e293b]">
             Tidak ada alternatif yang cocok dengan filter Anda
           </p>
-          <p className="mt-1 text-xs text-[#787872]">
+          <p className="mt-1 text-xs text-[#64748b]">
             Coba reset filter harga atau RAM untuk menampilkan seluruh kandidat snapshot.
           </p>
         </div>
@@ -133,8 +133,8 @@ export function RecommendationExplorer({
                   data-testid={`mobile-ranking-card-${item.code}`}
                   className={`rounded-lg border bg-white p-4 space-y-3.5 ${
                     item.rank === 1
-                      ? "border-[#e5e5e0] border-t-2 border-t-[#111113]"
-                      : "border-[#e5e5e0]"
+                      ? "border-[#e2e8f0] border-t-2 border-t-[#1e3a5f]"
+                      : "border-[#e2e8f0]"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -143,25 +143,25 @@ export function RecommendationExplorer({
                         <Badge tone={item.rank === 1 ? "dark" : "neutral"}>
                           #{item.rank}
                         </Badge>
-                        <span className="font-mono text-xs font-semibold text-[#111113]">
+                        <span className="font-mono text-xs font-semibold text-[#1e293b]">
                           {item.code}
                         </span>
-                        <span className="truncate font-mono text-[11px] text-[#787872]">
+                        <span className="truncate font-mono text-[11px] text-[#64748b]">
                           {item.sku}
                         </span>
                       </div>
-                      <h3 className="mt-1.5 text-sm font-semibold leading-snug text-[#111113]">
+                      <h3 className="mt-1.5 text-sm font-semibold leading-snug text-[#1e293b]">
                         {item.model}
                       </h3>
-                      <p className="text-xs text-[#787872]">
+                      <p className="text-xs text-[#64748b]">
                         {item.cpuName} · {item.seller}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <span className="block font-mono text-[10px] uppercase text-[#787872]">
+                      <span className="block font-mono text-[10px] uppercase text-[#64748b]">
                         Skor SAW
                       </span>
-                      <span className="font-mono text-base font-bold tabular-nums text-[#111113]">
+                      <span className="font-mono text-base font-bold tabular-nums text-[#1e293b]">
                         {formatDecimal(item.score, 6)}
                       </span>
                     </div>
@@ -169,45 +169,45 @@ export function RecommendationExplorer({
 
                   <ScoreBar value={item.score} />
 
-                  <div className="flex items-baseline justify-between border-y border-[#e5e5e0]/80 py-2.5">
-                    <span className="font-mono text-[10px] uppercase text-[#787872]">
+                  <div className="flex items-baseline justify-between border-y border-[#e2e8f0]/80 py-2.5">
+                    <span className="font-mono text-[10px] uppercase text-[#64748b]">
                       Harga Snapshot
                     </span>
-                    <span className="text-base font-semibold tabular-nums text-[#111113]">
+                    <span className="text-base font-semibold tabular-nums text-[#1e293b]">
                       {formatIdr(item.priceIdr)}
                     </span>
                   </div>
 
                   <dl className="grid grid-cols-2 gap-2.5 text-xs">
-                    <div className="rounded bg-[#f7f7f5] px-2.5 py-2">
-                      <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                    <div className="rounded bg-[#f8fafc] px-2.5 py-2">
+                      <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                         CPU Mark
                       </dt>
-                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                         {formatInteger(item.cpuMark)}
                       </dd>
                     </div>
-                    <div className="rounded bg-[#f7f7f5] px-2.5 py-2">
-                      <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                    <div className="rounded bg-[#f8fafc] px-2.5 py-2">
+                      <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                         RAM / SSD
                       </dt>
-                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                         {item.ramGb} / {item.ssdGb} GB
                       </dd>
                     </div>
-                    <div className="rounded bg-[#f7f7f5] px-2.5 py-2">
-                      <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                    <div className="rounded bg-[#f8fafc] px-2.5 py-2">
+                      <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                         Berat
                       </dt>
-                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                         {formatDecimal(item.weightKg, 2)} kg
                       </dd>
                     </div>
-                    <div className="rounded bg-[#f7f7f5] px-2.5 py-2">
-                      <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                    <div className="rounded bg-[#f8fafc] px-2.5 py-2">
+                      <dt className="font-mono text-[10px] uppercase text-[#64748b]">
                         Video 1080p
                       </dt>
-                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                      <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
                         {formatDecimal(item.batteryHours, 1)} jam
                       </dd>
                     </div>
@@ -220,7 +220,7 @@ export function RecommendationExplorer({
 
                   <Link
                     href={`/laptop/${item.code}`}
-                    className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#111113] text-xs font-medium text-white hover:bg-[#27272a]"
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#1e3a5f] text-xs font-medium text-white hover:bg-[#162d4a]"
                   >
                     Lihat Dekomposisi & 4 Sumber
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -231,11 +231,11 @@ export function RecommendationExplorer({
           </div>
 
           {/* Desktop Precision Analytical Ranking Table (md+) */}
-          <div className="hidden md:block rounded-lg border border-[#e5e5e0] bg-white overflow-hidden">
+          <div className="hidden md:block rounded-lg border border-[#e2e8f0] bg-white overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[880px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#787872]">
+                  <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748b]">
                     <th className="px-4 py-3">Rank</th>
                     <th className="px-4 py-3">Alternatif & Penjual</th>
                     <th className="px-3 py-3 text-right">Harga (C1)</th>
@@ -247,7 +247,7 @@ export function RecommendationExplorer({
                     <th className="px-4 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e5e5e0]/80">
+                <tbody className="divide-y divide-[#e2e8f0]/80">
                   {filtered.map((item) => {
                     const stockBadge = formatStockStatusLabel(item.stockStatus);
                     const evBadge = formatEvidenceStatusLabel(item.evidenceStatus);
@@ -255,8 +255,8 @@ export function RecommendationExplorer({
                       <tr
                         key={item.code}
                         data-testid={`ranking-row-${item.code}`}
-                        className={`transition-colors hover:bg-[#f7f7f5]/80 ${
-                          item.rank === 1 ? "bg-[#f7f7f5]/50" : "bg-white"
+                        className={`transition-colors hover:bg-[#f8fafc]/80 ${
+                          item.rank === 1 ? "bg-[#f8fafc]/50" : "bg-white"
                         }`}
                       >
                         <td className="px-4 py-4 align-top whitespace-nowrap">
@@ -266,38 +266,38 @@ export function RecommendationExplorer({
                         </td>
                         <td className="px-4 py-4 align-top">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-semibold text-[#111113]">
+                            <span className="font-mono text-xs font-semibold text-[#1e293b]">
                               {item.code}
                             </span>
                             <Link
                               href={`/laptop/${item.code}`}
-                              className="font-semibold text-[#111113] hover:underline"
+                              className="font-semibold text-[#1e293b] hover:underline"
                             >
                               {item.model}
                             </Link>
                           </div>
-                          <p className="mt-0.5 text-xs text-[#787872]">
+                          <p className="mt-0.5 text-xs text-[#64748b]">
                             {item.cpuName} · {item.seller}
                           </p>
                         </td>
-                        <td className="px-3 py-4 align-top text-right font-mono text-[13px] font-medium tabular-nums whitespace-nowrap text-[#111113]">
+                        <td className="px-3 py-4 align-top text-right font-mono text-[13px] font-medium tabular-nums whitespace-nowrap text-[#1e293b]">
                           {formatIdr(item.priceIdr)}
                         </td>
-                        <td className="px-3 py-4 align-top text-right font-mono text-xs tabular-nums text-[#52524e]">
+                        <td className="px-3 py-4 align-top text-right font-mono text-xs tabular-nums text-[#475569]">
                           {formatInteger(item.cpuMark)}
                         </td>
-                        <td className="px-3 py-4 align-top text-right font-mono text-xs tabular-nums whitespace-nowrap text-[#52524e]">
+                        <td className="px-3 py-4 align-top text-right font-mono text-xs tabular-nums whitespace-nowrap text-[#475569]">
                           {item.ramGb} / {item.ssdGb} GB
                         </td>
-                        <td className="px-3 py-4 align-top text-right font-mono text-xs tabular-nums whitespace-nowrap text-[#52524e]">
+                        <td className="px-3 py-4 align-top text-right font-mono text-xs tabular-nums whitespace-nowrap text-[#475569]">
                           <div>{formatDecimal(item.weightKg, 2)} kg</div>
-                          <div className="text-[11px] text-[#787872]">
+                          <div className="text-[11px] text-[#64748b]">
                             {formatDecimal(item.batteryHours, 1)} jam
                           </div>
                         </td>
                         <td className="px-4 py-4 align-top text-right">
                           <span
-                            className="block font-mono text-sm font-semibold tabular-nums text-[#111113]"
+                            className="block font-mono text-sm font-semibold tabular-nums text-[#1e293b]"
                             data-testid={`ranking-score-${item.code}`}
                           >
                             {formatDecimal(item.score, 6)}
@@ -315,7 +315,7 @@ export function RecommendationExplorer({
                         <td className="px-4 py-4 align-top text-right whitespace-nowrap">
                           <Link
                             href={`/laptop/${item.code}`}
-                            className="inline-flex h-8 items-center gap-1 rounded-md border border-[#d0d0c8] bg-white px-2.5 text-xs font-medium text-[#111113] hover:border-[#111113] hover:bg-[#f7f7f5]"
+                            className="inline-flex h-8 items-center gap-1 rounded-md border border-[#cbd5e1] bg-white px-2.5 text-xs font-medium text-[#1e293b] hover:border-[#1e3a5f] hover:bg-[#f8fafc]"
                           >
                             Detail
                             <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -332,15 +332,15 @@ export function RecommendationExplorer({
       )}
 
       {/* Contribution Breakdown Chart */}
-      <div className="rounded-lg border border-[#e5e5e0] bg-white p-5 sm:p-6">
+      <div className="rounded-lg border border-[#e2e8f0] bg-white p-5 sm:p-6">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="editorial-kicker">Dekomposisi Preferensi</p>
-            <h2 className="mt-1 text-base font-semibold text-[#111113]">
+            <h2 className="mt-1 text-base font-semibold text-[#1e293b]">
               Kontribusi Berbobot Setiap Kriteria (wⱼ × rᵢⱼ)
             </h2>
           </div>
-          <span className="font-mono text-[11px] text-[#787872]">
+          <span className="font-mono text-[11px] text-[#64748b]">
             Skala 0,000000 – 1,000000
           </span>
         </div>

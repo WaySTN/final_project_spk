@@ -455,7 +455,7 @@ export function AlternatifWorkbench({
           <CardTitle>Impor Dataset Alternatif Laptop (Workbook Audit Revisi / CSV)</CardTitle>
           <CardDescription>
             Membaca sheet{" "}
-            <code className="rounded bg-[#f2f2ee] px-1 py-0.5 font-mono text-[11px] text-[#111113]">
+            <code className="rounded bg-[#f1f5f9] px-1 py-0.5 font-mono text-[11px] text-[#1e293b]">
               Data Audit
             </code>{" "}
             lengkap beserta 4 URL sumber bukti. Setiap impor membuat versi dataset draft baru
@@ -463,7 +463,7 @@ export function AlternatifWorkbench({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="rounded-lg border border-dashed border-[#d0d0c8] bg-[#f7f7f5] p-4">
+          <div className="rounded-lg border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4">
             <div className="grid gap-4 sm:grid-cols-4">
               <div className="sm:col-span-2">
                 <Label htmlFor="laptop-file">Berkas alternatif (.xlsx / .csv)</Label>
@@ -473,7 +473,7 @@ export function AlternatifWorkbench({
                   type="file"
                   accept=".xlsx,.csv"
                   onChange={handleFileChange}
-                  className="h-10 w-full rounded-lg border border-[#d0d0c8] bg-white px-3 pt-2 text-sm text-[#111113] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10"
+                  className="h-10 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 pt-2 text-sm text-[#1e293b] transition-colors focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/10"
                 />
               </div>
               <div>
@@ -516,9 +516,9 @@ export function AlternatifWorkbench({
           </div>
 
           {preview && (
-            <div className="space-y-3 rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-4">
+            <div className="space-y-3 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[#111113]">
+                <p className="text-sm font-semibold text-[#1e293b]">
                   Preview: {preview.filename} ({preview.sheetName}) —{" "}
                   {preview.summary.eligibleRows}/{preview.summary.totalRows} eligible
                 </p>
@@ -532,10 +532,10 @@ export function AlternatifWorkbench({
                 </p>
               ))}
               {preview.rows.length > 0 && (
-                <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
+                <div className="overflow-x-auto rounded-lg border border-[#e2e8f0] bg-white">
                   <table className="w-full min-w-[640px] border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#787872]">
+                      <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#64748b]">
                         <th className="px-3 py-2.5">Kode</th>
                         <th className="px-3 py-2.5">Model / SKU</th>
                         <th className="px-3 py-2.5 text-right">Harga</th>
@@ -545,13 +545,13 @@ export function AlternatifWorkbench({
                         <th className="px-3 py-2.5">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e5e5e0]/80">
+                    <tbody className="divide-y divide-[#e2e8f0]/80">
                       {preview.rows.map((r) => (
                         <tr key={r.rowNo}>
-                          <td className="px-3 py-2 font-mono font-semibold text-[#111113]">
+                          <td className="px-3 py-2 font-mono font-semibold text-[#1e293b]">
                             {r.code}
                           </td>
-                          <td className="px-3 py-2 text-[#111113]">{r.model}</td>
+                          <td className="px-3 py-2 text-[#1e293b]">{r.model}</td>
                           <td className="px-3 py-2 text-right font-mono tabular-nums">
                             {formatIdr(r.priceIdr)}
                           </td>
@@ -652,7 +652,7 @@ export function AlternatifWorkbench({
               description="Impor workbook SPK_Kelompok_13_Audit_SAW_Revisi.xlsx pada formulir di atas untuk mengisi 7 alternatif baseline beserta 4 tautan sumbernya."
             />
           ) : loading ? (
-            <p className="py-8 text-center text-sm text-[#787872]">Memuat dataset...</p>
+            <p className="py-8 text-center text-sm text-[#64748b]">Memuat dataset...</p>
           ) : isMobile ? (
             /* Mobile Hardware Spec Sheet Cards (< 768px) */
             <div className="space-y-3">
@@ -662,52 +662,52 @@ export function AlternatifWorkbench({
                 return (
                   <div
                     key={alt.id}
-                    className={`rounded-lg border border-[#e5e5e0] p-4 space-y-3 ${
-                      !alt.active ? "bg-[#f7f7f5] opacity-65" : "bg-white"
+                    className={`rounded-lg border border-[#e2e8f0] p-4 space-y-3 ${
+                      !alt.active ? "bg-[#f8fafc] opacity-65" : "bg-white"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="rounded bg-[#111113] px-2 py-0.5 font-mono text-xs font-semibold text-white">
+                          <span className="rounded bg-[#1e3a5f] px-2 py-0.5 font-mono text-xs font-semibold text-white">
                             {alt.code}
                           </span>
                           {!alt.active && <Badge tone="neutral">Nonaktif</Badge>}
                         </div>
-                        <p className="mt-1.5 text-sm font-semibold text-[#111113]">
+                        <p className="mt-1.5 text-sm font-semibold text-[#1e293b]">
                           {alt.model}
                         </p>
-                        <p className="text-xs text-[#787872]">
+                        <p className="text-xs text-[#64748b]">
                           {alt.cpuName} · {alt.seller}
                         </p>
                       </div>
-                      <p className="shrink-0 font-mono text-xs font-semibold tabular-nums text-[#111113]">
+                      <p className="shrink-0 font-mono text-xs font-semibold tabular-nums text-[#1e293b]">
                         {formatIdr(alt.priceIdr)}
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-[#e5e5e0] bg-[#e5e5e0] text-xs">
-                      <div className="bg-[#f7f7f5] p-2.5">
-                        <p className="font-mono text-[10px] uppercase text-[#787872]">CPU Mark</p>
-                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-[#e2e8f0] bg-[#e2e8f0] text-xs">
+                      <div className="bg-[#f8fafc] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#64748b]">CPU Mark</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#1e293b]">
                           {formatInteger(alt.cpuMark)}
                         </p>
                       </div>
-                      <div className="bg-[#f7f7f5] p-2.5">
-                        <p className="font-mono text-[10px] uppercase text-[#787872]">RAM / SSD</p>
-                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                      <div className="bg-[#f8fafc] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#64748b]">RAM / SSD</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#1e293b]">
                           {alt.ramGb} / {alt.ssdGb} GB
                         </p>
                       </div>
-                      <div className="bg-[#f7f7f5] p-2.5">
-                        <p className="font-mono text-[10px] uppercase text-[#787872]">Berat</p>
-                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                      <div className="bg-[#f8fafc] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#64748b]">Berat</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#1e293b]">
                           {alt.weightKg} kg
                         </p>
                       </div>
-                      <div className="bg-[#f7f7f5] p-2.5">
-                        <p className="font-mono text-[10px] uppercase text-[#787872]">Baterai C6</p>
-                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                      <div className="bg-[#f8fafc] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#64748b]">Baterai C6</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#1e293b]">
                           {alt.batteryHours} jam
                         </p>
                       </div>
@@ -718,7 +718,7 @@ export function AlternatifWorkbench({
                       <Badge tone={evBadge.tone}>{evBadge.label}</Badge>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#e5e5e0] pt-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#e2e8f0] pt-3">
                       <div className="flex flex-wrap gap-2 text-[11px]">
                         {alt.sources.map((s) => (
                           <a
@@ -726,7 +726,7 @@ export function AlternatifWorkbench({
                             href={s.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-0.5 font-mono text-[#52524e] underline hover:text-[#111113]"
+                            className="inline-flex items-center gap-0.5 font-mono text-[#475569] underline hover:text-[#1e293b]"
                           >
                             {s.sourceType}
                             <ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
@@ -763,10 +763,10 @@ export function AlternatifWorkbench({
             </div>
           ) : (
             /* Desktop Precision Ledger Table (>= 768px) */
-            <div className="overflow-x-auto rounded-lg border border-[#e5e5e0]">
+            <div className="overflow-x-auto rounded-lg border border-[#e2e8f0]">
               <table className="w-full min-w-[960px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                  <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                     <th className="px-3.5 py-3">Kode</th>
                     <th className="px-3.5 py-3">Model / SKU &amp; Prosesor</th>
                     <th className="px-3.5 py-3 text-right">Harga (C1)</th>
@@ -777,7 +777,7 @@ export function AlternatifWorkbench({
                     <th className="px-3.5 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e5e5e0]/80">
+                <tbody className="divide-y divide-[#e2e8f0]/80">
                   {alternatives.map((alt) => {
                     const stockBadge = formatStockStatusLabel(alt.stockStatus);
                     const evBadge = formatEvidenceStatusLabel(alt.evidenceStatus);
@@ -786,11 +786,11 @@ export function AlternatifWorkbench({
                         key={alt.id}
                         className={
                           !alt.active
-                            ? "bg-[#f7f7f5] opacity-60"
-                            : "transition-colors hover:bg-[#f7f7f5]/60"
+                            ? "bg-[#f8fafc] opacity-60"
+                            : "transition-colors hover:bg-[#f8fafc]/60"
                         }
                       >
-                        <td className="px-3.5 py-3.5 font-mono font-semibold text-[#111113]">
+                        <td className="px-3.5 py-3.5 font-mono font-semibold text-[#1e293b]">
                           {alt.code}
                           {!alt.active && (
                             <div className="mt-1">
@@ -799,23 +799,23 @@ export function AlternatifWorkbench({
                           )}
                         </td>
                         <td className="px-3.5 py-3.5">
-                          <p className="font-medium text-[#111113]">{alt.model}</p>
-                          <p className="text-xs text-[#787872]">
+                          <p className="font-medium text-[#1e293b]">{alt.model}</p>
+                          <p className="text-xs text-[#64748b]">
                             {alt.cpuName} · {alt.seller}
                           </p>
                         </td>
-                        <td className="px-3.5 py-3.5 text-right font-mono text-xs font-semibold tabular-nums whitespace-nowrap text-[#111113]">
+                        <td className="px-3.5 py-3.5 text-right font-mono text-xs font-semibold tabular-nums whitespace-nowrap text-[#1e293b]">
                           {formatIdr(alt.priceIdr)}
                         </td>
-                        <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums text-[#52524e]">
+                        <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums text-[#475569]">
                           {formatInteger(alt.cpuMark)}
                         </td>
-                        <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums whitespace-nowrap text-[#52524e]">
+                        <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums whitespace-nowrap text-[#475569]">
                           {alt.ramGb} GB / {alt.ssdGb} GB
                         </td>
                         <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums whitespace-nowrap">
-                          <p className="text-[#111113]">{alt.weightKg} kg</p>
-                          <p className="text-[11px] text-[#787872]">
+                          <p className="text-[#1e293b]">{alt.weightKg} kg</p>
+                          <p className="text-[11px] text-[#64748b]">
                             {alt.batteryHours} jam
                             {alt.batteryWh ? ` (${alt.batteryWh} Wh)` : ""}
                           </p>
@@ -832,7 +832,7 @@ export function AlternatifWorkbench({
                                 href={s.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-0.5 font-mono text-[#52524e] underline hover:text-[#111113]"
+                                className="inline-flex items-center gap-0.5 font-mono text-[#475569] underline hover:text-[#1e293b]"
                               >
                                 {s.sourceType}
                                 <ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
@@ -939,7 +939,7 @@ export function AlternatifWorkbench({
             </div>
           </div>
 
-          <div className="space-y-3 border-t border-[#e5e5e0] pt-4">
+          <div className="space-y-3 border-t border-[#e2e8f0] pt-4">
             <p className="editorial-kicker">Nilai Enam Kriteria (C1–C6)</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
@@ -1017,7 +1017,7 @@ export function AlternatifWorkbench({
             </div>
           </div>
 
-          <div className="grid gap-3 border-t border-[#e5e5e0] pt-4 sm:grid-cols-3">
+          <div className="grid gap-3 border-t border-[#e2e8f0] pt-4 sm:grid-cols-3">
             <div>
               <Label htmlFor="f-wh">Baterai Wh (opsional)</Label>
               <Input
@@ -1089,7 +1089,7 @@ export function AlternatifWorkbench({
             </div>
           </div>
 
-          <div className="space-y-3 border-t border-[#e5e5e0] pt-4">
+          <div className="space-y-3 border-t border-[#e2e8f0] pt-4">
             <p className="editorial-kicker">
               4 Tautan Sumber Bukti Wajib (http:// atau https://)
             </p>
@@ -1149,7 +1149,7 @@ export function AlternatifWorkbench({
             />
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-[#e5e5e0] pt-4">
+          <div className="flex justify-end gap-2 border-t border-[#e2e8f0] pt-4">
             <Button variant="outline" onClick={() => setFormOpen(false)}>
               Batal
             </Button>

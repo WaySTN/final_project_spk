@@ -216,7 +216,7 @@ export function SawWorkbench({
           </div>
 
           {sawRuns.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e5e0] pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e2e8f0] pt-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Label htmlFor="saw-select" className="mb-0">
                   Run SAW ditampilkan:
@@ -242,7 +242,7 @@ export function SawWorkbench({
               {selectedRunId && (
                 <a
                   href={`/api/admin/export/${selectedRunId}`}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#d0d0c8] bg-white px-3 text-xs font-medium text-[#111113] transition-colors hover:border-[#111113]/40 hover:bg-[#f7f7f5]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#cbd5e1] bg-white px-3 text-xs font-medium text-[#1e293b] transition-colors hover:border-[#1e3a5f]/40 hover:bg-[#f8fafc]"
                 >
                   <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   Ekspor XLSX Run Ini
@@ -260,7 +260,7 @@ export function SawWorkbench({
           description="Pilih run AHP dan dataset alternatif laptop, lalu klik Hitung SAW Sekarang untuk memproses matriks keputusan X, normalisasi R, kontribusi berbobot, dan peringkat."
         />
       ) : loadingDetail || !detail ? (
-        <p className="py-8 text-center text-sm text-[#787872]">
+        <p className="py-8 text-center text-sm text-[#64748b]">
           Memuat matriks keputusan, normalisasi, dan peringkat SAW...
         </p>
       ) : (
@@ -301,8 +301,8 @@ export function SawWorkbench({
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#787872]">
-                      <th className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-[#f7f7f5] px-4 py-2.5">
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748b]">
+                      <th className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-[#f8fafc] px-4 py-2.5">
                         Kode
                       </th>
                       <th className="px-4 py-2.5">Alternatif</th>
@@ -314,36 +314,36 @@ export function SawWorkbench({
                       <th className="px-3 py-2.5 text-right">C6 Baterai</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e5e5e0]/80 font-mono text-xs tabular-nums">
+                  <tbody className="divide-y divide-[#e2e8f0]/80 font-mono text-xs tabular-nums">
                     {detail.results.map((r) => (
-                      <tr key={r.id} className="hover:bg-[#f7f7f5]/60">
-                        <td className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-2.5 font-semibold text-[#111113]">
+                      <tr key={r.id} className="hover:bg-[#f8fafc]/60">
+                        <td className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-white px-4 py-2.5 font-semibold text-[#1e293b]">
                           {r.alternativeCode}
                         </td>
-                        <td className="px-4 py-2.5 font-sans text-xs text-[#111113]">
+                        <td className="px-4 py-2.5 font-sans text-xs text-[#1e293b]">
                           {r.alternativeModel}
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#111113]">
+                        <td className="px-3 py-2.5 text-right text-[#1e293b]">
                           {formatIdr(r.criteriaValues.C1)}
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#52524e]">
+                        <td className="px-3 py-2.5 text-right text-[#475569]">
                           {formatInteger(r.criteriaValues.C2)}
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#52524e]">
+                        <td className="px-3 py-2.5 text-right text-[#475569]">
                           {r.criteriaValues.C3} GB
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#52524e]">
+                        <td className="px-3 py-2.5 text-right text-[#475569]">
                           {r.criteriaValues.C4} GB
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#52524e]">
+                        <td className="px-3 py-2.5 text-right text-[#475569]">
                           {formatDecimal(r.criteriaValues.C5, 2)} kg
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#52524e]">
+                        <td className="px-3 py-2.5 text-right text-[#475569]">
                           {formatDecimal(r.criteriaValues.C6, 1)} jam
                         </td>
                       </tr>
                     ))}
-                    <tr className="border-t-2 border-[#d0d0c8] bg-[#f7f7f5] text-xs font-semibold text-[#111113]">
+                    <tr className="border-t-2 border-[#cbd5e1] bg-[#f8fafc] text-xs font-semibold text-[#1e293b]">
                       <td className="px-4 py-2.5 font-sans" colSpan={2}>
                         Basis Normalisasi (Min Cost · Max Benefit)
                       </td>
@@ -385,8 +385,8 @@ export function SawWorkbench({
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[700px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#787872]">
-                      <th className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-[#f7f7f5] px-4 py-2.5">
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748b]">
+                      <th className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-[#f8fafc] px-4 py-2.5">
                         Kode
                       </th>
                       {CRITERIA.map((c) => (
@@ -396,16 +396,16 @@ export function SawWorkbench({
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e5e5e0]/80 font-mono text-xs tabular-nums">
+                  <tbody className="divide-y divide-[#e2e8f0]/80 font-mono text-xs tabular-nums">
                     {detail.results.map((r) => (
-                      <tr key={r.id} className="hover:bg-[#f7f7f5]/60">
-                        <td className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-2.5 font-semibold text-[#111113]">
+                      <tr key={r.id} className="hover:bg-[#f8fafc]/60">
+                        <td className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-white px-4 py-2.5 font-semibold text-[#1e293b]">
                           {r.alternativeCode}
                         </td>
                         {CRITERIA.map((c) => (
                           <td
                             key={c.code}
-                            className="px-3 py-2.5 text-right text-[#52524e]"
+                            className="px-3 py-2.5 text-right text-[#475569]"
                           >
                             {formatDecimal(r.normalizedValues[c.code], 6)}
                           </td>
@@ -433,10 +433,10 @@ export function SawWorkbench({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="overflow-x-auto rounded-lg border border-[#e5e5e0]">
+              <div className="overflow-x-auto rounded-lg border border-[#e2e8f0]">
                 <table className="w-full min-w-[840px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#787872]">
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748b]">
                       <th className="px-3.5 py-2.5">Rank</th>
                       <th className="px-3.5 py-2.5">Kode &amp; Model</th>
                       {CRITERIA.map((c) => (
@@ -447,14 +447,14 @@ export function SawWorkbench({
                       <th className="px-3.5 py-2.5 text-right">Nilai Preferensi (V)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e5e5e0]/80 tabular-nums">
+                  <tbody className="divide-y divide-[#e2e8f0]/80 tabular-nums">
                     {detail.results.map((r) => (
                       <tr
                         key={r.id}
                         className={
                           r.rank === 1
-                            ? "bg-[#f7f7f5] font-medium"
-                            : "transition-colors hover:bg-[#f7f7f5]/60"
+                            ? "bg-[#f8fafc] font-medium"
+                            : "transition-colors hover:bg-[#f8fafc]/60"
                         }
                       >
                         <td className="px-3.5 py-3">
@@ -463,24 +463,24 @@ export function SawWorkbench({
                           </Badge>
                         </td>
                         <td className="px-3.5 py-3">
-                          <span className="mr-1.5 font-mono text-xs font-semibold text-[#111113]">
+                          <span className="mr-1.5 font-mono text-xs font-semibold text-[#1e293b]">
                             {r.alternativeCode}
                           </span>
-                          <span className="text-xs text-[#111113]">
+                          <span className="text-xs text-[#1e293b]">
                             {r.alternativeModel}
                           </span>
                         </td>
                         {CRITERIA.map((c) => (
                           <td
                             key={c.code}
-                            className="px-2.5 py-3 text-right font-mono text-xs text-[#52524e]"
+                            className="px-2.5 py-3 text-right font-mono text-xs text-[#475569]"
                           >
                             {formatDecimal(r.weightedValues[c.code], 6)}
                           </td>
                         ))}
                         <td className="px-3.5 py-3 text-right">
                           <div className="ml-auto w-28 space-y-1">
-                            <p className="font-mono text-sm font-bold text-[#111113]">
+                            <p className="font-mono text-sm font-bold text-[#1e293b]">
                               {formatDecimal(r.score, 6)}
                             </p>
                             <ScoreBar value={r.score} max={1} />
@@ -493,7 +493,7 @@ export function SawWorkbench({
               </div>
 
               <div>
-                <h3 className="mb-2.5 text-sm font-semibold tracking-[-0.01em] text-[#111113]">
+                <h3 className="mb-2.5 text-sm font-semibold tracking-[-0.01em] text-[#1e293b]">
                   Visualisasi Dekomposisi Skor SAW per Kriteria
                 </h3>
                 <SawContributionChart

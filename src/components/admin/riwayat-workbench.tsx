@@ -229,12 +229,12 @@ export function RiwayatWorkbench({
               <div
                 className={`space-y-3 rounded-lg border p-4 transition-colors ${
                   intendedStatus === "final"
-                    ? "border-[#111113]/30 bg-white"
-                    : "border-[#e5e5e0] bg-[#f7f7f5]"
+                    ? "border-[#1e3a5f]/30 bg-white"
+                    : "border-[#e2e8f0] bg-[#f8fafc]"
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-[#111113]">
+                  <p className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1e293b]">
                     <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                     Checklist Verifikasi Kualitas (Wajib Penuh untuk Status Final)
                   </p>
@@ -249,7 +249,7 @@ export function RiwayatWorkbench({
                   {CHECKLIST_ITEMS.map(([key, label]) => (
                     <label
                       key={key}
-                      className="flex cursor-pointer items-start gap-2.5 text-xs leading-relaxed text-[#111113]"
+                      className="flex cursor-pointer items-start gap-2.5 text-xs leading-relaxed text-[#1e293b]"
                     >
                       <input
                         type="checkbox"
@@ -257,7 +257,7 @@ export function RiwayatWorkbench({
                         onChange={(e) =>
                           setChecklist({ ...checklist, [key]: e.target.checked })
                         }
-                        className="mt-0.5 h-4 w-4 rounded border-[#d0d0c8] accent-[#111113]"
+                        className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#1e3a5f]"
                       />
                       <span>{label}</span>
                     </label>
@@ -272,7 +272,7 @@ export function RiwayatWorkbench({
                     ? "Memvalidasi & Mempublikasikan..."
                     : `Publikasikan sebagai ${intendedStatus.toUpperCase()}`}
                 </Button>
-                <span className="text-xs text-[#787872]">
+                <span className="text-xs text-[#64748b]">
                   Payload publik disanitasi di server: tidak memuat data mentah responden.
                 </span>
               </div>
@@ -291,14 +291,14 @@ export function RiwayatWorkbench({
         </CardHeader>
         <CardContent className="p-0">
           {publications.length === 0 ? (
-            <p className="px-5 py-8 text-center text-sm text-[#787872]">
+            <p className="px-5 py-8 text-center text-sm text-[#64748b]">
               Belum ada snapshot yang dipublikasikan.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[680px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                  <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                     <th className="px-4 py-2.5">Waktu Publikasi</th>
                     <th className="px-4 py-2.5">Status</th>
                     <th className="px-4 py-2.5">Skenario</th>
@@ -306,12 +306,12 @@ export function RiwayatWorkbench({
                     <th className="px-4 py-2.5">Status Aktif</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e5e5e0]/80">
+                <tbody className="divide-y divide-[#e2e8f0]/80">
                   {publications.map((pub) => {
                     const top = pub.publicPayload.saw.items[0];
                     return (
-                      <tr key={pub.id} className="hover:bg-[#f7f7f5]/60">
-                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap text-[#52524e]">
+                      <tr key={pub.id} className="hover:bg-[#f8fafc]/60">
+                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap text-[#475569]">
                           {formatDateTimeJakarta(pub.publishedAt)}
                         </td>
                         <td className="px-4 py-3">
@@ -327,10 +327,10 @@ export function RiwayatWorkbench({
                             {pub.status.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-xs text-[#52524e]">
+                        <td className="px-4 py-3 text-xs text-[#475569]">
                           {getScenarioLabel(pub.publicPayload.scenario)}
                         </td>
-                        <td className="px-4 py-3 text-xs font-medium text-[#111113]">
+                        <td className="px-4 py-3 text-xs font-medium text-[#1e293b]">
                           {top ? `${top.code} — ${top.model}` : "—"}
                         </td>
                         <td className="px-4 py-3">
@@ -340,7 +340,7 @@ export function RiwayatWorkbench({
                               Aktif di Publik
                             </Badge>
                           ) : (
-                            <span className="text-xs text-[#9c9c95]">Diarsipkan</span>
+                            <span className="text-xs text-[#94a3b8]">Diarsipkan</span>
                           )}
                         </td>
                       </tr>
@@ -364,14 +364,14 @@ export function RiwayatWorkbench({
         </CardHeader>
         <CardContent className="p-0">
           {initialSawRuns.length === 0 ? (
-            <p className="px-5 py-8 text-center text-sm text-[#787872]">
+            <p className="px-5 py-8 text-center text-sm text-[#64748b]">
               Belum ada histori perhitungan SAW.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                  <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                     <th className="px-4 py-2.5">Waktu</th>
                     <th className="px-4 py-2.5">Skenario</th>
                     <th className="px-4 py-2.5">Mode AHP</th>
@@ -380,25 +380,25 @@ export function RiwayatWorkbench({
                     <th className="px-4 py-2.5">Algoritma</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e5e5e0]/80 text-xs">
+                <tbody className="divide-y divide-[#e2e8f0]/80 text-xs">
                   {initialSawRuns.map((run) => (
-                    <tr key={run.id} className="hover:bg-[#f7f7f5]/60">
-                      <td className="px-4 py-3 font-mono whitespace-nowrap text-[#52524e]">
+                    <tr key={run.id} className="hover:bg-[#f8fafc]/60">
+                      <td className="px-4 py-3 font-mono whitespace-nowrap text-[#475569]">
                         {formatDateTimeJakarta(run.createdAt)}
                       </td>
-                      <td className="px-4 py-3 font-medium text-[#111113]">
+                      <td className="px-4 py-3 font-medium text-[#1e293b]">
                         {run.scenario}
                       </td>
-                      <td className="px-4 py-3 font-mono text-[#52524e]">
+                      <td className="px-4 py-3 font-mono text-[#475569]">
                         {run.inputSnapshot.ahpMode}
                       </td>
-                      <td className="px-4 py-3 font-mono text-[#52524e]">
+                      <td className="px-4 py-3 font-mono text-[#475569]">
                         v{run.inputSnapshot.datasetVersion} ({run.inputSnapshot.observedAt})
                       </td>
-                      <td className="px-4 py-3 font-mono text-[#111113]">
+                      <td className="px-4 py-3 font-mono text-[#1e293b]">
                         {run.inputSnapshot.alternativeCodes.join(", ")}
                       </td>
-                      <td className="px-4 py-3 font-mono text-[#787872]">
+                      <td className="px-4 py-3 font-mono text-[#64748b]">
                         {run.algorithmVersion}
                       </td>
                     </tr>
