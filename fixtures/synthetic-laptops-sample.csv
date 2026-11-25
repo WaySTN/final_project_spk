@@ -1,0 +1,3 @@
+Kode,Model dan SKU,Prosesor,Harga (Rp),CPU Mark,RAM (GB),SSD (GB),Berat (kg),Video (jam),Baterai (Wh),Penjual,Status bukti,URL harga,URL spesifikasi,URL baterai,URL CPU Mark
+A1,Synthetic DemoBook 14 SYN-01,Demo CPU 5,9500000,15000,16,512,1.40,12.5,47,Toko Uji Sintetis,Fixture sintetis hanya untuk pengujian,https://example.com/price-syn-1,https://example.com/spec-syn-1,https://example.com/battery-syn-1,https://example.com/cpumark-syn-1
+A2,Synthetic DemoBook 14 SYN-02,Demo CPU 7,10500000,17000,8,512,1.35,14.5,50,Toko Uji Sintetis,Fixture sintetis hanya untuk pengujian,https://example.com/price-syn-2,https://example.com/spec-syn-2,https://example.com/battery-syn-2,https://example.com/cpumark-syn-2
