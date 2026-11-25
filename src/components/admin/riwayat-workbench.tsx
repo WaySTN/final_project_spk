@@ -24,6 +24,29 @@ import type {
   SawRunRecord,
 } from "@/lib/repositories/types";
 
+const CHECKLIST_ITEMS = [
+  [
+    "primaryRuleVerified",
+    "Aturan konsistensi AHP individu (CR ≤ 0,10) dan CR gabungan telah diverifikasi.",
+  ],
+  [
+    "sourcesAndSkuReviewed",
+    "Keempat tautan sumber, tingkat SKU, dan protokol baterai C6 telah diperiksa manual.",
+  ],
+  [
+    "responseIndependenceConfirmed",
+    "Independensi & keaslian respons kuesioner tambahan (termasuk 10 baris CR ≈ 0) telah dikonfirmasi peneliti.",
+  ],
+  [
+    "stockOrArchivalScopeRecorded",
+    "Hasil konfirmasi stok penjual (atau pembatasan eksplisit ke arsip penawaran bertanggal) telah dicatat.",
+  ],
+  [
+    "caveatsAcknowledged",
+    "Keterbatasan merek tunggal (Lenovo), sensitivitas A7/A6, dan snapshot tanggal telah diakui.",
+  ],
+] as const;
+
 export function RiwayatWorkbench({
   initialSawRuns,
   initialPublications,
@@ -59,6 +82,8 @@ export function RiwayatWorkbench({
     message: string;
     unmet?: string[];
   } | null>(null);
+
+  const checkedCount = CHECKLIST_ITEMS.filter(([key]) => Boolean(checklist[key])).length;
 
   async function handlePublish() {
     if (!selectedSawRunId) return;
@@ -119,7 +144,7 @@ export function RiwayatWorkbench({
         >
           <p>{feedback.message}</p>
           {feedback.unmet && feedback.unmet.length > 0 && (
-            <ul className="mt-2 list-disc pl-5 text-xs space-y-1">
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
               {feedback.unmet.map((item, idx) => (
                 <li key={idx}>{item}</li>
               ))}
@@ -131,15 +156,22 @@ export function RiwayatWorkbench({
       {/* Publication Panel */}
       <Card>
         <CardHeader>
-          <CardTitle>Publikasikan Snapshot ke Website Publik</CardTitle>
-          <CardDescription>
-            Hanya satu publikasi yang aktif pada satu waktu. Publikasi{" "}
-            <strong>provisional</strong> cukup untuk mendemonstrasikan hasil penelitian dengan
-            peringatan bersyarat; status <strong>final</strong> hanya dibuka setelah seluruh
-            checklist verifikasi manusia dikonfirmasi.
-          </CardDescription>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <CardTitle>Publikasikan Snapshot ke Website Publik</CardTitle>
+              <CardDescription>
+                Hanya satu publikasi yang aktif pada satu waktu. Publikasi{" "}
+                <strong>provisional</strong> menayangkan hasil dengan peringatan bersyarat;
+                status <strong>final</strong> hanya dibuka setelah seluruh checklist verifikasi
+                manusia dikonfirmasi.
+              </CardDescription>
+            </div>
+            <Badge tone={intendedStatus === "final" ? "dark" : "warning"}>
+              Mode: {intendedStatus.toUpperCase()}
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           {initialSawRuns.length === 0 ? (
             <EmptyState
               title="Belum ada run SAW yang dapat dipublikasikan"
@@ -194,50 +226,43 @@ export function RiwayatWorkbench({
                 />
               </div>
 
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-2.5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600 flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                  Checklist Verifikasi Kualitas (Wajib Penuh untuk Status Final)
-                </p>
-                {(
-                  [
-                    [
-                      "primaryRuleVerified",
-                      "Aturan konsistensi AHP individu (CR ≤ 0,10) dan CR gabungan telah diverifikasi.",
-                    ],
-                    [
-                      "sourcesAndSkuReviewed",
-                      "Keempat tautan sumber, tingkat SKU, dan protokol baterai C6 telah diperiksa manual.",
-                    ],
-                    [
-                      "responseIndependenceConfirmed",
-                      "Independensi & keaslian respons kuesioner tambahan (termasuk 10 baris CR ≈ 0) telah dikonfirmasi peneliti.",
-                    ],
-                    [
-                      "stockOrArchivalScopeRecorded",
-                      "Hasil konfirmasi stok penjual (atau pembatasan eksplisit ke arsip penawaran bertanggal) telah dicatat.",
-                    ],
-                    [
-                      "caveatsAcknowledged",
-                      "Keterbatasan merek tunggal (Lenovo), sensitivitas A7/A6, dan snapshot tanggal telah diakui.",
-                    ],
-                  ] as const
-                ).map(([key, label]) => (
-                  <label
-                    key={key}
-                    className="flex items-start gap-2.5 text-xs text-zinc-800 cursor-pointer"
+              <div
+                className={`space-y-3 rounded-lg border p-4 transition-colors ${
+                  intendedStatus === "final"
+                    ? "border-[#111113]/30 bg-white"
+                    : "border-[#e5e5e0] bg-[#f7f7f5]"
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-[#111113]">
+                    <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                    Checklist Verifikasi Kualitas (Wajib Penuh untuk Status Final)
+                  </p>
+                  <Badge
+                    tone={checkedCount === CHECKLIST_ITEMS.length ? "success" : "neutral"}
                   >
-                    <input
-                      type="checkbox"
-                      checked={Boolean(checklist[key])}
-                      onChange={(e) =>
-                        setChecklist({ ...checklist, [key]: e.target.checked })
-                      }
-                      className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-zinc-900"
-                    />
-                    <span>{label}</span>
-                  </label>
-                ))}
+                    {checkedCount} / {CHECKLIST_ITEMS.length} terkonfirmasi
+                  </Badge>
+                </div>
+
+                <div className="space-y-2.5">
+                  {CHECKLIST_ITEMS.map(([key, label]) => (
+                    <label
+                      key={key}
+                      className="flex cursor-pointer items-start gap-2.5 text-xs leading-relaxed text-[#111113]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(checklist[key])}
+                        onChange={(e) =>
+                          setChecklist({ ...checklist, [key]: e.target.checked })
+                        }
+                        className="mt-0.5 h-4 w-4 rounded border-[#d0d0c8] accent-[#111113]"
+                      />
+                      <span>{label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -247,7 +272,7 @@ export function RiwayatWorkbench({
                     ? "Memvalidasi & Mempublikasikan..."
                     : `Publikasikan sebagai ${intendedStatus.toUpperCase()}`}
                 </Button>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-[#787872]">
                   Payload publik disanitasi di server: tidak memuat data mentah responden.
                 </span>
               </div>
@@ -266,14 +291,14 @@ export function RiwayatWorkbench({
         </CardHeader>
         <CardContent className="p-0">
           {publications.length === 0 ? (
-            <p className="px-5 py-8 text-center text-sm text-zinc-500">
+            <p className="px-5 py-8 text-center text-sm text-[#787872]">
               Belum ada snapshot yang dipublikasikan.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[680px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold text-zinc-600">
+                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
                     <th className="px-4 py-2.5">Waktu Publikasi</th>
                     <th className="px-4 py-2.5">Status</th>
                     <th className="px-4 py-2.5">Skenario</th>
@@ -281,12 +306,12 @@ export function RiwayatWorkbench({
                     <th className="px-4 py-2.5">Status Aktif</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="divide-y divide-[#e5e5e0]/80">
                   {publications.map((pub) => {
                     const top = pub.publicPayload.saw.items[0];
                     return (
-                      <tr key={pub.id}>
-                        <td className="px-4 py-3 text-xs whitespace-nowrap">
+                      <tr key={pub.id} className="hover:bg-[#f7f7f5]/60">
+                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap text-[#52524e]">
                           {formatDateTimeJakarta(pub.publishedAt)}
                         </td>
                         <td className="px-4 py-3">
@@ -302,11 +327,11 @@ export function RiwayatWorkbench({
                             {pub.status.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-xs text-zinc-700">
+                        <td className="px-4 py-3 text-xs text-[#52524e]">
                           {getScenarioLabel(pub.publicPayload.scenario)}
                         </td>
-                        <td className="px-4 py-3 text-xs font-medium">
-                          {top ? `${top.code} — ${top.model}` : "-"}
+                        <td className="px-4 py-3 text-xs font-medium text-[#111113]">
+                          {top ? `${top.code} — ${top.model}` : "—"}
                         </td>
                         <td className="px-4 py-3">
                           {pub.isCurrent ? (
@@ -315,7 +340,7 @@ export function RiwayatWorkbench({
                               Aktif di Publik
                             </Badge>
                           ) : (
-                            <span className="text-xs text-zinc-400">Diarsipkan</span>
+                            <span className="text-xs text-[#9c9c95]">Diarsipkan</span>
                           )}
                         </td>
                       </tr>
@@ -339,14 +364,14 @@ export function RiwayatWorkbench({
         </CardHeader>
         <CardContent className="p-0">
           {initialSawRuns.length === 0 ? (
-            <p className="px-5 py-8 text-center text-sm text-zinc-500">
+            <p className="px-5 py-8 text-center text-sm text-[#787872]">
               Belum ada histori perhitungan SAW.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold text-zinc-600">
+                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
                     <th className="px-4 py-2.5">Waktu</th>
                     <th className="px-4 py-2.5">Skenario</th>
                     <th className="px-4 py-2.5">Mode AHP</th>
@@ -355,23 +380,25 @@ export function RiwayatWorkbench({
                     <th className="px-4 py-2.5">Algoritma</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100 text-xs">
+                <tbody className="divide-y divide-[#e5e5e0]/80 text-xs">
                   {initialSawRuns.map((run) => (
-                    <tr key={run.id}>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                    <tr key={run.id} className="hover:bg-[#f7f7f5]/60">
+                      <td className="px-4 py-3 font-mono whitespace-nowrap text-[#52524e]">
                         {formatDateTimeJakarta(run.createdAt)}
                       </td>
-                      <td className="px-4 py-3 font-medium text-zinc-900">
+                      <td className="px-4 py-3 font-medium text-[#111113]">
                         {run.scenario}
                       </td>
-                      <td className="px-4 py-3">{run.inputSnapshot.ahpMode}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 font-mono text-[#52524e]">
+                        {run.inputSnapshot.ahpMode}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-[#52524e]">
                         v{run.inputSnapshot.datasetVersion} ({run.inputSnapshot.observedAt})
                       </td>
-                      <td className="px-4 py-3 font-mono">
+                      <td className="px-4 py-3 font-mono text-[#111113]">
                         {run.inputSnapshot.alternativeCodes.join(", ")}
                       </td>
-                      <td className="px-4 py-3 font-mono text-zinc-500">
+                      <td className="px-4 py-3 font-mono text-[#787872]">
                         {run.algorithmVersion}
                       </td>
                     </tr>

@@ -2,15 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Laptop, Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import {
   Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
   Input,
   Label,
+  ScoreBar,
   Select,
   formatStockStatusLabel,
 } from "@/components/ui/primitives";
@@ -37,12 +34,12 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 grid gap-4 sm:grid-cols-3">
+      <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-4 sm:p-5 grid gap-3.5 sm:grid-cols-3">
         <div>
-          <Label htmlFor="cat-search">Cari nama model, SKU, atau prosesor</Label>
+          <Label htmlFor="cat-search">Cari model, SKU, atau prosesor</Label>
           <div className="relative">
             <Search
-              className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-400"
+              className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#787872]"
               aria-hidden="true"
             />
             <Input
@@ -50,7 +47,7 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Mis. 83EQ0077ID, V14, Core i5..."
-              className="pl-9 bg-white"
+              className="pl-9"
             />
           </div>
         </div>
@@ -79,88 +76,105 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-12 text-center text-sm text-zinc-500">
-          Tidak ada laptop dalam snapshot yang sesuai dengan kriteria pencarian.
-        </p>
+        <div className="rounded-lg border border-dashed border-[#d0d0c8] bg-[#f7f7f5]/60 px-6 py-12 text-center text-sm text-[#787872]">
+          Tidak ada laptop dalam snapshot yang sesuai dengan pencarian Anda.
+        </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((item) => {
             const stockBadge = formatStockStatusLabel(item.stockStatus);
             return (
-              <Card key={item.code} className="flex flex-col justify-between">
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-800">
-                        <Laptop className="h-4 w-4" aria-hidden="true" />
-                      </div>
-                      <div>
-                        <span className="font-mono text-xs font-semibold text-zinc-900">
-                          {item.code}
-                        </span>
-                        <span className="block font-mono text-[11px] text-zinc-500">
-                          SKU: {item.sku}
-                        </span>
-                      </div>
+              <article
+                key={item.code}
+                className={`min-w-0 flex flex-col justify-between rounded-lg border bg-white transition-colors hover:border-[#111113]/45 ${
+                  item.rank === 1
+                    ? "border-[#e5e5e0] border-t-2 border-t-[#111113]"
+                    : "border-[#e5e5e0]"
+                }`}
+              >
+                <div>
+                  {/* Spec-sheet header bar */}
+                  <div className="flex items-center justify-between border-b border-[#e5e5e0] bg-[#f7f7f5] px-4 py-2.5">
+                    <div className="flex items-center gap-2 font-mono text-xs">
+                      <span className="font-semibold text-[#111113]">{item.code}</span>
+                      <span className="text-[#d0d0c8]">/</span>
+                      <span className="text-[11px] text-[#787872]">{item.sku}</span>
                     </div>
                     <Badge tone={item.rank === 1 ? "dark" : "neutral"}>
                       Rank #{item.rank}
                     </Badge>
                   </div>
-                  <div>
-                    <CardTitle className="text-base leading-snug">{item.model}</CardTitle>
-                    <p className="mt-0.5 text-xs text-zinc-500">{item.cpuName}</p>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-baseline justify-between border-b border-zinc-100 pb-3">
-                    <span className="text-lg font-bold tabular-nums text-zinc-900">
-                      {formatIdr(item.priceIdr)}
-                    </span>
-                    <span className="font-mono text-xs text-zinc-600 tabular-nums">
-                      SAW {formatDecimal(item.score, 6)}
-                    </span>
-                  </div>
 
-                  <dl className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-lg bg-zinc-50 p-2">
-                      <dt className="text-zinc-500">CPU Mark</dt>
-                      <dd className="font-semibold tabular-nums">
-                        {formatInteger(item.cpuMark)}
-                      </dd>
+                  <div className="p-5 space-y-4">
+                    <div>
+                      <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.015em] text-[#111113]">
+                        {item.model}
+                      </h3>
+                      <p className="mt-0.5 text-xs text-[#787872]">
+                        {item.cpuName} · {item.seller}
+                      </p>
                     </div>
-                    <div className="rounded-lg bg-zinc-50 p-2">
-                      <dt className="text-zinc-500">RAM / SSD</dt>
-                      <dd className="font-semibold tabular-nums">
-                        {item.ramGb} / {item.ssdGb} GB
-                      </dd>
-                    </div>
-                    <div className="rounded-lg bg-zinc-50 p-2">
-                      <dt className="text-zinc-500">Berat</dt>
-                      <dd className="font-semibold tabular-nums">
-                        {formatDecimal(item.weightKg, 2)} kg
-                      </dd>
-                    </div>
-                    <div className="rounded-lg bg-zinc-50 p-2">
-                      <dt className="text-zinc-500">Video 1080p</dt>
-                      <dd className="font-semibold tabular-nums">
-                        {formatDecimal(item.batteryHours, 1)} jam
-                      </dd>
-                    </div>
-                  </dl>
 
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <Badge tone={stockBadge.tone}>{stockBadge.label}</Badge>
-                    <Link
-                      href={`/laptop/${item.code}`}
-                      className="inline-flex h-9 items-center gap-1 rounded-lg bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
-                    >
-                      Lihat Detail
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </Link>
+                    <div className="space-y-2 border-y border-[#e5e5e0]/80 py-3">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-lg font-semibold tracking-[-0.02em] tabular-nums text-[#111113]">
+                          {formatIdr(item.priceIdr)}
+                        </span>
+                        <span className="font-mono text-xs font-semibold tabular-nums text-[#52524e]">
+                          SAW {formatDecimal(item.score, 6)}
+                        </span>
+                      </div>
+                      <ScoreBar value={item.score} className="h-1" />
+                    </div>
+
+                    <dl className="grid grid-cols-2 divide-y divide-[#e5e5e0]/60 text-xs">
+                      <div className="py-1.5 pr-2">
+                        <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                          C2 CPU Mark
+                        </dt>
+                        <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                          {formatInteger(item.cpuMark)}
+                        </dd>
+                      </div>
+                      <div className="py-1.5 pl-2">
+                        <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                          C3–C4 Memori
+                        </dt>
+                        <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                          {item.ramGb} / {item.ssdGb} GB
+                        </dd>
+                      </div>
+                      <div className="py-1.5 pr-2">
+                        <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                          C5 Berat
+                        </dt>
+                        <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                          {formatDecimal(item.weightKg, 2)} kg
+                        </dd>
+                      </div>
+                      <div className="py-1.5 pl-2">
+                        <dt className="font-mono text-[10px] uppercase text-[#787872]">
+                          C6 Video 1080p
+                        </dt>
+                        <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#111113]">
+                          {formatDecimal(item.batteryHours, 1)} jam
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 border-t border-[#e5e5e0] px-5 py-3.5">
+                  <Badge tone={stockBadge.tone}>{stockBadge.label}</Badge>
+                  <Link
+                    href={`/laptop/${item.code}`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#111113] px-3 text-xs font-medium text-white hover:bg-[#27272a]"
+                  >
+                    Detail
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
             );
           })}
         </div>

@@ -1,16 +1,8 @@
-import { ExternalLink } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { CriteriaWeightsChart } from "@/components/decision/charts";
 import { PairwiseMatrixTable } from "@/components/decision/matrix-table";
 import { PublicationBanner } from "@/components/public/publication-banner";
-import {
-  AlertBanner,
-  Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/primitives";
+import { AlertBanner, Badge, ScoreBar } from "@/components/ui/primitives";
 import {
   ACADEMIC_REFERENCES,
   CRITERIA,
@@ -27,285 +19,341 @@ import { getRepository } from "@/lib/repositories";
 
 export const dynamic = "force-dynamic";
 
+const TOC_SECTIONS = [
+  { id: "kriteria", num: "01", label: "Enam Kriteria" },
+  { id: "kuesioner", num: "02", label: "Responden & Skala" },
+  { id: "rumus", num: "03", label: "Rumus AHP & SAW" },
+  { id: "ahp-hasil", num: "04", label: "Matriks & Bobot AHP" },
+  { id: "saw-hasil", num: "05", label: "Matriks X, R & Skor" },
+  { id: "sensitivitas", num: "06", label: "Analisis Sensitivitas" },
+  { id: "referensi", num: "07", label: "Referensi DOI" },
+  { id: "keterbatasan", num: "08", label: "Keterbatasan" },
+];
+
 export default async function MetodologiPage() {
   const repo = await getRepository();
   const publication = await repo.getCurrentPublication();
   const payload = publication?.publicPayload ?? null;
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 space-y-8">
-      <div className="max-w-3xl space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Dokumentasi Ilmiah & Audit Algoritma
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:py-12 space-y-8">
+      <div className="border-b border-[#e5e5e0] pb-6 space-y-2">
+        <p className="editorial-kicker">Dokumentasi Ilmiah & Audit Algoritma</p>
+        <h1 className="text-2xl font-semibold tracking-[-0.03em] text-[#111113] sm:text-4xl">
           Metodologi Penelitian AHP–SAW
         </h1>
-        <p className="text-sm text-zinc-600 leading-relaxed">
-          Halaman ini merinci dasar penetapan enam kriteria, desain kuesioner daring 15
-          pasangan, skala perbandingan Saaty, uji konsistensi eigenvector, agregasi geometrik
-          AIJ, normalisasi SAW, analisis sensitivitas, rujukan DOI, serta keterbatasan
-          penelitian secara transparan.
+        <p className="max-w-3xl text-sm leading-relaxed text-[#52524e]">
+          Dasar penetapan enam kriteria, kuesioner 15 perbandingan berpasangan, skala Saaty
+          sederhana, uji konsistensi eigenvector, agregasi geometrik AIJ, normalisasi SAW,
+          uji stabilitas peringkat antar skenario, 9 referensi DOI, serta keterbatasan
+          penelitian.
         </p>
       </div>
 
       {payload && <PublicationBanner payload={payload} />}
 
-      {/* 1. Criteria & Literature Rationale */}
-      <Card>
-        <CardHeader>
-          <CardTitle>1. Hierarki & Dasar Pemilihan Enam Kriteria</CardTitle>
-          <CardDescription>
-            Disusun berdasarkan penelitian terdahulu (Ardhana & Indriyanti, 2025; Mukharir &
-            Wardoyo, 2021; Ardiansyah dkk., 2025) pada anggaran tetap Rp9.000.000–Rp11.000.000.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold text-zinc-600">
-                  <th className="px-4 py-2.5">Kode</th>
-                  <th className="px-4 py-2.5">Kriteria</th>
-                  <th className="px-4 py-2.5">Satuan</th>
-                  <th className="px-4 py-2.5">Atribut</th>
-                  <th className="px-4 py-2.5">Definisi Operasional & Sumber</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {CRITERIA.map((c) => (
-                  <tr key={c.code} className="align-top">
-                    <td className="px-4 py-3 font-mono font-semibold">{c.code}</td>
-                    <td className="px-4 py-3 font-medium text-zinc-900">{c.name}</td>
-                    <td className="px-4 py-3 text-xs text-zinc-600 whitespace-nowrap">
-                      {c.unit}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge tone={c.attribute === "cost" ? "dark" : "neutral"}>
-                        {c.attribute === "cost" ? "Cost" : "Benefit"}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-zinc-600">
-                      <p className="text-zinc-800">{c.definition}</p>
-                      <p className="mt-1 text-zinc-500">{c.measurementSource}</p>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Mobile horizontal jump links */}
+      <nav
+        aria-label="Navigasi cepat bagian metodologi"
+        className="flex gap-2 overflow-x-auto pb-1 lg:hidden no-print"
+      >
+        {TOC_SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[#e5e5e0] bg-[#f7f7f5] px-3 py-2 font-mono text-[11px] text-[#52524e] hover:border-[#111113] hover:text-[#111113]"
+          >
+            <span className="text-[#787872]">{s.num}</span>
+            {s.label}
+          </a>
+        ))}
+      </nav>
 
-      {/* 2. Questionnaire, Respondents & Sample Size */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>2. Responden, Kuesioner Daring & Ukuran Panel</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-zinc-700 leading-relaxed">
-            <p>
-              <strong>Pemilihan mahasiswa sebagai responden:</strong> Mahasiswa aktif
-              merupakan pengguna sasaran utama sistem sehingga bobot kriteria berasal dari
-              preferensi pemakai, bukan persentase subjektif peneliti. Perekrutan dilakukan
-              dengan <em>non-probability sampling</em> (kriteria mahasiswa aktif & kemudahan
-              akses).
-            </p>
-            <p>
-              <strong>Alasan kuesioner daring:</strong> Penelitian membutuhkan penilaian
-              kuantitatif berpasangan dengan struktur dan skala identik bagi seluruh
-              responden agar dapat langsung dikonversi ke matriks 6×6. Studi Pascoe dkk.
-              (2024) dijadikan rujukan konteks survei AHP daring dan tantangan
-              inkonsistensinya, namun penelitian ini menerapkan{" "}
-              <strong>AHP standar dengan skala disederhanakan</strong>, bukan algoritma
-              modifikasi pada artikel tersebut.
-            </p>
-            <p>
-              <strong>Alasan ukuran responden:</strong> Target awal 12 respons lolos CR
-              merupakan keputusan praktis penelitian, bukan ambang baku universal AHP
-              (Schmidt dkk., 2015). Mengacu Bethlehem (2010), hasil survei web diposisikan
-              sebagai preferensi panel, bukan estimasi populasi seluruh mahasiswa.
-            </p>
-            <p>
-              <strong>Dasar 15 pertanyaan:</strong> Untuk 6 kriteria, jumlah pasangan unik
-              segitiga atas matriks adalah <code>n(n − 1) / 2 = 6(5) / 2 = 15</code>.
-              Elemen diagonal bernilai 1 dan segitiga bawah diisi kebalikannya (
-              <code>aⱼᵢ = 1 / aᵢⱼ</code>).
-            </p>
-          </CardContent>
-        </Card>
+      {/* 2-Column Editorial Layout with Sticky Table of Contents */}
+      <div className="grid gap-10 lg:grid-cols-[220px_1fr] lg:items-start">
+        <aside className="hidden lg:block sticky top-24 space-y-2 no-print">
+          <p className="editorial-kicker pb-2 border-b border-[#e5e5e0]">Daftar Isi</p>
+          <nav aria-label="Daftar isi metodologi" className="space-y-0.5">
+            {TOC_SECTIONS.map((s) => (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-xs text-[#52524e] transition-colors hover:bg-[#f7f7f5] hover:text-[#111113]"
+              >
+                <span className="font-mono text-[10px] text-[#787872]">{s.num}</span>
+                <span>{s.label}</span>
+              </a>
+            ))}
+          </nav>
+        </aside>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>3. Skala Perbandingan Saaty Sederhana</CardTitle>
-            <CardDescription>
-              Nilai genap (2, 4, 6, 8) ditiadakan untuk mempermudah pengisian daring.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="overflow-x-auto rounded-lg border border-zinc-200">
-              <table className="w-full border-collapse text-xs">
+        <div className="min-w-0 space-y-12">
+          {/* 01. Criteria */}
+          <section id="kriteria" className="scroll-mt-24 space-y-4">
+            <div className="space-y-1">
+              <p className="editorial-kicker">01 / Hierarki Keputusan</p>
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                Dasar Pemilihan Enam Kriteria (C1–C6)
+              </h2>
+              <p className="text-sm text-[#52524e]">
+                Ditetapkan dari kajian literatur terdahulu (Ardhana & Indriyanti, 2025;
+                Mukharir & Wardoyo, 2021; Ardiansyah dkk., 2025) pada rentang anggaran tetap
+                Rp9.000.000–Rp11.000.000.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
+              <table className="w-full min-w-[640px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 bg-zinc-50 text-left font-semibold text-zinc-600">
-                    <th className="px-3 py-2">Skala</th>
-                    <th className="px-3 py-2">Makna Perbandingan</th>
+                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] uppercase tracking-[0.06em] text-[#787872]">
+                    <th className="px-4 py-2.5">Kode</th>
+                    <th className="px-4 py-2.5">Kriteria</th>
+                    <th className="px-3 py-2.5">Satuan</th>
+                    <th className="px-3 py-2.5">Atribut</th>
+                    <th className="px-4 py-2.5">Definisi Operasional & Sumber</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {SAATY_SIMPLIFIED_SCALE.map((s) => (
-                    <tr key={s.token}>
-                      <td className="px-3 py-2 font-mono font-semibold text-zinc-900 whitespace-nowrap">
-                        {s.token === "1" ? "1" : `${s.token} / ${s.reciprocal}`}
+                <tbody className="divide-y divide-[#e5e5e0]/70">
+                  {CRITERIA.map((c) => (
+                    <tr key={c.code} className="align-top">
+                      <td className="px-4 py-3 font-mono text-xs font-semibold text-[#111113]">
+                        {c.code}
                       </td>
-                      <td className="px-3 py-2 text-zinc-700">{s.meaning}</td>
+                      <td className="px-4 py-3 text-xs font-semibold text-[#111113] whitespace-nowrap">
+                        {c.name}
+                      </td>
+                      <td className="px-3 py-3 font-mono text-xs text-[#52524e] whitespace-nowrap">
+                        {c.unit}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Badge tone={c.attribute === "cost" ? "dark" : "neutral"}>
+                          {c.attribute === "cost" ? "Cost" : "Benefit"}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-xs leading-relaxed text-[#52524e]">
+                        <p className="text-[#111113]">{c.definition}</p>
+                        <p className="mt-1 text-[#787872]">{c.measurementSource}</p>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          </section>
 
-            <div>
-              <p className="mb-1.5 text-xs font-semibold text-zinc-700">
-                15 Pasangan Perbandingan (Segitiga Atas Matriks 6×6):
-              </p>
-              <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 text-xs text-zinc-600">
-                {PAIRWISE_DEFINITIONS.map((p) => (
-                  <p key={p.pairKey} className="truncate">
-                    <span className="font-mono text-zinc-400 mr-1">
-                      {String(p.questionNo).padStart(2, "0")}.
-                    </span>
-                    <span className="font-medium text-zinc-800">{p.pairKey}</span> —{" "}
-                    {p.leftLabel} vs {p.rightLabel}
+          {/* 02. Questionnaire & Scale */}
+          <section id="kuesioner" className="scroll-mt-24 space-y-5">
+            <div className="space-y-1">
+              <p className="editorial-kicker">02 / Instrumen & Responden</p>
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                Kuesioner Daring, Panel Mahasiswa & Skala Saaty
+              </h2>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="min-w-0 rounded-lg border border-[#e5e5e0] bg-white p-5 space-y-3 text-xs sm:text-[13px] leading-relaxed text-[#52524e]">
+                <p>
+                  <strong className="text-[#111113]">Responden mahasiswa aktif:</strong>{" "}
+                  Dipilih sebagai pengguna sasaran agar bobot berasal dari preferensi pemakai
+                  melalui <em>non-probability sampling</em> berbasis kriteria dan kemudahan
+                  akses.
+                </p>
+                <p>
+                  <strong className="text-[#111113]">Alasan kuesioner daring:</strong>{" "}
+                  Menghasilkan 15 perbandingan berpasangan terstruktur yang seragam. Studi
+                  Pascoe dkk. (2024) menjadi rujukan konteks tantangan survei daring; sistem
+                  ini menerapkan <strong>AHP standar</strong>, bukan algoritma modifikasi pada
+                  artikel tersebut.
+                </p>
+                <p>
+                  <strong className="text-[#111113]">Target ukuran panel (12):</strong>{" "}
+                  Keputusan praktis penelitian, bukan batas minimum baku AHP (Schmidt dkk.,
+                  2015). Mengacu Bethlehem (2010), hasil diposisikan sebagai preferensi panel,
+                  bukan representasi populasi seluruh mahasiswa.
+                </p>
+                <p>
+                  <strong className="text-[#111113]">Dasar 15 pertanyaan:</strong> Segitiga
+                  atas matriks 6×6 memiliki <code className="font-mono">n(n−1)/2 = 15</code>{" "}
+                  pasangan unik; diagonal bernilai 1 dan bawah diagonal diisi kebalikannya.
+                </p>
+              </div>
+
+              <div className="min-w-0 rounded-lg border border-[#e5e5e0] bg-white p-5 space-y-4">
+                <div>
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-[#111113]">
+                    Skala Saaty Disederhanakan (Tanpa Nilai Genap)
                   </p>
-                ))}
+                  <div className="mt-2.5 overflow-x-auto rounded border border-[#e5e5e0]">
+                    <table className="w-full border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase text-[#787872]">
+                          <th className="px-3 py-2">Skala</th>
+                          <th className="px-3 py-2">Makna</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#e5e5e0]/70">
+                        {SAATY_SIMPLIFIED_SCALE.map((s) => (
+                          <tr key={s.token}>
+                            <td className="px-3 py-2 font-mono font-semibold text-[#111113] whitespace-nowrap">
+                              {s.token === "1" ? "1" : `${s.token} / ${s.reciprocal}`}
+                            </td>
+                            <td className="px-3 py-2 text-[#52524e]">{s.meaning}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-[#111113] mb-2">
+                    15 Pasangan Perbandingan
+                  </p>
+                  <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 text-[11px] text-[#52524e]">
+                    {PAIRWISE_DEFINITIONS.map((p) => (
+                      <p key={p.pairKey} className="truncate">
+                        <span className="font-mono text-[#787872] mr-1">
+                          {String(p.questionNo).padStart(2, "0")}.
+                        </span>
+                        <span className="font-mono font-medium text-[#111113]">
+                          {p.pairKey}
+                        </span>{" "}
+                        {p.leftLabel} vs {p.rightLabel}
+                      </p>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </section>
 
-      {/* 4. Mathematical Procedures */}
-      <Card>
-        <CardHeader>
-          <CardTitle>4. Rumus Pengujian Konsistensi AHP, AIJ & Pemeringkatan SAW</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-6 md:grid-cols-2 text-xs text-zinc-700 leading-relaxed">
-          <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-sm font-semibold text-zinc-900">
-              Analytical Hierarchy Process (AHP)
-            </p>
-            <ul className="list-disc pl-4 space-y-1.5">
-              <li>
-                Vektor prioritas <code>w</code> dihitung dari principal right eigenvector
-                matriks 6×6 melalui <em>power iteration</em> (toleransi{" "}
-                <code>10⁻¹²</code>, maks 10.000 iterasi), bukan rata-rata baris normalisasi.
-              </li>
-              <li>
-                <code>λmaks = rata-rata((A · w)ᵢ / wᵢ)</code>
-              </li>
-              <li>
-                <code>CI = (λmaks − 6) / 5</code>, <code>RI = 1,24</code> (untuk n = 6),{" "}
-                <code>CR = CI / RI</code>.
-              </li>
-              <li>
-                Batas konsistensi: <code>CR ≤ 0,10</code> tanpa pembulatan.
-              </li>
-              <li>
-                Agregasi kelompok menggunakan rata-rata geometrik (AIJ):{" "}
-                <code>aᵢⱼ(G) = exp(mean(ln(aᵢⱼ)))</code> (Forman & Peniwati, 1998).
-              </li>
-            </ul>
-          </div>
+          {/* 03. Mathematical Formulas */}
+          <section id="rumus" className="scroll-mt-24 space-y-4">
+            <div className="space-y-1">
+              <p className="editorial-kicker">03 / Spesifikasi Algoritma</p>
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                Prosedur Matematis AHP & SAW
+              </h2>
+            </div>
 
-          <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-sm font-semibold text-zinc-900">
-              Simple Additive Weighting (SAW)
-            </p>
-            <ul className="list-disc pl-4 space-y-1.5">
-              <li>
-                Kriteria <strong>Benefit</strong> (C2, C3, C4, C6):{" "}
-                <code>rᵢⱼ = xᵢⱼ / maxᵢ(xᵢⱼ)</code>.
-              </li>
-              <li>
-                Kriteria <strong>Cost</strong> (C1, C5):{" "}
-                <code>rᵢⱼ = minᵢ(xᵢⱼ) / xᵢⱼ</code>.
-              </li>
-              <li>
-                Kontribusi kriteria: <code>cᵢⱼ = wⱼ × rᵢⱼ</code>.
-              </li>
-              <li>
-                Nilai preferensi: <code>Vᵢ = Σⱼ (wⱼ × rᵢⱼ)</code> dengan presisi penuh tanpa
-                pembulatan perantara.
-              </li>
-              <li>
-                Jika himpunan alternatif berubah, <code>min/max</code> dihitung ulang; skor
-                absolut antarskenario berbeda tidak dibandingkan secara langsung (Tofallis,
-                2014).
-              </li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-5 space-y-2.5 text-xs leading-relaxed text-[#52524e]">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-[#111113]">
+                  Analytical Hierarchy Process (AHP)
+                </p>
+                <ul className="list-disc pl-4 space-y-1.5">
+                  <li>
+                    Principal right eigenvector dihitung melalui <em>power iteration</em>{" "}
+                    (konvergensi <code className="font-mono">10⁻¹²</code>, maks 10.000
+                    iterasi) — bukan rata-rata baris normalisasi.
+                  </li>
+                  <li>
+                    <code className="font-mono text-[#111113]">
+                      λmaks = mean((A·w)ᵢ / wᵢ)
+                    </code>
+                  </li>
+                  <li>
+                    <code className="font-mono text-[#111113]">
+                      CI = (λmaks − 6)/5 ; RI = 1,24 ; CR = CI/RI
+                    </code>
+                  </li>
+                  <li>
+                    Ambang konsistensi <code className="font-mono">CR ≤ 0,10</code> tanpa
+                    pembulatan; agregasi AIJ{" "}
+                    <code className="font-mono">aᵢⱼ(G) = exp(mean(ln aᵢⱼ))</code> (Forman &
+                    Peniwati, 1998).
+                  </li>
+                </ul>
+              </div>
 
-      {/* 5. Live Published Calculation Matrices & Sensitivity (if published) */}
-      {payload && (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>5. Hasil Agregat AHP (Snapshot Aktif)</CardTitle>
-              <CardDescription>
-                Panel responden: {payload.researchSummary.totalResponses} terkumpul (
-                {payload.researchSummary.eligibleResponses} eligible,{" "}
-                {payload.researchSummary.consistentResponses} lolos CR ≤ 0,10,{" "}
-                {payload.researchSummary.inconsistentResponses} tidak lolos). λmaks ={" "}
-                {formatDecimal(payload.ahp.lambdaMax, 8)} · CI ={" "}
-                {formatDecimal(payload.ahp.ci, 8)} · CR gabungan ={" "}
-                {formatDecimal(payload.ahp.cr, 8)}.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-zinc-900">
-                  Matriks Perbandingan Gabungan (AIJ)
-                </h3>
+              <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-5 space-y-2.5 text-xs leading-relaxed text-[#52524e]">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-[#111113]">
+                  Simple Additive Weighting (SAW)
+                </p>
+                <ul className="list-disc pl-4 space-y-1.5">
+                  <li>
+                    Benefit (C2, C3, C4, C6):{" "}
+                    <code className="font-mono text-[#111113]">rᵢⱼ = xᵢⱼ / maxᵢ(xᵢⱼ)</code>
+                  </li>
+                  <li>
+                    Cost (C1, C5):{" "}
+                    <code className="font-mono text-[#111113]">rᵢⱼ = minᵢ(xᵢⱼ) / xᵢⱼ</code>
+                  </li>
+                  <li>
+                    Kontribusi <code className="font-mono">cᵢⱼ = wⱼ·rᵢⱼ</code> dan nilai
+                    preferensi <code className="font-mono">Vᵢ = Σ cᵢⱼ</code> presisi penuh.
+                  </li>
+                  <li>
+                    Perubahan himpunan alternatif memicu normalisasi ulang; skor absolut antar
+                    himpunan berbeda tidak sebanding langsung (Tofallis, 2014).
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* 04–06: Live Published Results */}
+          {payload && (
+            <>
+              <section id="ahp-hasil" className="scroll-mt-24 space-y-5">
+                <div className="space-y-1">
+                  <p className="editorial-kicker">04 / Hasil Agregat AHP (Snapshot Aktif)</p>
+                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                    Matriks Perbandingan Gabungan (AIJ) & Bobot Prioritas
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#52524e]">
+                    Panel: {payload.researchSummary.totalResponses} respons (
+                    {payload.researchSummary.consistentResponses} lolos CR ≤ 0,10 ·{" "}
+                    {payload.researchSummary.inconsistentResponses} tidak lolos) ·{" "}
+                    <span className="font-mono text-[#111113]">
+                      λmaks = {formatDecimal(payload.ahp.lambdaMax, 8)} · CI ={" "}
+                      {formatDecimal(payload.ahp.ci, 8)} · CR ={" "}
+                      {formatDecimal(payload.ahp.cr, 8)}
+                    </span>
+                  </p>
+                </div>
+
                 <PairwiseMatrixTable
                   matrix={payload.ahp.aggregateMatrix}
                   digits={4}
                   caption="Matriks perbandingan gabungan AIJ snapshot aktif"
                 />
-              </div>
 
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-zinc-900">
-                    Bobot Prioritas AHP & Pembanding Sensitivitas
-                  </h3>
-                  <div className="overflow-x-auto rounded-lg border border-zinc-200">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="min-w-0 overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
                     <table className="w-full border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-zinc-200 bg-zinc-50 text-left font-semibold text-zinc-600">
-                          <th className="px-3 py-2">Kriteria</th>
-                          <th className="px-3 py-2 text-right">Bobot Utama</th>
-                          <th className="px-3 py-2 text-right">% Utama</th>
+                        <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase text-[#787872]">
+                          <th className="px-3.5 py-2.5">Kriteria</th>
+                          <th className="px-3 py-2.5 text-right">Bobot Utama</th>
+                          <th className="px-3 py-2.5 text-right">% Utama</th>
                           {payload.sensitivity.allEligibleWeightsByCode && (
-                            <th className="px-3 py-2 text-right">% 33 Respons</th>
+                            <th className="px-3 py-2.5 text-right">% 33 Resp</th>
                           )}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-100 tabular-nums">
+                      <tbody className="divide-y divide-[#e5e5e0]/70 tabular-nums">
                         {CRITERIA.map((c) => (
                           <tr key={c.code}>
-                            <td className="px-3 py-2 font-medium text-zinc-900">
-                              {c.code} — {c.shortName}
+                            <td className="px-3.5 py-2.5 font-medium text-[#111113]">
+                              <span className="font-mono text-[#787872] mr-1.5">
+                                {c.code}
+                              </span>
+                              {c.shortName}
+                              <ScoreBar
+                                value={payload.ahp.weightsByCode[c.code]}
+                                max={0.28}
+                                className="mt-1 h-1"
+                              />
                             </td>
-                            <td className="px-3 py-2 text-right font-mono">
+                            <td className="px-3 py-2.5 text-right font-mono text-[#52524e]">
                               {formatDecimal(payload.ahp.weightsByCode[c.code], 8)}
                             </td>
-                            <td className="px-3 py-2 text-right font-semibold">
+                            <td className="px-3 py-2.5 text-right font-mono font-semibold text-[#111113]">
                               {formatWeightPercent(payload.ahp.weightsByCode[c.code], 2)}
                             </td>
                             {payload.sensitivity.allEligibleWeightsByCode && (
-                              <td className="px-3 py-2 text-right text-zinc-600">
+                              <td className="px-3 py-2.5 text-right font-mono text-[#787872]">
                                 {formatWeightPercent(
                                   payload.sensitivity.allEligibleWeightsByCode[c.code],
                                   2,
@@ -317,225 +365,257 @@ export default async function MetodologiPage() {
                       </tbody>
                     </table>
                   </div>
+
+                  <div className="min-w-0 rounded-lg border border-[#e5e5e0] bg-white p-4">
+                    <CriteriaWeightsChart
+                      weightsByCode={payload.ahp.weightsByCode}
+                      comparisonWeightsByCode={payload.sensitivity.allEligibleWeightsByCode}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section id="saw-hasil" className="scroll-mt-24 space-y-5">
+                <div className="space-y-1">
+                  <p className="editorial-kicker">05 / Matriks Keputusan & Normalisasi</p>
+                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                    Matriks X, Matriks Normalisasi R & Nilai Preferensi SAW
+                  </h2>
                 </div>
 
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-zinc-900">
-                    Grafik Perbandingan Bobot Kriteria
-                  </h3>
-                  <CriteriaWeightsChart
-                    weightsByCode={payload.ahp.weightsByCode}
-                    comparisonWeightsByCode={payload.sensitivity.allEligibleWeightsByCode}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* SAW Matrices X, R, and Score */}
-          <Card>
-            <CardHeader>
-              <CardTitle>6. Matriks Keputusan (X), Normalisasi (R) & Skor SAW</CardTitle>
-              <CardDescription>
-                Seluruh nilai berasal dari run SAW terpublikasi tanpa data statis.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-zinc-900">
-                  Matriks Keputusan (X)
-                </h3>
-                <div className="overflow-x-auto rounded-lg border border-zinc-200">
-                  <table className="w-full min-w-[700px] border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-zinc-200 bg-zinc-50 text-left font-semibold text-zinc-600">
-                        <th className="px-3 py-2">Kode</th>
-                        <th className="px-3 py-2">Model</th>
-                        <th className="px-3 py-2 text-right">C1 (Rp)</th>
-                        <th className="px-3 py-2 text-right">C2</th>
-                        <th className="px-3 py-2 text-right">C3 (GB)</th>
-                        <th className="px-3 py-2 text-right">C4 (GB)</th>
-                        <th className="px-3 py-2 text-right">C5 (kg)</th>
-                        <th className="px-3 py-2 text-right">C6 (jam)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100 tabular-nums">
-                      {payload.saw.items.map((item) => (
-                        <tr key={item.code}>
-                          <td className="px-3 py-2 font-mono font-semibold">{item.code}</td>
-                          <td className="px-3 py-2">{item.model}</td>
-                          <td className="px-3 py-2 text-right">{formatIdr(item.priceIdr)}</td>
-                          <td className="px-3 py-2 text-right">{formatInteger(item.cpuMark)}</td>
-                          <td className="px-3 py-2 text-right">{item.ramGb}</td>
-                          <td className="px-3 py-2 text-right">{item.ssdGb}</td>
-                          <td className="px-3 py-2 text-right">{formatDecimal(item.weightKg, 2)}</td>
-                          <td className="px-3 py-2 text-right">{formatDecimal(item.batteryHours, 1)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-zinc-900">
-                  Matriks Normalisasi (R) & Nilai Preferensi (V)
-                </h3>
-                <div className="overflow-x-auto rounded-lg border border-zinc-200">
-                  <table className="w-full min-w-[720px] border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-zinc-200 bg-zinc-50 text-left font-semibold text-zinc-600">
-                        <th className="px-3 py-2">Rank</th>
-                        <th className="px-3 py-2">Kode</th>
-                        {CRITERIA.map((c) => (
-                          <th key={c.code} className="px-2.5 py-2 text-right">
-                            R_{c.code}
+                <div className="space-y-1.5">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#787872]">
+                    Matriks Keputusan (X)
+                  </p>
+                  <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
+                    <table className="w-full min-w-[660px] border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase text-[#787872]">
+                          <th className="sticky left-0 bg-[#f7f7f5] border-r border-[#e5e5e0] px-3 py-2.5">
+                            Kode
                           </th>
+                          <th className="px-3 py-2.5">Model</th>
+                          <th className="px-3 py-2.5 text-right">C1 (Rp)</th>
+                          <th className="px-3 py-2.5 text-right">C2</th>
+                          <th className="px-3 py-2.5 text-right">C3</th>
+                          <th className="px-3 py-2.5 text-right">C4</th>
+                          <th className="px-3 py-2.5 text-right">C5 (kg)</th>
+                          <th className="px-3 py-2.5 text-right">C6 (jam)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#e5e5e0]/70 font-mono tabular-nums">
+                        {payload.saw.items.map((item) => (
+                          <tr key={item.code}>
+                            <td className="sticky left-0 bg-white border-r border-[#e5e5e0] px-3 py-2.5 font-semibold text-[#111113]">
+                              {item.code}
+                            </td>
+                            <td className="px-3 py-2.5 font-sans text-[#111113]">
+                              {item.model}
+                            </td>
+                            <td className="px-3 py-2.5 text-right">
+                              {formatIdr(item.priceIdr)}
+                            </td>
+                            <td className="px-3 py-2.5 text-right">
+                              {formatInteger(item.cpuMark)}
+                            </td>
+                            <td className="px-3 py-2.5 text-right">{item.ramGb} GB</td>
+                            <td className="px-3 py-2.5 text-right">{item.ssdGb} GB</td>
+                            <td className="px-3 py-2.5 text-right">
+                              {formatDecimal(item.weightKg, 2)}
+                            </td>
+                            <td className="px-3 py-2.5 text-right">
+                              {formatDecimal(item.batteryHours, 1)}
+                            </td>
+                          </tr>
                         ))}
-                        <th className="px-3 py-2 text-right">Skor SAW (V)</th>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#787872]">
+                    Matriks Normalisasi (R) & Skor Preferensi (V)
+                  </p>
+                  <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
+                    <table className="w-full min-w-[680px] border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase text-[#787872]">
+                          <th className="px-3 py-2.5">Rank</th>
+                          <th className="sticky left-0 bg-[#f7f7f5] border-r border-[#e5e5e0] px-3 py-2.5">
+                            Kode
+                          </th>
+                          {CRITERIA.map((c) => (
+                            <th key={c.code} className="px-2.5 py-2.5 text-right">
+                              R_{c.code}
+                            </th>
+                          ))}
+                          <th className="px-3 py-2.5 text-right">Skor SAW (V)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#e5e5e0]/70 font-mono tabular-nums">
+                        {payload.saw.items.map((item) => (
+                          <tr key={item.code}>
+                            <td className="px-3 py-2.5 font-semibold text-[#111113]">
+                              #{item.rank}
+                            </td>
+                            <td className="sticky left-0 bg-white border-r border-[#e5e5e0] px-3 py-2.5 font-semibold text-[#111113]">
+                              {item.code}
+                            </td>
+                            {CRITERIA.map((c) => (
+                              <td
+                                key={c.code}
+                                className="px-2.5 py-2.5 text-right text-[#52524e]"
+                              >
+                                {formatDecimal(item.normalizedValues[c.code], 6)}
+                              </td>
+                            ))}
+                            <td className="px-3 py-2.5 text-right font-bold text-[#111113]">
+                              {formatDecimal(item.score, 6)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+
+              <section id="sensitivitas" className="scroll-mt-24 space-y-4">
+                <div className="space-y-1">
+                  <p className="editorial-kicker">06 / Stabilitas Peringkat</p>
+                  <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                    Analisis Sensitivitas Lintas Skenario
+                  </h2>
+                  <p className="text-sm text-[#52524e]">
+                    Perubahan peringkat saat seluruh 33 respons disertakan atau saat A6 & A7
+                    dikeluarkan (simulasi risiko ketersediaan stok).
+                  </p>
+                </div>
+
+                <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
+                  <table className="w-full min-w-[680px] border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase text-[#787872]">
+                        <th className="sticky left-0 bg-[#f7f7f5] border-r border-[#e5e5e0] px-3 py-2.5">
+                          Kode
+                        </th>
+                        <th className="px-3 py-2.5">Alternatif</th>
+                        <th className="px-3 py-2.5 text-right">S1 (7 Alt · 17)</th>
+                        <th className="px-3 py-2.5 text-right">S2 (7 Alt · 33)</th>
+                        <th className="px-3 py-2.5 text-right">S3 (5 Alt Tanpa A6/A7)</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100 font-mono tabular-nums">
-                      {payload.saw.items.map((item) => (
-                        <tr key={item.code}>
-                          <td className="px-3 py-2 font-semibold">#{item.rank}</td>
-                          <td className="px-3 py-2 font-semibold">{item.code}</td>
-                          {CRITERIA.map((c) => (
-                            <td key={c.code} className="px-2.5 py-2 text-right text-zinc-700">
-                              {formatDecimal(item.normalizedValues[c.code], 6)}
-                            </td>
-                          ))}
-                          <td className="px-3 py-2 text-right font-bold text-zinc-900">
-                            {formatDecimal(item.score, 6)}
+                    <tbody className="divide-y divide-[#e5e5e0]/70 tabular-nums">
+                      {payload.sensitivity.rankComparison.map((row) => (
+                        <tr key={row.code}>
+                          <td className="sticky left-0 bg-white border-r border-[#e5e5e0] px-3 py-2.5 font-mono font-semibold text-[#111113]">
+                            {row.code}
+                          </td>
+                          <td className="px-3 py-2.5 text-[#111113]">{row.model}</td>
+                          <td className="px-3 py-2.5 text-right font-mono">
+                            {row.rankPrimary !== null
+                              ? `#${row.rankPrimary} (${formatDecimal(row.scorePrimary ?? 0, 6)})`
+                              : "—"}
+                          </td>
+                          <td className="px-3 py-2.5 text-right font-mono">
+                            {row.rankAllEligible !== null
+                              ? `#${row.rankAllEligible} (${formatDecimal(row.scoreAllEligible ?? 0, 6)})`
+                              : "—"}
+                          </td>
+                          <td className="px-3 py-2.5 text-right font-mono text-[#52524e]">
+                            {row.rankWithoutA6A7 !== null
+                              ? `#${row.rankWithoutA6A7} (${formatDecimal(row.scoreWithoutA6A7 ?? 0, 6)})`
+                              : "Dikeluarkan"}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* 7. Sensitivity Analysis */}
-          <Card>
-            <CardHeader>
-              <CardTitle>7. Analisis Sensitivitas Lintas Skenario</CardTitle>
-              <CardDescription>
-                Membandingkan perubahan peringkat ketika bobot menggunakan seluruh 33 respons
-                atau saat A6 dan A7 dikeluarkan (simulasi risiko stok).
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="overflow-x-auto rounded-lg border border-zinc-200">
-                <table className="w-full min-w-[720px] border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50 text-left font-semibold text-zinc-600">
-                      <th className="px-3 py-2.5">Kode</th>
-                      <th className="px-3 py-2.5">Alternatif</th>
-                      <th className="px-3 py-2.5 text-right">S1 Utama (7 Alt · 17)</th>
-                      <th className="px-3 py-2.5 text-right">S2 (7 Alt · 33 Resp)</th>
-                      <th className="px-3 py-2.5 text-right">S3 (5 Alt Tanpa A6/A7)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100 tabular-nums">
-                    {payload.sensitivity.rankComparison.map((row) => (
-                      <tr key={row.code}>
-                        <td className="px-3 py-2.5 font-mono font-semibold">{row.code}</td>
-                        <td className="px-3 py-2.5 text-zinc-800">{row.model}</td>
-                        <td className="px-3 py-2.5 text-right font-mono">
-                          {row.rankPrimary !== null
-                            ? `#${row.rankPrimary} (${formatDecimal(row.scorePrimary ?? 0, 6)})`
-                            : "—"}
-                        </td>
-                        <td className="px-3 py-2.5 text-right font-mono">
-                          {row.rankAllEligible !== null
-                            ? `#${row.rankAllEligible} (${formatDecimal(row.scoreAllEligible ?? 0, 6)})`
-                            : "—"}
-                        </td>
-                        <td className="px-3 py-2.5 text-right font-mono">
-                          {row.rankWithoutA6A7 !== null
-                            ? `#${row.rankWithoutA6A7} (${formatDecimal(row.scoreWithoutA6A7 ?? 0, 6)})`
-                            : "Dikeluarkan"}
-                        </td>
-                      </tr>
+                <AlertBanner tone="warning" title="Aturan Pembacaan Sensitivitas">
+                  <ul className="list-disc pl-4 space-y-1 text-xs">
+                    {payload.sensitivity.notes.map((n, i) => (
+                      <li key={i}>{n}</li>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </ul>
+                </AlertBanner>
+              </section>
+            </>
+          )}
 
-              <AlertBanner tone="warning" title="Penting dalam Membaca Analisis Sensitivitas">
-                <ul className="list-disc pl-4 space-y-1 text-xs">
-                  {payload.sensitivity.notes.map((n, i) => (
-                    <li key={i}>{n}</li>
-                  ))}
-                </ul>
-              </AlertBanner>
-            </CardContent>
-          </Card>
-        </>
-      )}
-
-      {/* 8. Academic References (DOIs) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Referensi Ilmiah & Tautan DOI</CardTitle>
-          <CardDescription>
-            Seluruh acuan ilmiah yang digunakan dalam perancangan kriteria, metode AHP–SAW,
-            dan batasan penelitian.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="divide-y divide-zinc-100 p-0">
-          {ACADEMIC_REFERENCES.map((ref) => (
-            <div key={ref.id} className="px-5 py-4 space-y-1">
-              <p className="text-sm font-medium text-zinc-900">
-                {ref.authors} ({ref.year}). <em>{ref.title}</em>. {ref.journal}.
-              </p>
-              <p className="text-xs text-zinc-600">{ref.usageContext}</p>
-              <a
-                href={ref.doi}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-mono text-zinc-800 underline hover:text-zinc-600"
-              >
-                {ref.doi}
-                <ExternalLink className="h-3 w-3" aria-hidden="true" />
-              </a>
+          {/* 07. References */}
+          <section id="referensi" className="scroll-mt-24 space-y-4">
+            <div className="space-y-1">
+              <p className="editorial-kicker">07 / Daftar Pustaka</p>
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                Referensi Ilmiah & Tautan DOI
+              </h2>
             </div>
-          ))}
-        </CardContent>
-      </Card>
 
-      {/* 9. Limitations */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Keterbatasan Penelitian</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-disc pl-5 space-y-2 text-sm text-zinc-700 leading-relaxed">
-            <li>
-              Sampel responden menggunakan <em>non-probability sampling</em> sehingga
-              mencerminkan preferensi panel mahasiswa yang berpartisipasi, bukan estimasi
-              populasi seluruh mahasiswa.
-            </li>
-            <li>
-              Sepuluh respons tambahan memiliki CR mendekati nol dan sebagian cap waktu tidak
-              berurutan; konsistensi matematis tidak membuktikan keaslian/independensi
-              respons sehingga konfirmasi manual peneliti tetap diperlukan.
-            </li>
-            <li>
-              Alternatif baseline terbatas pada 7 konfigurasi Lenovo demi keseragaman
-              pengukuran daya tahan baterai (Lenovo PSREF video lokal 1080p @ 150 nit), dan
-              seluruh kandidat memiliki SSD 512 GB (kontribusi C4 konstan).
-            </li>
-            <li>
-              Harga dan ketersediaan merupakan snapshot audit bertanggal (bukan real-time),
-              sebagian seri (A4, A6, A7) berstatus <em>withdrawn</em>, dan stok belum
-              dikonfirmasi langsung ke penjual oleh kelompok.
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
+            <div className="divide-y divide-[#e5e5e0] rounded-lg border border-[#e5e5e0] bg-white">
+              {ACADEMIC_REFERENCES.map((ref, idx) => (
+                <div key={ref.id} className="px-5 py-4 space-y-1">
+                  <p className="text-sm font-medium text-[#111113]">
+                    <span className="font-mono text-xs text-[#787872] mr-2">
+                      [{idx + 1}]
+                    </span>
+                    {ref.authors} ({ref.year}). <em>{ref.title}</em>. {ref.journal}.
+                  </p>
+                  <p className="text-xs text-[#52524e] pl-6">{ref.usageContext}</p>
+                  <div className="pl-6">
+                    <a
+                      href={ref.doi}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 break-all font-mono text-xs text-[#111113] underline hover:opacity-70"
+                    >
+                      {ref.doi}
+                      <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 08. Limitations */}
+          <section id="keterbatasan" className="scroll-mt-24 space-y-4">
+            <div className="space-y-1">
+              <p className="editorial-kicker">08 / Transparansi Akademik</p>
+              <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#111113]">
+                Keterbatasan Penelitian
+              </h2>
+            </div>
+
+            <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-5">
+              <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm leading-relaxed text-[#52524e]">
+                <li>
+                  Sampel responden menggunakan <em>non-probability sampling</em> sehingga
+                  mencerminkan preferensi panel mahasiswa yang berpartisipasi, bukan estimasi
+                  populasi seluruh mahasiswa.
+                </li>
+                <li>
+                  Sepuluh respons tambahan memiliki CR mendekati nol dan sebagian cap waktu
+                  tidak berurutan; konsistensi matematis tidak membuktikan keaslian/independensi
+                  respons sehingga konfirmasi manual peneliti tetap diperlukan.
+                </li>
+                <li>
+                  Alternatif baseline terbatas pada 7 konfigurasi Lenovo demi keseragaman
+                  pengukuran daya tahan baterai (Lenovo PSREF video lokal 1080p @ 150 nit),
+                  dan seluruh kandidat memiliki SSD 512 GB (kontribusi C4 konstan).
+                </li>
+                <li>
+                  Harga dan ketersediaan merupakan snapshot audit bertanggal (bukan real-time),
+                  sebagian seri (A4, A6, A7) berstatus <em>withdrawn</em>, dan stok belum
+                  dikonfirmasi langsung ke penjual oleh kelompok.
+                </li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }

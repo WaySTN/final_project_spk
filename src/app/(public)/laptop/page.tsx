@@ -13,17 +13,15 @@ export default async function KatalogLaptopPage() {
   const payload = publication?.publicPayload ?? null;
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 space-y-6">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Katalog Alternatif Penelitian
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:py-12 space-y-6">
+      <div className="border-b border-[#e5e5e0] pb-6 space-y-1.5">
+        <p className="editorial-kicker">Katalog Alternatif Penelitian</p>
+        <h1 className="text-2xl font-semibold tracking-[-0.03em] text-[#111113] sm:text-4xl">
           Daftar Alternatif Laptop
         </h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          Seluruh konfigurasi laptop yang dinilai dalam snapshot aktif beserta spesifikasi
-          enam kriteria. Tidak menampilkan gambar produk buatan/tebakan tanpa sumber resmi.
+        <p className="max-w-2xl text-sm leading-relaxed text-[#52524e]">
+          Lembar spesifikasi seluruh konfigurasi SKU yang dinilai pada snapshot aktif —
+          tanpa gambar ilustrasi buatan maupun tebakan stok.
         </p>
       </div>
 

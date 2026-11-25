@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Eye, Play, Scale, X } from "lucide-react";
+import { Eye, Play, Scale } from "lucide-react";
 import { CriteriaWeightsChart } from "@/components/decision/charts";
 import { PairwiseMatrixTable } from "@/components/decision/matrix-table";
 import {
@@ -13,9 +13,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CrGaugeBar,
   EmptyState,
   Label,
+  ScoreBar,
   Select,
+  SlideOverDrawer,
 } from "@/components/ui/primitives";
 import { CRITERIA, type AhpMode } from "@/lib/decision";
 import {
@@ -141,6 +144,8 @@ export function AhpWorkbench({
         .sort((a, b) => b.weight - a.weight)
     : [];
 
+  const maxWeight = sortedWeights[0]?.weight ?? 1;
+
   return (
     <div className="space-y-6">
       {feedback && (
@@ -203,7 +208,7 @@ export function AhpWorkbench({
           </div>
 
           {runs.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
+            <div className="flex flex-wrap items-center gap-3 border-t border-[#e5e5e0] pt-4">
               <Label htmlFor="ahp-history-select" className="mb-0">
                 Tampilkan hasil run tersimpan:
               </Label>
@@ -214,7 +219,7 @@ export function AhpWorkbench({
                   setLoadingDetail(true);
                   setSelectedRunId(e.target.value);
                 }}
-                className="w-auto min-w-[300px]"
+                className="w-full sm:w-auto sm:min-w-[300px]"
               >
                 {runs.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -236,63 +241,63 @@ export function AhpWorkbench({
           description="Pilih batch responden yang sudah diimpor lalu klik Hitung AHP Sekarang untuk menjalankan algoritma eigenvector dan agregasi geometrik."
         />
       ) : loadingDetail || !runDetail ? (
-        <p className="py-8 text-center text-sm text-zinc-500">
+        <p className="py-8 text-center text-sm text-[#787872]">
           Memuat detail matriks dan audit konsistensi AHP...
         </p>
       ) : (
         <>
-          {/* Summary metrics */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-zinc-500">Disertakan / Dieksklusi</p>
-                <p className="mt-1 text-xl font-bold tabular-nums">
-                  {runDetail.run.includedIds.length} / {runDetail.run.excludedIds.length}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-zinc-500">Lambda Maksimum</p>
-                <p className="mt-1 text-xl font-bold tabular-nums">
-                  {formatDecimal(runDetail.run.lambdaMax, 8)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-zinc-500">Consistency Index (CI)</p>
-                <p className="mt-1 text-xl font-bold tabular-nums">
-                  {formatDecimal(runDetail.run.ci, 8)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-zinc-500">Consistency Ratio (CR)</p>
-                <p className="mt-1 text-xl font-bold tabular-nums">
-                  {formatDecimal(runDetail.run.cr, 8)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-xs text-zinc-500">Status (RI = 1,24)</p>
-                <div className="mt-1.5">
-                  <Badge tone={runDetail.run.passesCr ? "success" : "error"}>
-                    {runDetail.run.passesCr ? "Konsisten (CR ≤ 0,10)" : "Tidak Konsisten"}
-                  </Badge>
-                </div>
-                <p className="mt-1 text-[11px] text-zinc-500">
-                  Konvergen: {runDetail.run.iterations} iterasi
-                </p>
-              </CardContent>
-            </Card>
+          {/* 5-Column Hairline Metrics Strip */}
+          <div className="grid gap-px overflow-hidden rounded-lg border border-[#e5e5e0] bg-[#e5e5e0] sm:grid-cols-2 lg:grid-cols-5">
+            <div className="bg-white p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+                Disertakan / Eksklusi
+              </p>
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#111113]">
+                {runDetail.run.includedIds.length} / {runDetail.run.excludedIds.length}
+              </p>
+            </div>
+            <div className="bg-white p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+                Lambda Maksimum
+              </p>
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#111113]">
+                {formatDecimal(runDetail.run.lambdaMax, 8)}
+              </p>
+            </div>
+            <div className="bg-white p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+                Consistency Index (CI)
+              </p>
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-[#111113]">
+                {formatDecimal(runDetail.run.ci, 8)}
+              </p>
+            </div>
+            <div className="bg-[#111113] p-4 text-white">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                Consistency Ratio (CR)
+              </p>
+              <p className="mt-1.5 font-mono text-xl font-semibold tabular-nums text-white">
+                {formatDecimal(runDetail.run.cr, 8)}
+              </p>
+            </div>
+            <div className="bg-white p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+                Status (RI = 1,24)
+              </p>
+              <div className="mt-1.5">
+                <Badge tone={runDetail.run.passesCr ? "success" : "error"}>
+                  {runDetail.run.passesCr ? "Konsisten (CR ≤ 0,10)" : "Tidak Konsisten"}
+                </Badge>
+              </div>
+              <p className="mt-1.5 font-mono text-[11px] text-[#787872]">
+                Konvergen: {runDetail.run.iterations} iterasi
+              </p>
+            </div>
           </div>
 
           {runDetail.run.warnings.length > 0 && (
             <AlertBanner tone="warning" title="Catatan Kualitas & Peringatan Metodologi">
-              <ul className="list-disc pl-4 space-y-1 text-xs">
+              <ul className="list-disc space-y-1 pl-4 text-xs">
                 {runDetail.run.warnings.map((w, i) => (
                   <li key={i}>{w}</li>
                 ))}
@@ -313,7 +318,7 @@ export function AhpWorkbench({
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold text-zinc-600">
+                      <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
                         <th className="px-4 py-2.5">Prioritas</th>
                         <th className="px-4 py-2.5">Kriteria</th>
                         <th className="px-4 py-2.5 text-right">Bobot</th>
@@ -323,31 +328,38 @@ export function AhpWorkbench({
                         )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-[#e5e5e0]/80">
                       {sortedWeights.map((row, idx) => (
-                        <tr key={row.criterion.code}>
-                          <td className="px-4 py-2.5 font-mono text-xs font-semibold">
+                        <tr key={row.criterion.code} className="hover:bg-[#f7f7f5]/60">
+                          <td className="px-4 py-3 font-mono text-xs font-semibold text-[#111113]">
                             #{idx + 1}
                           </td>
-                          <td className="px-4 py-2.5">
-                            <span className="font-mono text-xs text-zinc-500 mr-1.5">
-                              {row.criterion.code}
-                            </span>
-                            <span className="font-medium text-zinc-900">
-                              {row.criterion.name}
-                            </span>
+                          <td className="px-4 py-3">
+                            <div>
+                              <span className="mr-1.5 font-mono text-xs text-[#787872]">
+                                {row.criterion.code}
+                              </span>
+                              <span className="font-medium text-[#111113]">
+                                {row.criterion.name}
+                              </span>
+                            </div>
+                            <ScoreBar
+                              value={row.weight}
+                              max={maxWeight}
+                              className="mt-1.5 max-w-[160px]"
+                            />
                           </td>
-                          <td className="px-4 py-2.5 text-right font-mono text-xs tabular-nums">
+                          <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#52524e]">
                             {formatDecimal(row.weight, 8)}
                           </td>
-                          <td className="px-4 py-2.5 text-right font-semibold tabular-nums">
+                          <td className="px-4 py-3 text-right font-mono text-sm font-semibold tabular-nums text-[#111113]">
                             {formatWeightPercent(row.weight, 2)}
                           </td>
                           {comparisonRun && (
-                            <td className="px-4 py-2.5 text-right text-xs text-zinc-500 tabular-nums">
+                            <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#787872]">
                               {row.compWeight !== null
                                 ? formatWeightPercent(row.compWeight, 2)
-                                : "-"}
+                                : "—"}
                             </td>
                           )}
                         </tr>
@@ -413,15 +425,15 @@ export function AhpWorkbench({
             <CardHeader>
               <CardTitle>Audit Konsistensi Individual per Responden</CardTitle>
               <CardDescription>
-                Seluruh responden tetap ditampilkan secara transparan beserta alasan inklusi
-                atau eksklusi.
+                Seluruh responden tetap ditampilkan secara transparan beserta indikator ambang
+                CR 0,10 dan alasan inklusi atau eksklusi.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[720px] border-collapse text-sm">
+                <table className="w-full min-w-[740px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold text-zinc-600">
+                    <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
                       <th className="px-4 py-2.5">Kode</th>
                       <th className="px-4 py-2.5 text-right">λmaks</th>
                       <th className="px-4 py-2.5 text-right">CR Individu</th>
@@ -430,27 +442,30 @@ export function AhpWorkbench({
                       <th className="px-4 py-2.5 text-right">Matriks</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100">
+                  <tbody className="divide-y divide-[#e5e5e0]/80">
                     {runDetail.individualResults.map((ir) => (
-                      <tr key={ir.id} className="hover:bg-zinc-50/70">
-                        <td className="px-4 py-2.5 font-mono font-semibold">
+                      <tr key={ir.id} className="transition-colors hover:bg-[#f7f7f5]/60">
+                        <td className="px-4 py-3 font-mono font-semibold text-[#111113]">
                           {ir.responseCode}
                         </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-xs tabular-nums">
-                          {ir.lambdaMax !== null ? formatDecimal(ir.lambdaMax, 6) : "-"}
+                        <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-[#52524e]">
+                          {ir.lambdaMax !== null ? formatDecimal(ir.lambdaMax, 6) : "—"}
                         </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-xs tabular-nums">
-                          {ir.cr !== null ? formatDecimal(ir.cr, 6) : "-"}
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex flex-col items-end">
+                            <span className="font-mono text-xs font-medium tabular-nums text-[#111113]">
+                              {ir.cr !== null ? formatDecimal(ir.cr, 6) : "—"}
+                            </span>
+                            <CrGaugeBar cr={ir.cr} />
+                          </div>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-4 py-3">
                           <Badge tone={ir.passesCr ? "success" : "error"}>
                             {ir.passesCr ? "Lolos" : "Tidak lolos"}
                           </Badge>
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-zinc-600">
-                          {ir.reason}
-                        </td>
-                        <td className="px-4 py-2.5 text-right">
+                        <td className="px-4 py-3 text-xs text-[#52524e]">{ir.reason}</td>
+                        <td className="px-4 py-3 text-right">
                           {ir.matrix && (
                             <Button
                               variant="outline"
@@ -472,39 +487,27 @@ export function AhpWorkbench({
         </>
       )}
 
-      {/* Individual Matrix Modal */}
-      {inspectedInd && inspectedInd.matrix && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 p-4"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="w-full max-w-3xl rounded-xl border border-zinc-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
-              <div>
-                <h3 className="text-base font-bold">
-                  Matriks AHP Individual — {inspectedInd.responseCode}
-                </h3>
-                <p className="text-xs text-zinc-500">
-                  CR = {inspectedInd.cr !== null ? formatDecimal(inspectedInd.cr, 8) : "-"} ·{" "}
-                  {inspectedInd.reason}
-                </p>
-              </div>
-              <button
-                type="button"
-                aria-label="Tutup modal"
-                onClick={() => setInspectedInd(null)}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 hover:bg-zinc-100"
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="p-5">
-              <PairwiseMatrixTable matrix={inspectedInd.matrix} digits={4} />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Slide-Over Individual Matrix Drawer */}
+      <SlideOverDrawer
+        open={Boolean(inspectedInd?.matrix)}
+        onClose={() => setInspectedInd(null)}
+        title={
+          inspectedInd ? `Matriks AHP Individual — ${inspectedInd.responseCode}` : ""
+        }
+        subtitle={
+          inspectedInd
+            ? `CR = ${inspectedInd.cr !== null ? formatDecimal(inspectedInd.cr, 8) : "-"} · ${inspectedInd.reason}`
+            : undefined
+        }
+      >
+        {inspectedInd?.matrix && (
+          <PairwiseMatrixTable
+            matrix={inspectedInd.matrix}
+            digits={4}
+            caption={`Matriks 6x6 individual ${inspectedInd.responseCode}`}
+          />
+        )}
+      </SlideOverDrawer>
     </div>
   );
 }

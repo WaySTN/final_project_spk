@@ -2,22 +2,21 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #18181b;
-  --surface: #fafafa;
-  --surface-elevated: #ffffff;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --border: #e4e4e7;
-  --border-strong: #d4d4d8;
-  --primary: #18181b;
+  --foreground: #111113;
+  --paper: #f7f7f5;
+  --obsidian: #111113;
+  --ink-secondary: #52524e;
+  --muted: #f2f2ee;
+  --muted-foreground: #787872;
+  --border: #e5e5e0;
+  --border-strong: #d0d0c8;
+  --primary: #111113;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
-  --ring: #18181b;
+  --secondary: #f2f2ee;
+  --secondary-foreground: #111113;
+  --ring: #111113;
 
-  /* Semantic validation colors (restrained, strictly for status feedback) */
+  /* Semantic validation tokens (restrained, strictly for research status) */
   --status-success-bg: #f0fdf4;
   --status-success-text: #166534;
   --status-success-border: #bbf7d0;
@@ -29,16 +28,13 @@
   --status-error-bg: #fef2f2;
   --status-error-text: #991b1b;
   --status-error-border: #fecaca;
-
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
+  --color-paper: var(--paper);
+  --color-obsidian: var(--obsidian);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
@@ -46,8 +42,8 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Code", "Fira Code", Menlo, Consolas, monospace;
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
 }
 
 * {
@@ -61,7 +57,7 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -70,8 +66,36 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.editorial-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+@keyframes drawerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-drawer-in {
+  animation: drawerSlideIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @media print {
   .no-print {
     display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
   }
 }

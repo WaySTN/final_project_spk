@@ -12,14 +12,12 @@ export default async function AdminAhpPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-          Komputasi Pembobotan Kriteria
-        </p>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
-          Perhitungan AHP (Eigenvector & AIJ)
+      <div className="border-b border-[#e5e5e0] pb-5">
+        <p className="editorial-kicker">Komputasi Pembobotan Kriteria</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#111113]">
+          Perhitungan AHP (Eigenvector &amp; AIJ)
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#787872]">
           Jalankan perhitungan bobot kriteria dari data respons kuesioner secara deterministik
           di server, lengkap dengan audit CR individual dan skenario sensitivitas seluruh respons.
         </p>

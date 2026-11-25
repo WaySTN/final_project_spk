@@ -23,17 +23,15 @@ export default async function BandingkanPage({
   const payload = publication?.publicPayload ?? null;
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 space-y-6">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Perbandingan Spesifikasi & Kontribusi
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:py-12 space-y-6">
+      <div className="border-b border-[#e5e5e0] pb-6 space-y-1.5">
+        <p className="editorial-kicker">Perbandingan Spesifikasi & Kontribusi</p>
+        <h1 className="text-2xl font-semibold tracking-[-0.03em] text-[#111113] sm:text-4xl">
           Bandingkan Alternatif Laptop
         </h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          Bandingkan hingga tiga konfigurasi laptop secara berdampingan beserta kontribusi
-          kriteria SAW dan sumber datanya.
+        <p className="max-w-2xl text-sm leading-relaxed text-[#52524e]">
+          Evaluasi hingga tiga konfigurasi secara berdampingan lengkap dengan kontribusi
+          masing-masing kriteria SAW dan tautan bukti sumbernya.
         </p>
       </div>
 

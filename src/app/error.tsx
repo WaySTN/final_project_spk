@@ -15,14 +15,14 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-      <p className="font-mono text-xs font-semibold uppercase tracking-widest text-red-700">
-        Terjadi Kesalahan Aplikasi
+    <div className="flex min-h-[70vh] flex-col items-center justify-center bg-white px-4 text-center">
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-red-700">
+        Kesalahan Sistem
       </p>
-      <h1 className="mt-2 text-2xl font-bold text-zinc-900">
+      <h1 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-[#111113]">
         Halaman tidak dapat dimuat sementara waktu
       </h1>
-      <p className="mt-2 max-w-md text-sm text-zinc-600">
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-[#52524e]">
         Terjadi kendala saat memproses data. Silakan muat ulang halaman atau hubungi
         administrator penelitian apabila masalah berlanjut.
       </p>

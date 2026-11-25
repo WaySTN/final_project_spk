@@ -12,14 +12,12 @@ export default async function AdminAlternatifPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-          Data Sekunder Penawaran & Spesifikasi
-        </p>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
-          Alternatif Laptop & Audit Sumber Bukti
+      <div className="border-b border-[#e5e5e0] pb-5">
+        <p className="editorial-kicker">Data Sekunder Penawaran &amp; Spesifikasi</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-[#111113]">
+          Alternatif Laptop &amp; Audit Sumber Bukti
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#787872]">
           Kelola versi dataset laptop pada kisaran harga Rp9.000.000–Rp11.000.000 lengkap
           dengan tautan harga, spesifikasi, benchmark CPU Mark, dan durasi baterai PSREF.
         </p>

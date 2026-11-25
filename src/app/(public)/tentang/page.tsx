@@ -1,77 +1,85 @@
-import { Badge, Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
-
 const TEAM_MEMBERS = [
-  { name: "Wahyu Setiawan", npm: "23082010142" },
-  { name: "Lingga Dwi Al Farizi", npm: "23082010146" },
-  { name: "M. Ahnaf Zaki", npm: "23082010147" },
+  { no: "01", name: "Wahyu Setiawan", npm: "23082010142" },
+  { no: "02", name: "Lingga Dwi Al Farizi", npm: "23082010146" },
+  { no: "03", name: "M. Ahnaf Zaki", npm: "23082010147" },
 ];
 
 export default function TentangPage() {
   return (
-    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 space-y-8">
-      <div className="max-w-3xl space-y-2">
-        <Badge tone="dark">Final Project Mata Kuliah Sistem Pendukung Keputusan</Badge>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:py-14 space-y-10">
+      <div className="border-b border-[#e5e5e0] pb-8 max-w-3xl space-y-3">
+        <p className="editorial-kicker">
+          Final Project Mata Kuliah Sistem Pendukung Keputusan · 2026
+        </p>
+        <h1 className="text-3xl font-semibold tracking-[-0.035em] text-[#111113] sm:text-4xl">
           Tentang LaptopMatch
         </h1>
-        <p className="text-sm text-zinc-600 leading-relaxed">
+        <p className="text-base leading-relaxed text-[#52524e]">
           Sistem Pendukung Keputusan Pemilihan Laptop bagi Mahasiswa pada Kisaran Harga
           Rp9.000.000–Rp11.000.000 Menggunakan Metode Analytical Hierarchy Process (AHP) dan
           Simple Additive Weighting (SAW).
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Identitas Akademik — Kelompok 13</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ul className="divide-y divide-zinc-100 rounded-lg border border-zinc-200">
-              {TEAM_MEMBERS.map((m) => (
-                <li
-                  key={m.npm}
-                  className="flex items-center justify-between px-4 py-3 text-sm"
-                >
-                  <span className="font-medium text-zinc-900">{m.name}</span>
-                  <span className="font-mono text-xs text-zinc-500">{m.npm}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="text-xs text-zinc-600 space-y-1">
-              <p className="font-semibold text-zinc-900">
-                Program Studi Sistem Informasi
-              </p>
-              <p>Fakultas Ilmu Komputer</p>
-              <p>Universitas Pembangunan Nasional &ldquo;Veteran&rdquo; Jawa Timur (2026)</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-8 lg:grid-cols-12">
+        {/* Academic Team Ledger */}
+        <div className="lg:col-span-5 rounded-lg border border-[#e5e5e0] bg-white overflow-hidden">
+          <div className="border-b border-[#e5e5e0] bg-[#f7f7f5] px-5 py-4">
+            <p className="editorial-kicker">Tim Penyusun</p>
+            <h2 className="mt-1 text-base font-semibold text-[#111113]">
+              Kelompok 13 — Sistem Informasi
+            </h2>
+          </div>
+          <ul className="divide-y divide-[#e5e5e0]/80">
+            {TEAM_MEMBERS.map((m) => (
+              <li
+                key={m.npm}
+                className="flex items-center justify-between px-5 py-3.5 text-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-xs text-[#787872]">{m.no}</span>
+                  <span className="font-medium text-[#111113]">{m.name}</span>
+                </div>
+                <span className="font-mono text-xs text-[#52524e]">{m.npm}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="border-t border-[#e5e5e0] bg-[#f7f7f5] px-5 py-4 text-xs leading-relaxed text-[#52524e]">
+            <p className="font-semibold text-[#111113]">
+              Program Studi Sistem Informasi, Fakultas Ilmu Komputer
+            </p>
+            <p>Universitas Pembangunan Nasional &ldquo;Veteran&rdquo; Jawa Timur</p>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Tujuan & Ruang Lingkup Aplikasi</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-zinc-700 leading-relaxed">
-            <p>
-              LaptopMatch dikembangkan untuk menerjemahkan model penelitian AHP–SAW Kelompok
-              13 menjadi perangkat lunak web full-stack yang deterministik, transparan, dan
-              dapat diaudit oleh mahasiswa maupun dosen pengampu.
-            </p>
-            <p>
-              <strong>Apa yang dilakukan aplikasi ini:</strong> membaca data kuesioner asli,
-              menguji konsistensi CR tiap responden, mengagregasi matriks kelompok melalui
-              rata-rata geometrik (AIJ), menghitung bobot eigenvector, melakukan normalisasi
-              dan pemeringkatan SAW, serta menyajikan bukti sumber setiap spesifikasi.
-            </p>
-            <p>
-              <strong>Apa yang bukan tujuan aplikasi ini:</strong> LaptopMatch bukan platform
-              e-commerce, bukan marketplace transaksi, tidak melakukan scraping harga
-              real-time, tidak meramalkan harga, dan tidak menggunakan machine learning atau
-              AI generatif untuk menghasilkan rekomendasi.
-            </p>
-          </CardContent>
-        </Card>
+        {/* Scope vs Out-of-Scope Architectural Split */}
+        <div className="lg:col-span-7 grid gap-5 sm:grid-cols-2">
+          <div className="rounded-lg border border-[#e5e5e0] bg-white p-5 space-y-3">
+            <p className="editorial-kicker">Dalam Ruang Lingkup</p>
+            <h2 className="text-base font-semibold text-[#111113]">
+              Yang Dilakukan Sistem
+            </h2>
+            <ul className="list-disc pl-4 space-y-2 text-xs sm:text-[13px] leading-relaxed text-[#52524e]">
+              <li>Membaca data kuesioner asli 15 pasangan perbandingan dan menguji CR tiap responden.</li>
+              <li>Mengagregasi matriks 6×6 via rata-rata geometrik (AIJ) dan menghitung bobot eigenvector power iteration.</li>
+              <li>Menormalisasi 6 kriteria SAW (cost/benefit), menampilkan kontribusi tiap sel, dan menjalankan sensitivitas S1/S2/S3.</li>
+              <li>Menyediakan 4 tautan bukti sumber per kandidat dan ekspor laporan audit Excel 7-sheet.</li>
+            </ul>
+          </div>
+
+          <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-5 space-y-3">
+            <p className="editorial-kicker">Di Luar Ruang Lingkup</p>
+            <h2 className="text-base font-semibold text-[#111113]">
+              Batasan & Non-Klaim
+            </h2>
+            <ul className="list-disc pl-4 space-y-2 text-xs sm:text-[13px] leading-relaxed text-[#52524e]">
+              <li>Bukan platform e-commerce, marketplace transaksi, maupun jaminan ketersediaan stok real-time.</li>
+              <li>Tidak melakukan scraping harga otomatis maupun peramalan harga masa depan.</li>
+              <li>Tidak menggunakan machine learning atau AI generatif untuk menghasilkan skor rekomendasi.</li>
+              <li>Tidak mengklaim hasil mewakili seluruh populasi mahasiswa atau seluruh merek laptop di Indonesia.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

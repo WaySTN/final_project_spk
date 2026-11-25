@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Laptop, Lock, Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PUBLIC_NAV = [
@@ -20,24 +20,27 @@ export function PublicShell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-zinc-900">
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur-xs no-print">
+    <div className="flex min-h-screen flex-col bg-white text-[#111113]">
+      <header className="sticky top-0 z-30 border-b border-[#e5e5e0] bg-white/95 backdrop-blur-xs no-print">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
-              <Laptop className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <div>
-              <span className="block text-sm font-bold tracking-tight text-zinc-900 leading-none">
+          <Link href="/" className="group flex items-center gap-3">
+            <span className="flex h-7 w-7 items-center justify-center rounded border border-[#111113] bg-[#111113] font-mono text-[11px] font-semibold tracking-tighter text-white transition-transform duration-150 group-hover:scale-[1.03]">
+              LM
+            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[15px] font-semibold tracking-[-0.025em] text-[#111113]">
                 LaptopMatch
               </span>
-              <span className="block text-[11px] text-zinc-500 mt-0.5">
-                SPK AHP–SAW Mahasiswa
+              <span className="hidden font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872] sm:inline">
+                AHP–SAW
               </span>
             </div>
           </Link>
 
-          <nav aria-label="Navigasi utama" className="hidden items-center gap-1 md:flex">
+          <nav
+            aria-label="Navigasi utama"
+            className="hidden h-full items-center gap-1 md:flex"
+          >
             {PUBLIC_NAV.map((item) => {
               const active =
                 item.href === "/"
@@ -48,25 +51,31 @@ export function PublicShell({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "relative flex h-full items-center px-3 text-[13px] font-medium transition-colors",
                     active
-                      ? "bg-zinc-900 text-white"
-                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
+                      ? "text-[#111113]"
+                      : "text-[#787872] hover:text-[#111113]",
                   )}
                 >
                   {item.label}
+                  {active && (
+                    <span
+                      className="absolute inset-x-3 bottom-0 h-[2px] bg-[#111113]"
+                      aria-hidden="true"
+                    />
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center md:flex">
             <Link
               href="/admin"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:border-zinc-400 hover:text-zinc-900 transition-colors"
+              className="inline-flex h-8 items-center gap-1 rounded-md border border-[#e5e5e0] bg-[#f7f7f5] px-2.5 font-mono text-[11px] font-medium text-[#52524e] transition-colors hover:border-[#111113]/40 hover:bg-white hover:text-[#111113]"
             >
-              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
               Panel Admin
+              <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
             </Link>
           </div>
 
@@ -75,7 +84,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
             aria-label={menuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="flex h-11 w-11 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-100 md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#e5e5e0] text-[#111113] hover:bg-[#f7f7f5] md:hidden cursor-pointer"
           >
             {menuOpen ? (
               <X className="h-5 w-5" aria-hidden="true" />
@@ -86,9 +95,9 @@ export function PublicShell({ children }: { children: ReactNode }) {
         </div>
 
         {menuOpen && (
-          <div className="border-t border-zinc-200 bg-white px-4 py-3 md:hidden">
-            <nav aria-label="Navigasi mobile" className="flex flex-col gap-1">
-              {PUBLIC_NAV.map((item) => {
+          <div className="border-t border-[#e5e5e0] bg-white px-4 py-4 md:hidden">
+            <nav aria-label="Navigasi mobile" className="divide-y divide-[#e5e5e0]/70">
+              {PUBLIC_NAV.map((item, idx) => {
                 const active =
                   item.href === "/"
                     ? pathname === "/"
@@ -99,74 +108,103 @@ export function PublicShell({ children }: { children: ReactNode }) {
                     href={item.href}
                     onClick={() => setMenuOpen(false)}
                     className={cn(
-                      "flex min-h-[44px] items-center rounded-lg px-3 text-sm font-medium",
-                      active
-                        ? "bg-zinc-900 text-white"
-                        : "text-zinc-700 hover:bg-zinc-100",
+                      "flex min-h-[48px] items-center justify-between px-1 text-sm font-medium",
+                      active ? "text-[#111113] font-semibold" : "text-[#52524e]",
                     )}
                   >
-                    {item.label}
+                    <span className="flex items-center gap-3">
+                      <span className="font-mono text-[11px] text-[#787872]">
+                        0{idx + 1}
+                      </span>
+                      {item.label}
+                    </span>
+                    {active && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#111113]" />
+                    )}
                   </Link>
                 );
               })}
+            </nav>
+            <div className="mt-4 border-t border-[#e5e5e0] pt-4">
               <Link
                 href="/admin"
                 onClick={() => setMenuOpen(false)}
-                className="mt-1 flex min-h-[44px] items-center gap-2 rounded-lg border border-zinc-200 px-3 text-sm font-medium text-zinc-700"
+                className="flex min-h-[44px] items-center justify-between rounded-lg border border-[#d0d0c8] bg-[#f7f7f5] px-3.5 text-sm font-medium text-[#111113]"
               >
-                <Lock className="h-4 w-4" aria-hidden="true" />
-                Panel Administrator
+                <span>Masuk Panel Administrator</span>
+                <ArrowUpRight className="h-4 w-4 text-[#787872]" aria-hidden="true" />
               </Link>
-            </nav>
+            </div>
           </div>
         )}
       </header>
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-zinc-200 bg-zinc-50 no-print">
-        <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-900 text-white">
-                  <Laptop className="h-3.5 w-3.5" aria-hidden="true" />
-                </div>
-                <span className="text-sm font-bold text-zinc-900">LaptopMatch</span>
+      <footer className="border-t border-[#e5e5e0] bg-[#f7f7f5] no-print">
+        <div className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6">
+          <div className="grid gap-10 md:grid-cols-12">
+            <div className="space-y-3 md:col-span-5">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#111113] font-mono text-[10px] font-semibold text-white">
+                  LM
+                </span>
+                <span className="text-sm font-semibold tracking-[-0.02em] text-[#111113]">
+                  LaptopMatch
+                </span>
               </div>
-              <p className="text-xs text-zinc-600 leading-relaxed">
+              <p className="max-w-sm text-xs leading-relaxed text-[#52524e]">
                 Sistem Pendukung Keputusan Pemilihan Laptop bagi Mahasiswa pada Kisaran Harga
                 Rp9.000.000–Rp11.000.000 Menggunakan Metode Analytical Hierarchy Process (AHP)
                 dan Simple Additive Weighting (SAW).
               </p>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                Identitas Akademik
+            <div className="space-y-2 md:col-span-4">
+              <p className="editorial-kicker">Identitas Akademik</p>
+              <p className="text-xs font-semibold text-[#111113]">
+                Kelompok 13 — Sistem Pendukung Keputusan
               </p>
-              <p className="text-xs text-zinc-700 font-medium">
-                Kelompok 13 — Final Project Sistem Pendukung Keputusan
+              <p className="font-mono text-[11px] leading-relaxed text-[#52524e]">
+                Wahyu Setiawan (23082010142)
+                <br />
+                Lingga Dwi Al Farizi (23082010146)
+                <br />
+                M. Ahnaf Zaki (23082010147)
               </p>
-              <p className="text-xs text-zinc-600">
-                Wahyu Setiawan (23082010142) · Lingga Dwi Al Farizi (23082010146) · M. Ahnaf
-                Zaki (23082010147)
-              </p>
-              <p className="text-xs text-zinc-500">
-                Program Studi Sistem Informasi, Fakultas Ilmu Komputer, Universitas
-                Pembangunan Nasional &ldquo;Veteran&rdquo; Jawa Timur (2026)
+              <p className="text-[11px] text-[#787872]">
+                Program Studi Sistem Informasi, Fakultas Ilmu Komputer, UPN &ldquo;Veteran&rdquo;
+                Jawa Timur (2026)
               </p>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                Catatan Transparansi
+            <div className="space-y-2 md:col-span-3">
+              <p className="editorial-kicker">Integritas & Batasan</p>
+              <p className="text-xs leading-relaxed text-[#52524e]">
+                Bukan platform e-commerce dan bukan rekomendasi berbasis AI/ML. Seluruh skor
+                dihitung deterministik dari kuesioner mahasiswa dan snapshot audit bersumber,
+                bukan harga maupun stok real-time.
               </p>
-              <p className="text-xs text-zinc-600 leading-relaxed">
-                LaptopMatch bukan platform e-commerce, bukan marketplace, dan tidak
-                menghasilkan rekomendasi menggunakan machine learning atau AI generatif. Data
-                merupakan snapshot penelitian bersumber, bukan harga maupun stok real-time.
-              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-2 border-t border-[#e5e5e0] pt-5 text-[11px] text-[#787872] sm:flex-row sm:items-center sm:justify-between">
+            <span className="font-mono">
+              ALGORITMA: AHP POWER ITERATION + AIJ · SAW FULL PRECISION
+            </span>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/rekomendasi" className="hover:text-[#111113]">
+                Rekomendasi
+              </Link>
+              <Link href="/metodologi" className="hover:text-[#111113]">
+                Metodologi
+              </Link>
+              <Link href="/tentang" className="hover:text-[#111113]">
+                Tentang
+              </Link>
+              <Link href="/admin/login" className="hover:text-[#111113]">
+                Admin
+              </Link>
             </div>
           </div>
         </div>

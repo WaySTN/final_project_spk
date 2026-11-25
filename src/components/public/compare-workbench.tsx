@@ -2,19 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Printer } from "lucide-react";
+import { ArrowUpRight, Printer } from "lucide-react";
 import {
   AlertBanner,
   Badge,
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  ScoreBar,
   formatStockStatusLabel,
 } from "@/components/ui/primitives";
-import { CRITERIA } from "@/lib/decision";
 import {
   formatDecimal,
   formatIdr,
@@ -52,36 +47,44 @@ export function CompareWorkbench({
     .map((code) => items.find((i) => i.code === code))
     .filter((x): x is PublicLaptopRankingItem => Boolean(x));
 
+  const bestScore = Math.max(...compared.map((c) => c.score), -Infinity);
+  const bestPrice = Math.min(...compared.map((c) => c.priceIdr), Infinity);
+  const bestCpu = Math.max(...compared.map((c) => c.cpuMark), -Infinity);
+  const bestRam = Math.max(...compared.map((c) => c.ramGb), -Infinity);
+  const bestWeight = Math.min(...compared.map((c) => c.weightKg), Infinity);
+  const bestBattery = Math.max(...compared.map((c) => c.batteryHours), -Infinity);
+
   return (
     <div className="space-y-6">
       <AlertBanner tone="neutral" title="Perbandingan Berdampingan (Tidak Mengubah Ranking Resmi)">
         Pilih maksimal <strong>3 laptop</strong> dari snapshot aktif untuk membandingkan
-        spesifikasi, nilai normalisasi, kontribusi bobot, skor SAW resmi, dan tautan sumber.
-        Pemilihan di sini tidak melakukan perhitungan ulang maupun mengubah peringkat global.
+        spesifikasi, kontribusi bobot SAW, dan tautan sumber. Nilai terbaik pada tiap baris
+        di antara kandidat terpilih diberi penanda titik hitam — peringkat global tidak berubah.
       </AlertBanner>
 
-      {/* Selector Chips */}
-      <Card className="no-print">
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <CardTitle>Pilih Laptop untuk Dibandingkan ({selectedCodes.length}/3)</CardTitle>
-              <CardDescription>
-                Klik kode alternatif di bawah untuk menambah atau melepas perbandingan.
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.print()}
-              disabled={compared.length === 0}
-            >
-              <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-              Cetak Perbandingan
-            </Button>
+      {/* Selector Bar */}
+      <div className="rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-4 sm:p-5 space-y-3.5 no-print">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-[#52524e]">
+              Pilih Kandidat ({selectedCodes.length}/3)
+            </p>
+            <p className="text-xs text-[#787872]">
+              Klik kode alternatif di bawah untuk menambah atau mengganti slot perbandingan.
+            </p>
           </div>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.print()}
+            disabled={compared.length === 0}
+          >
+            <Printer className="h-3.5 w-3.5" aria-hidden="true" />
+            Cetak Perbandingan
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
           {items.map((item) => {
             const active = selectedCodes.includes(item.code);
             return (
@@ -89,193 +92,229 @@ export function CompareWorkbench({
                 key={item.code}
                 type="button"
                 onClick={() => toggleCode(item.code)}
-                className={`inline-flex min-h-[40px] items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                className={`inline-flex min-h-[40px] items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
                   active
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                    ? "border-[#111113] bg-[#111113] text-white"
+                    : "border-[#d0d0c8] bg-white text-[#52524e] hover:border-[#111113]/50 hover:text-[#111113]"
                 }`}
               >
                 <span className="font-mono font-semibold">{item.code}</span>
-                <span>#{item.rank}</span>
-                <span className="max-w-[180px] truncate">{item.model}</span>
+                <span className="font-mono text-[11px] opacity-75">#{item.rank}</span>
+                <span className="max-w-[165px] truncate">{item.model}</span>
               </button>
             );
           })}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Comparison Table */}
       {compared.length === 0 ? (
-        <p className="py-10 text-center text-sm text-zinc-500">
+        <div className="rounded-lg border border-dashed border-[#d0d0c8] py-12 text-center text-sm text-[#787872]">
           Pilih minimal 1 laptop di atas untuk menampilkan tabel perbandingan.
-        </p>
+        </div>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-                    <th className="w-48 px-4 py-3 text-xs font-semibold text-zinc-600">
-                      Atribut / Kriteria
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between sm:hidden">
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#787872]">
+              Perbandingan {compared.length} Kandidat
+            </span>
+            <span className="font-mono text-[10px] text-[#787872]">
+              Geser horizontal →
+            </span>
+          </div>
+
+          <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
+            <table className="w-full min-w-[620px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left">
+                  <th className="sticky left-0 z-10 w-44 border-r border-[#e5e5e0] bg-[#f7f7f5] px-4 py-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#787872]">
+                    Kriteria
+                  </th>
+                  {compared.map((item) => (
+                    <th key={item.code} className="px-4 py-3.5 align-top">
+                      <div className="flex items-center gap-2">
+                        <Badge tone={item.rank === 1 ? "dark" : "neutral"}>
+                          #{item.rank}
+                        </Badge>
+                        <span className="font-mono text-xs text-[#787872]">
+                          {item.code}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/laptop/${item.code}`}
+                        className="mt-1.5 block text-sm font-semibold text-[#111113] hover:underline"
+                      >
+                        {item.model}
+                      </Link>
+                      <p className="text-xs font-normal text-[#787872]">{item.cpuName}</p>
                     </th>
-                    {compared.map((item) => (
-                      <th key={item.code} className="px-4 py-3 align-top">
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e5e5e0]/80 tabular-nums">
+                <tr className="bg-[#f7f7f5]/60">
+                  <th
+                    scope="row"
+                    className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-[#f7f7f5] px-4 py-3.5 text-left text-xs font-semibold text-[#111113]"
+                  >
+                    Skor SAW Resmi
+                  </th>
+                  {compared.map((item) => {
+                    const isBest = compared.length > 1 && item.score === bestScore;
+                    return (
+                      <td key={item.code} className="px-4 py-3.5 space-y-1.5">
                         <div className="flex items-center gap-2">
-                          <Badge tone={item.rank === 1 ? "dark" : "neutral"}>
-                            Rank #{item.rank}
-                          </Badge>
-                          <span className="font-mono text-xs text-zinc-500">
-                            {item.code}
+                          <span className="font-mono text-base font-bold text-[#111113]">
+                            {formatDecimal(item.score, 6)}
                           </span>
+                          {isBest && (
+                            <span
+                              className="h-2 w-2 rounded-full bg-[#111113]"
+                              title="Tertinggi di perbandingan"
+                            />
+                          )}
                         </div>
-                        <Link
-                          href={`/laptop/${item.code}`}
-                          className="mt-1 block text-sm font-bold text-zinc-900 hover:underline"
-                        >
-                          {item.model}
-                        </Link>
-                        <p className="text-xs font-normal text-zinc-500">{item.cpuName}</p>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 tabular-nums">
-                  <tr className="bg-zinc-50/70">
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-                      Skor SAW Resmi
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3 font-mono text-base font-bold">
-                        {formatDecimal(item.score, 6)}
+                        <ScoreBar value={item.score} className="h-1" />
                       </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      C1 — Harga (Cost)
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3">
-                        <p className="font-semibold">{formatIdr(item.priceIdr)}</p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          Kontribusi: {formatDecimal(item.weightedValues.C1, 6)}
-                        </p>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      C2 — PassMark CPU Mark
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3">
-                        <p className="font-semibold">{formatInteger(item.cpuMark)}</p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          Kontribusi: {formatDecimal(item.weightedValues.C2, 6)}
-                        </p>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      C3 — Kapasitas RAM
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3">
-                        <p className="font-semibold">{item.ramGb} GB</p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          Kontribusi: {formatDecimal(item.weightedValues.C3, 6)}
-                        </p>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      C4 — Kapasitas SSD
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3">
-                        <p className="font-semibold">{item.ssdGb} GB</p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          Kontribusi: {formatDecimal(item.weightedValues.C4, 6)}
-                        </p>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      C5 — Berat Laptop (Cost)
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3">
-                        <p className="font-semibold">{formatDecimal(item.weightKg, 2)} kg</p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          Kontribusi: {formatDecimal(item.weightedValues.C5, 6)}
-                        </p>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      C6 — Video 1080p @ 150 nit
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3">
-                        <p className="font-semibold">
-                          {formatDecimal(item.batteryHours, 1)} jam
-                          {item.batteryWh ? ` (${item.batteryWh} Wh)` : ""}
-                        </p>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          Kontribusi: {formatDecimal(item.weightedValues.C6, 6)}
-                        </p>
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      Penjual & Status Stok
+                    );
+                  })}
+                </tr>
+
+                {[
+                  {
+                    label: "C1 — Harga (Cost)",
+                    render: (i: PublicLaptopRankingItem) => ({
+                      val: formatIdr(i.priceIdr),
+                      sub: `Kontribusi ${formatDecimal(i.weightedValues.C1, 6)}`,
+                      best: compared.length > 1 && i.priceIdr === bestPrice,
+                    }),
+                  },
+                  {
+                    label: "C2 — CPU Mark",
+                    render: (i: PublicLaptopRankingItem) => ({
+                      val: formatInteger(i.cpuMark),
+                      sub: `Kontribusi ${formatDecimal(i.weightedValues.C2, 6)}`,
+                      best: compared.length > 1 && i.cpuMark === bestCpu,
+                    }),
+                  },
+                  {
+                    label: "C3 — RAM Terpasang",
+                    render: (i: PublicLaptopRankingItem) => ({
+                      val: `${i.ramGb} GB`,
+                      sub: `Kontribusi ${formatDecimal(i.weightedValues.C3, 6)}`,
+                      best: compared.length > 1 && i.ramGb === bestRam,
+                    }),
+                  },
+                  {
+                    label: "C4 — SSD Terpasang",
+                    render: (i: PublicLaptopRankingItem) => ({
+                      val: `${i.ssdGb} GB`,
+                      sub: `Kontribusi ${formatDecimal(i.weightedValues.C4, 6)}`,
+                      best: false,
+                    }),
+                  },
+                  {
+                    label: "C5 — Berat (Cost)",
+                    render: (i: PublicLaptopRankingItem) => ({
+                      val: `${formatDecimal(i.weightKg, 2)} kg`,
+                      sub: `Kontribusi ${formatDecimal(i.weightedValues.C5, 6)}`,
+                      best: compared.length > 1 && i.weightKg === bestWeight,
+                    }),
+                  },
+                  {
+                    label: "C6 — Video 1080p",
+                    render: (i: PublicLaptopRankingItem) => ({
+                      val: `${formatDecimal(i.batteryHours, 1)} jam${i.batteryWh ? ` (${i.batteryWh} Wh)` : ""}`,
+                      sub: `Kontribusi ${formatDecimal(i.weightedValues.C6, 6)}`,
+                      best: compared.length > 1 && i.batteryHours === bestBattery,
+                    }),
+                  },
+                ].map((row) => (
+                  <tr key={row.label} className="hover:bg-[#f7f7f5]/50">
+                    <th
+                      scope="row"
+                      className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-3 text-left text-xs font-medium text-[#52524e]"
+                    >
+                      {row.label}
                     </th>
                     {compared.map((item) => {
-                      const sb = formatStockStatusLabel(item.stockStatus);
+                      const info = row.render(item);
                       return (
-                        <td key={item.code} className="px-4 py-3 space-y-1">
-                          <p className="text-xs font-medium text-zinc-900">{item.seller}</p>
-                          <Badge tone={sb.tone}>{sb.label}</Badge>
+                        <td key={item.code} className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`font-mono text-xs sm:text-[13px] ${
+                                info.best
+                                  ? "font-bold text-[#111113]"
+                                  : "font-medium text-[#52524e]"
+                              }`}
+                            >
+                              {info.val}
+                            </span>
+                            {info.best && (
+                              <span
+                                className="h-1.5 w-1.5 rounded-full bg-[#111113]"
+                                title="Unggul pada perbandingan ini"
+                              />
+                            )}
+                          </div>
+                          <p className="mt-0.5 font-mono text-[11px] text-[#787872]">
+                            {info.sub}
+                          </p>
                         </td>
                       );
                     })}
                   </tr>
-                  <tr>
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-zinc-600">
-                      Tautan Sumber Audit
-                    </th>
-                    {compared.map((item) => (
-                      <td key={item.code} className="px-4 py-3">
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          {item.sources.map((s) => (
-                            <a
-                              key={s.sourceType}
-                              href={s.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-0.5 text-zinc-700 underline hover:text-zinc-900"
-                            >
-                              {s.sourceType}
-                              <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                            </a>
-                          ))}
-                        </div>
+                ))}
+
+                <tr>
+                  <th
+                    scope="row"
+                    className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-3 text-left text-xs font-medium text-[#52524e]"
+                  >
+                    Penjual & Status Stok
+                  </th>
+                  {compared.map((item) => {
+                    const sb = formatStockStatusLabel(item.stockStatus);
+                    return (
+                      <td key={item.code} className="px-4 py-3 space-y-1.5">
+                        <p className="text-xs font-medium text-[#111113]">{item.seller}</p>
+                        <Badge tone={sb.tone}>{sb.label}</Badge>
                       </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                    );
+                  })}
+                </tr>
+
+                <tr>
+                  <th
+                    scope="row"
+                    className="sticky left-0 z-10 border-r border-[#e5e5e0] bg-white px-4 py-3 text-left text-xs font-medium text-[#52524e]"
+                  >
+                    Tautan Sumber Audit
+                  </th>
+                  {compared.map((item) => (
+                    <td key={item.code} className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        {item.sources.map((s) => (
+                          <a
+                            key={s.sourceType}
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-0.5 font-mono text-[11px] text-[#52524e] underline hover:text-[#111113]"
+                          >
+                            {s.sourceType}
+                            <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                          </a>
+                        ))}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
-      {void CRITERIA}
     </div>
   );
 }

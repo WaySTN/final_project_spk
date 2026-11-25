@@ -1,6 +1,12 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import {
   CheckCircle2,
   Copy,
@@ -10,7 +16,6 @@ import {
   Lock,
   Plus,
   Power,
-  X,
 } from "lucide-react";
 import {
   AlertBanner,
@@ -25,6 +30,7 @@ import {
   Input,
   Label,
   Select,
+  SlideOverDrawer,
   Textarea,
   formatEvidenceStatusLabel,
   formatStockStatusLabel,
@@ -41,6 +47,26 @@ import type {
   AlternativeDatasetRecord,
   AlternativeRecord,
 } from "@/lib/repositories/types";
+
+function subscribeMobileViewport(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const mq = window.matchMedia("(max-width: 767px)");
+  mq.addEventListener("change", callback);
+  return () => mq.removeEventListener("change", callback);
+}
+
+function getMobileViewportSnapshot() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function useIsMobileViewport() {
+  return useSyncExternalStore(
+    subscribeMobileViewport,
+    getMobileViewportSnapshot,
+    () => false,
+  );
+}
 
 interface DraftFormState {
   id?: string;
@@ -137,6 +163,7 @@ export function AlternatifWorkbench({
   initialSelectedDataset: AlternativeDatasetRecord | null;
   initialAlternatives: AlternativeRecord[];
 }) {
+  const isMobile = useIsMobileViewport();
   const [datasets, setDatasets] = useState<AlternativeDatasetRecord[]>(initialDatasets);
   const [selectedId, setSelectedId] = useState<string>(
     initialSelectedDataset?.id ?? "",
@@ -155,7 +182,7 @@ export function AlternatifWorkbench({
   const [preview, setPreview] = useState<LaptopImportPreview | null>(null);
   const [busyImport, setBusyImport] = useState(false);
 
-  // Modal CRUD form state
+  // Slide-over CRUD drawer state
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<DraftFormState>(emptyDraftForm());
   const [savingForm, setSavingForm] = useState(false);
@@ -427,67 +454,73 @@ export function AlternatifWorkbench({
         <CardHeader>
           <CardTitle>Impor Dataset Alternatif Laptop (Workbook Audit Revisi / CSV)</CardTitle>
           <CardDescription>
-            Membaca sheet <code className="font-mono">Data Audit</code> lengkap beserta 4 URL
-            sumber bukti. Setiap impor membuat versi dataset draft baru tanpa menimpa histori.
+            Membaca sheet{" "}
+            <code className="rounded bg-[#f2f2ee] px-1 py-0.5 font-mono text-[11px] text-[#111113]">
+              Data Audit
+            </code>{" "}
+            lengkap beserta 4 URL sumber bukti. Setiap impor membuat versi dataset draft baru
+            tanpa menimpa histori.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-4">
-            <div className="sm:col-span-2">
-              <Label htmlFor="laptop-file">Berkas alternatif (.xlsx / .csv)</Label>
-              <input
-                ref={fileInputRef}
-                id="laptop-file"
-                type="file"
-                accept=".xlsx,.csv"
-                onChange={handleFileChange}
-                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 pt-2 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/15"
-              />
+          <div className="rounded-lg border border-dashed border-[#d0d0c8] bg-[#f7f7f5] p-4">
+            <div className="grid gap-4 sm:grid-cols-4">
+              <div className="sm:col-span-2">
+                <Label htmlFor="laptop-file">Berkas alternatif (.xlsx / .csv)</Label>
+                <input
+                  ref={fileInputRef}
+                  id="laptop-file"
+                  type="file"
+                  accept=".xlsx,.csv"
+                  onChange={handleFileChange}
+                  className="h-10 w-full rounded-lg border border-[#d0d0c8] bg-white px-3 pt-2 text-sm text-[#111113] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10"
+                />
+              </div>
+              <div>
+                <Label htmlFor="observed-at">Tanggal audit snapshot</Label>
+                <Input
+                  id="observed-at"
+                  type="date"
+                  value={observedAt}
+                  onChange={(e) => setObservedAt(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="import-label">Label dataset (opsional)</Label>
+                <Input
+                  id="import-label"
+                  value={importLabel}
+                  onChange={(e) => setImportLabel(e.target.value)}
+                  placeholder="Mis. Audit SAW Revisi"
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="observed-at">Tanggal audit snapshot</Label>
-              <Input
-                id="observed-at"
-                type="date"
-                value={observedAt}
-                onChange={(e) => setObservedAt(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="import-label">Label dataset (opsional)</Label>
-              <Input
-                id="import-label"
-                value={importLabel}
-                onChange={(e) => setImportLabel(e.target.value)}
-                placeholder="Mis. Audit SAW Revisi"
-              />
-            </div>
-          </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={() => handleImport(false)}
-              disabled={!file || busyImport}
-            >
-              <FileUp className="h-4 w-4" aria-hidden="true" />
-              {busyImport ? "Memproses..." : "1. Preview Alternatif"}
-            </Button>
-            <Button
-              onClick={() => handleImport(true)}
-              disabled={!preview?.ok || busyImport}
-            >
-              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-              2. Simpan sebagai Draft Baru
-            </Button>
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <Button
+                variant="outline"
+                onClick={() => handleImport(false)}
+                disabled={!file || busyImport}
+              >
+                <FileUp className="h-4 w-4" aria-hidden="true" />
+                {busyImport ? "Memproses..." : "1. Preview Alternatif"}
+              </Button>
+              <Button
+                onClick={() => handleImport(true)}
+                disabled={!preview?.ok || busyImport}
+              >
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                2. Simpan sebagai Draft Baru
+              </Button>
+            </div>
           </div>
 
           {preview && (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-3">
+            <div className="space-y-3 rounded-lg border border-[#e5e5e0] bg-[#f7f7f5] p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold">
-                  Preview: {preview.filename} ({preview.sheetName}) — {preview.summary.eligibleRows}/
-                  {preview.summary.totalRows} eligible
+                <p className="text-sm font-semibold text-[#111113]">
+                  Preview: {preview.filename} ({preview.sheetName}) —{" "}
+                  {preview.summary.eligibleRows}/{preview.summary.totalRows} eligible
                 </p>
                 <Badge tone={preview.ok ? "success" : "error"}>
                   {preview.ok ? "Lolos Validasi" : "Ada Baris Invalid"}
@@ -499,34 +532,36 @@ export function AlternatifWorkbench({
                 </p>
               ))}
               {preview.rows.length > 0 && (
-                <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+                <div className="overflow-x-auto rounded-lg border border-[#e5e5e0] bg-white">
                   <table className="w-full min-w-[640px] border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-zinc-200 bg-zinc-50 text-left font-semibold text-zinc-600">
-                        <th className="px-3 py-2">Kode</th>
-                        <th className="px-3 py-2">Model / SKU</th>
-                        <th className="px-3 py-2 text-right">Harga</th>
-                        <th className="px-3 py-2 text-right">CPU Mark</th>
-                        <th className="px-3 py-2 text-right">RAM/SSD</th>
-                        <th className="px-3 py-2 text-right">kg / jam</th>
-                        <th className="px-3 py-2">Status</th>
+                      <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#787872]">
+                        <th className="px-3 py-2.5">Kode</th>
+                        <th className="px-3 py-2.5">Model / SKU</th>
+                        <th className="px-3 py-2.5 text-right">Harga</th>
+                        <th className="px-3 py-2.5 text-right">CPU Mark</th>
+                        <th className="px-3 py-2.5 text-right">RAM/SSD</th>
+                        <th className="px-3 py-2.5 text-right">kg / jam</th>
+                        <th className="px-3 py-2.5">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-[#e5e5e0]/80">
                       {preview.rows.map((r) => (
                         <tr key={r.rowNo}>
-                          <td className="px-3 py-2 font-mono font-semibold">{r.code}</td>
-                          <td className="px-3 py-2">{r.model}</td>
-                          <td className="px-3 py-2 text-right tabular-nums">
+                          <td className="px-3 py-2 font-mono font-semibold text-[#111113]">
+                            {r.code}
+                          </td>
+                          <td className="px-3 py-2 text-[#111113]">{r.model}</td>
+                          <td className="px-3 py-2 text-right font-mono tabular-nums">
                             {formatIdr(r.priceIdr)}
                           </td>
-                          <td className="px-3 py-2 text-right tabular-nums">
+                          <td className="px-3 py-2 text-right font-mono tabular-nums">
                             {formatInteger(r.cpuMark)}
                           </td>
-                          <td className="px-3 py-2 text-right tabular-nums">
+                          <td className="px-3 py-2 text-right font-mono tabular-nums">
                             {r.ramGb} / {r.ssdGb} GB
                           </td>
-                          <td className="px-3 py-2 text-right tabular-nums">
+                          <td className="px-3 py-2 text-right font-mono tabular-nums">
                             {r.weightKg} kg / {r.batteryHours} jam
                           </td>
                           <td className="px-3 py-2">
@@ -547,12 +582,12 @@ export function AlternatifWorkbench({
         </CardContent>
       </Card>
 
-      {/* Active Dataset Table & Controls */}
+      {/* Active Dataset Table / Cards & Controls */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Daftar Alternatif & Sumber Bukti</CardTitle>
+              <CardTitle>Daftar Alternatif &amp; Sumber Bukti</CardTitle>
               <CardDescription>
                 {selectedDataset
                   ? `Dataset v${selectedDataset.version} · Audit ${formatDateJakarta(selectedDataset.observedAt)} · Status: ${selectedDataset.status.toUpperCase()}`
@@ -564,7 +599,7 @@ export function AlternatifWorkbench({
                 aria-label="Pilih versi dataset alternatif"
                 value={selectedId}
                 onChange={(e) => handleDatasetSwitch(e.target.value)}
-                className="w-auto min-w-[220px]"
+                className="w-full sm:w-auto sm:min-w-[220px]"
               >
                 {datasets.length === 0 && <option value="">Belum ada dataset</option>}
                 {datasets.map((d) => (
@@ -600,11 +635,13 @@ export function AlternatifWorkbench({
         <CardContent className="space-y-4">
           {isSealed && (
             <AlertBanner tone="neutral" title="Dataset berstatus Sealed (Immutable)">
-              <span className="inline-flex items-center gap-1">
-                <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                Dataset ini telah digunakan pada perhitungan SAW sehingga terkunci agar histori
-                penelitian tetap dapat diaudit. Klik <strong>Gandakan ke Draft</strong> untuk
-                membuat versi baru apabila ingin mengubah harga atau menonaktifkan alternatif.
+              <span className="inline-flex items-start gap-1.5">
+                <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>
+                  Dataset ini telah digunakan pada perhitungan SAW sehingga terkunci agar histori
+                  penelitian tetap dapat diaudit. Klik <strong>Gandakan ke Draft</strong> untuk
+                  membuat versi baru apabila ingin mengubah harga atau menonaktifkan alternatif.
+                </span>
               </span>
             </AlertBanner>
           )}
@@ -615,32 +652,145 @@ export function AlternatifWorkbench({
               description="Impor workbook SPK_Kelompok_13_Audit_SAW_Revisi.xlsx pada formulir di atas untuk mengisi 7 alternatif baseline beserta 4 tautan sumbernya."
             />
           ) : loading ? (
-            <p className="py-8 text-center text-sm text-zinc-500">Memuat dataset...</p>
+            <p className="py-8 text-center text-sm text-[#787872]">Memuat dataset...</p>
+          ) : isMobile ? (
+            /* Mobile Hardware Spec Sheet Cards (< 768px) */
+            <div className="space-y-3">
+              {alternatives.map((alt) => {
+                const stockBadge = formatStockStatusLabel(alt.stockStatus);
+                const evBadge = formatEvidenceStatusLabel(alt.evidenceStatus);
+                return (
+                  <div
+                    key={alt.id}
+                    className={`rounded-lg border border-[#e5e5e0] p-4 space-y-3 ${
+                      !alt.active ? "bg-[#f7f7f5] opacity-65" : "bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded bg-[#111113] px-2 py-0.5 font-mono text-xs font-semibold text-white">
+                            {alt.code}
+                          </span>
+                          {!alt.active && <Badge tone="neutral">Nonaktif</Badge>}
+                        </div>
+                        <p className="mt-1.5 text-sm font-semibold text-[#111113]">
+                          {alt.model}
+                        </p>
+                        <p className="text-xs text-[#787872]">
+                          {alt.cpuName} · {alt.seller}
+                        </p>
+                      </div>
+                      <p className="shrink-0 font-mono text-xs font-semibold tabular-nums text-[#111113]">
+                        {formatIdr(alt.priceIdr)}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-[#e5e5e0] bg-[#e5e5e0] text-xs">
+                      <div className="bg-[#f7f7f5] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#787872]">CPU Mark</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                          {formatInteger(alt.cpuMark)}
+                        </p>
+                      </div>
+                      <div className="bg-[#f7f7f5] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#787872]">RAM / SSD</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                          {alt.ramGb} / {alt.ssdGb} GB
+                        </p>
+                      </div>
+                      <div className="bg-[#f7f7f5] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#787872]">Berat</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                          {alt.weightKg} kg
+                        </p>
+                      </div>
+                      <div className="bg-[#f7f7f5] p-2.5">
+                        <p className="font-mono text-[10px] uppercase text-[#787872]">Baterai C6</p>
+                        <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#111113]">
+                          {alt.batteryHours} jam
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge tone={stockBadge.tone}>{stockBadge.label}</Badge>
+                      <Badge tone={evBadge.tone}>{evBadge.label}</Badge>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#e5e5e0] pt-3">
+                      <div className="flex flex-wrap gap-2 text-[11px]">
+                        {alt.sources.map((s) => (
+                          <a
+                            key={s.id}
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-0.5 font-mono text-[#52524e] underline hover:text-[#111113]"
+                          >
+                            {s.sourceType}
+                            <ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
+                          </a>
+                        ))}
+                      </div>
+                      <div className="inline-flex gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isSealed}
+                          onClick={() => {
+                            setForm(recordToForm(alt));
+                            setFormOpen(true);
+                          }}
+                        >
+                          <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />
+                          Ubah
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={isSealed}
+                          onClick={() => handleToggleActive(alt)}
+                          title={alt.active ? "Nonaktifkan kandidat" : "Aktifkan kandidat"}
+                        >
+                          <Power className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-zinc-200">
+            /* Desktop Precision Ledger Table (>= 768px) */
+            <div className="overflow-x-auto rounded-lg border border-[#e5e5e0]">
               <table className="w-full min-w-[960px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold text-zinc-600">
-                    <th className="px-3 py-3">Kode</th>
-                    <th className="px-3 py-3">Model / SKU & Prosesor</th>
-                    <th className="px-3 py-3 text-right">Harga (C1)</th>
-                    <th className="px-3 py-3 text-right">CPU (C2)</th>
-                    <th className="px-3 py-3 text-right">RAM/SSD</th>
-                    <th className="px-3 py-3 text-right">Berat / Baterai</th>
-                    <th className="px-3 py-3">Status & Sumber</th>
-                    <th className="px-3 py-3 text-right">Aksi</th>
+                  <tr className="border-b border-[#e5e5e0] bg-[#f7f7f5] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#787872]">
+                    <th className="px-3.5 py-3">Kode</th>
+                    <th className="px-3.5 py-3">Model / SKU &amp; Prosesor</th>
+                    <th className="px-3.5 py-3 text-right">Harga (C1)</th>
+                    <th className="px-3.5 py-3 text-right">CPU (C2)</th>
+                    <th className="px-3.5 py-3 text-right">RAM/SSD</th>
+                    <th className="px-3.5 py-3 text-right">Berat / Baterai</th>
+                    <th className="px-3.5 py-3">Status &amp; Sumber</th>
+                    <th className="px-3.5 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="divide-y divide-[#e5e5e0]/80">
                   {alternatives.map((alt) => {
                     const stockBadge = formatStockStatusLabel(alt.stockStatus);
                     const evBadge = formatEvidenceStatusLabel(alt.evidenceStatus);
                     return (
                       <tr
                         key={alt.id}
-                        className={!alt.active ? "bg-zinc-50/80 opacity-60" : "hover:bg-zinc-50/70"}
+                        className={
+                          !alt.active
+                            ? "bg-[#f7f7f5] opacity-60"
+                            : "transition-colors hover:bg-[#f7f7f5]/60"
+                        }
                       >
-                        <td className="px-3 py-3 font-mono font-semibold text-zinc-900">
+                        <td className="px-3.5 py-3.5 font-mono font-semibold text-[#111113]">
                           {alt.code}
                           {!alt.active && (
                             <div className="mt-1">
@@ -648,29 +798,29 @@ export function AlternatifWorkbench({
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-3">
-                          <p className="font-medium text-zinc-900">{alt.model}</p>
-                          <p className="text-xs text-zinc-500">
+                        <td className="px-3.5 py-3.5">
+                          <p className="font-medium text-[#111113]">{alt.model}</p>
+                          <p className="text-xs text-[#787872]">
                             {alt.cpuName} · {alt.seller}
                           </p>
                         </td>
-                        <td className="px-3 py-3 text-right font-medium tabular-nums whitespace-nowrap">
+                        <td className="px-3.5 py-3.5 text-right font-mono text-xs font-semibold tabular-nums whitespace-nowrap text-[#111113]">
                           {formatIdr(alt.priceIdr)}
                         </td>
-                        <td className="px-3 py-3 text-right tabular-nums">
+                        <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums text-[#52524e]">
                           {formatInteger(alt.cpuMark)}
                         </td>
-                        <td className="px-3 py-3 text-right tabular-nums whitespace-nowrap">
+                        <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums whitespace-nowrap text-[#52524e]">
                           {alt.ramGb} GB / {alt.ssdGb} GB
                         </td>
-                        <td className="px-3 py-3 text-right tabular-nums whitespace-nowrap">
-                          <p>{alt.weightKg} kg</p>
-                          <p className="text-xs text-zinc-500">
+                        <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums whitespace-nowrap">
+                          <p className="text-[#111113]">{alt.weightKg} kg</p>
+                          <p className="text-[11px] text-[#787872]">
                             {alt.batteryHours} jam
                             {alt.batteryWh ? ` (${alt.batteryWh} Wh)` : ""}
                           </p>
                         </td>
-                        <td className="px-3 py-3 space-y-1.5">
+                        <td className="space-y-1.5 px-3.5 py-3.5">
                           <div className="flex flex-wrap gap-1">
                             <Badge tone={stockBadge.tone}>{stockBadge.label}</Badge>
                             <Badge tone={evBadge.tone}>{evBadge.label}</Badge>
@@ -682,7 +832,7 @@ export function AlternatifWorkbench({
                                 href={s.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-0.5 text-zinc-600 underline hover:text-zinc-900"
+                                className="inline-flex items-center gap-0.5 font-mono text-[#52524e] underline hover:text-[#111113]"
                               >
                                 {s.sourceType}
                                 <ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
@@ -690,7 +840,7 @@ export function AlternatifWorkbench({
                             ))}
                           </div>
                         </td>
-                        <td className="px-3 py-3 text-right whitespace-nowrap">
+                        <td className="px-3.5 py-3.5 text-right whitespace-nowrap">
                           <div className="inline-flex gap-1.5">
                             <Button
                               variant="outline"
@@ -725,298 +875,290 @@ export function AlternatifWorkbench({
         </CardContent>
       </Card>
 
-      {/* CRUD Modal */}
-      {formOpen && selectedDataset && !isSealed && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Form alternatif laptop"
-        >
-          <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white px-5 py-4">
-              <h2 className="text-lg font-bold text-zinc-900">
-                {form.id ? `Ubah Alternatif ${form.code}` : "Tambah Alternatif ke Draft"}
-              </h2>
-              <button
-                type="button"
-                aria-label="Tutup form"
-                onClick={() => setFormOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-100"
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
+      {/* Slide-Over CRUD Drawer */}
+      <SlideOverDrawer
+        open={formOpen && Boolean(selectedDataset) && !isSealed}
+        onClose={() => setFormOpen(false)}
+        title={form.id ? `Ubah Alternatif ${form.code}` : "Tambah Alternatif ke Draft"}
+        subtitle={
+          selectedDataset
+            ? `Dataset draft v${selectedDataset.version} · Audit ${formatDateJakarta(selectedDataset.observedAt)}`
+            : undefined
+        }
+        ariaLabel="Form alternatif laptop"
+      >
+        <form onSubmit={handleFormSubmit} className="space-y-5">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="f-code">Kode (mis. A1)</Label>
+              <Input
+                id="f-code"
+                required
+                value={form.code}
+                onChange={(e) => setForm({ ...form, code: e.target.value })}
+              />
             </div>
+            <div>
+              <Label htmlFor="f-brand">Merek</Label>
+              <Input
+                id="f-brand"
+                required
+                value={form.brand}
+                onChange={(e) => setForm({ ...form, brand: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="f-sku">SKU</Label>
+              <Input
+                id="f-sku"
+                required
+                value={form.sku}
+                onChange={(e) => setForm({ ...form, sku: e.target.value })}
+              />
+            </div>
+          </div>
 
-            <form onSubmit={handleFormSubmit} className="space-y-4 p-5">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <Label htmlFor="f-code">Kode (mis. A1)</Label>
-                  <Input
-                    id="f-code"
-                    required
-                    value={form.code}
-                    onChange={(e) => setForm({ ...form, code: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-brand">Merek</Label>
-                  <Input
-                    id="f-brand"
-                    required
-                    value={form.brand}
-                    onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-sku">SKU</Label>
-                  <Input
-                    id="f-sku"
-                    required
-                    value={form.sku}
-                    onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                  />
-                </div>
-              </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="f-model">Nama Model Lengkap &amp; SKU</Label>
+              <Input
+                id="f-model"
+                required
+                value={form.model}
+                onChange={(e) => setForm({ ...form, model: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="f-cpu">Prosesor</Label>
+              <Input
+                id="f-cpu"
+                required
+                value={form.cpuName}
+                onChange={(e) => setForm({ ...form, cpuName: e.target.value })}
+              />
+            </div>
+          </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="f-model">Nama Model Lengkap & SKU</Label>
-                  <Input
-                    id="f-model"
-                    required
-                    value={form.model}
-                    onChange={(e) => setForm({ ...form, model: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-cpu">Prosesor</Label>
-                  <Input
-                    id="f-cpu"
-                    required
-                    value={form.cpuName}
-                    onChange={(e) => setForm({ ...form, cpuName: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <Label htmlFor="f-price">
-                    C1 Harga Rp ({PRICE_MIN_IDR.toLocaleString("id-ID")}–
-                    {PRICE_MAX_IDR.toLocaleString("id-ID")})
-                  </Label>
-                  <Input
-                    id="f-price"
-                    type="number"
-                    required
-                    min={PRICE_MIN_IDR}
-                    max={PRICE_MAX_IDR}
-                    value={form.priceIdr}
-                    onChange={(e) => setForm({ ...form, priceIdr: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-cpumark">C2 PassMark CPU Mark</Label>
-                  <Input
-                    id="f-cpumark"
-                    type="number"
-                    required
-                    min={1}
-                    value={form.cpuMark}
-                    onChange={(e) => setForm({ ...form, cpuMark: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-ram">C3 RAM (GB)</Label>
-                  <Input
-                    id="f-ram"
-                    type="number"
-                    required
-                    min={1}
-                    value={form.ramGb}
-                    onChange={(e) => setForm({ ...form, ramGb: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-ssd">C4 SSD (GB)</Label>
-                  <Input
-                    id="f-ssd"
-                    type="number"
-                    required
-                    min={1}
-                    value={form.ssdGb}
-                    onChange={(e) => setForm({ ...form, ssdGb: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-weight">C5 Berat (kg)</Label>
-                  <Input
-                    id="f-weight"
-                    type="number"
-                    step="0.01"
-                    required
-                    min={0.1}
-                    value={form.weightKg}
-                    onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-bat">C6 Baterai Video 1080p (jam)</Label>
-                  <Input
-                    id="f-bat"
-                    type="number"
-                    step="0.1"
-                    required
-                    min={0.5}
-                    value={form.batteryHours}
-                    onChange={(e) => setForm({ ...form, batteryHours: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <Label htmlFor="f-wh">Baterai Wh (metadata opsional)</Label>
-                  <Input
-                    id="f-wh"
-                    type="number"
-                    step="0.1"
-                    value={form.batteryWh}
-                    onChange={(e) => setForm({ ...form, batteryWh: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-seller">Penjual</Label>
-                  <Input
-                    id="f-seller"
-                    required
-                    value={form.seller}
-                    onChange={(e) => setForm({ ...form, seller: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="f-stock">Status Stok</Label>
-                  <Select
-                    id="f-stock"
-                    value={form.stockStatus}
-                    onChange={(e) =>
-                      setForm({ ...form, stockStatus: e.target.value as StockStatus })
-                    }
-                  >
-                    <option value="indexed_in_stock">Tercatat tersedia di indeks</option>
-                    <option value="unconfirmed">Stok belum dikonfirmasi</option>
-                    <option value="confirmation_required">Perlu konfirmasi penjual</option>
-                    <option value="withdrawn_series">Seri withdrawn</option>
-                    <option value="confirmed_available">Terkonfirmasi tersedia</option>
-                    <option value="unavailable">Tidak tersedia</option>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="f-ev">Status Bukti</Label>
-                  <Select
-                    id="f-ev"
-                    value={form.evidenceStatus}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        evidenceStatus: e.target.value as EvidenceStatus,
-                      })
-                    }
-                  >
-                    <option value="provisional_unconfirmed">Provisional (belum konfirmasi penuh)</option>
-                    <option value="verified_by_researcher">Terverifikasi oleh peneliti</option>
-                    <option value="incomplete">Belum lengkap</option>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="f-proto">Protokol Pengukuran Baterai</Label>
-                  <Input
-                    id="f-proto"
-                    required
-                    value={form.batteryProtocol}
-                    onChange={(e) =>
-                      setForm({ ...form, batteryProtocol: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3 border-t border-zinc-200 pt-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  4 Tautan Sumber Bukti Wajib (http:// atau https://)
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="f-uprice">URL Harga</Label>
-                    <Input
-                      id="f-uprice"
-                      type="url"
-                      required
-                      value={form.urlPrice}
-                      onChange={(e) => setForm({ ...form, urlPrice: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="f-uspec">URL Spesifikasi</Label>
-                    <Input
-                      id="f-uspec"
-                      type="url"
-                      required
-                      value={form.urlSpec}
-                      onChange={(e) => setForm({ ...form, urlSpec: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="f-ubench">URL PassMark CPU Mark</Label>
-                    <Input
-                      id="f-ubench"
-                      type="url"
-                      required
-                      value={form.urlBenchmark}
-                      onChange={(e) =>
-                        setForm({ ...form, urlBenchmark: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="f-ubat">URL Baterai (PSREF)</Label>
-                    <Input
-                      id="f-ubat"
-                      type="url"
-                      required
-                      value={form.urlBattery}
-                      onChange={(e) => setForm({ ...form, urlBattery: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-
+          <div className="space-y-3 border-t border-[#e5e5e0] pt-4">
+            <p className="editorial-kicker">Nilai Enam Kriteria (C1–C6)</p>
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label htmlFor="f-notes">Catatan Audit & Ketersediaan</Label>
-                <Textarea
-                  id="f-notes"
-                  rows={2}
-                  value={form.evidenceNotes}
-                  onChange={(e) => setForm({ ...form, evidenceNotes: e.target.value })}
+                <Label htmlFor="f-price">
+                  C1 Harga Rp ({PRICE_MIN_IDR.toLocaleString("id-ID")}–
+                  {PRICE_MAX_IDR.toLocaleString("id-ID")})
+                </Label>
+                <Input
+                  id="f-price"
+                  type="number"
+                  required
+                  min={PRICE_MIN_IDR}
+                  max={PRICE_MAX_IDR}
+                  value={form.priceIdr}
+                  onChange={(e) => setForm({ ...form, priceIdr: e.target.value })}
                 />
               </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setFormOpen(false)}>
-                  Batal
-                </Button>
-                <Button type="submit" disabled={savingForm}>
-                  {savingForm ? "Menyimpan..." : "Simpan Alternatif"}
-                </Button>
+              <div>
+                <Label htmlFor="f-cpumark">C2 PassMark CPU Mark</Label>
+                <Input
+                  id="f-cpumark"
+                  type="number"
+                  required
+                  min={1}
+                  value={form.cpuMark}
+                  onChange={(e) => setForm({ ...form, cpuMark: e.target.value })}
+                />
               </div>
-            </form>
+              <div>
+                <Label htmlFor="f-ram">C3 RAM (GB)</Label>
+                <Input
+                  id="f-ram"
+                  type="number"
+                  required
+                  min={1}
+                  value={form.ramGb}
+                  onChange={(e) => setForm({ ...form, ramGb: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="f-ssd">C4 SSD (GB)</Label>
+                <Input
+                  id="f-ssd"
+                  type="number"
+                  required
+                  min={1}
+                  value={form.ssdGb}
+                  onChange={(e) => setForm({ ...form, ssdGb: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="f-weight">C5 Berat (kg)</Label>
+                <Input
+                  id="f-weight"
+                  type="number"
+                  step="0.01"
+                  required
+                  min={0.1}
+                  value={form.weightKg}
+                  onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="f-bat">C6 Baterai Video 1080p (jam)</Label>
+                <Input
+                  id="f-bat"
+                  type="number"
+                  step="0.1"
+                  required
+                  min={0.5}
+                  value={form.batteryHours}
+                  onChange={(e) => setForm({ ...form, batteryHours: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="grid gap-3 border-t border-[#e5e5e0] pt-4 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="f-wh">Baterai Wh (opsional)</Label>
+              <Input
+                id="f-wh"
+                type="number"
+                step="0.1"
+                value={form.batteryWh}
+                onChange={(e) => setForm({ ...form, batteryWh: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="f-seller">Penjual</Label>
+              <Input
+                id="f-seller"
+                required
+                value={form.seller}
+                onChange={(e) => setForm({ ...form, seller: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="f-stock">Status Stok</Label>
+              <Select
+                id="f-stock"
+                value={form.stockStatus}
+                onChange={(e) =>
+                  setForm({ ...form, stockStatus: e.target.value as StockStatus })
+                }
+              >
+                <option value="indexed_in_stock">Tercatat tersedia di indeks</option>
+                <option value="unconfirmed">Stok belum dikonfirmasi</option>
+                <option value="confirmation_required">Perlu konfirmasi penjual</option>
+                <option value="withdrawn_series">Seri withdrawn</option>
+                <option value="confirmed_available">Terkonfirmasi tersedia</option>
+                <option value="unavailable">Tidak tersedia</option>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="f-ev">Status Bukti</Label>
+              <Select
+                id="f-ev"
+                value={form.evidenceStatus}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    evidenceStatus: e.target.value as EvidenceStatus,
+                  })
+                }
+              >
+                <option value="provisional_unconfirmed">
+                  Provisional (belum konfirmasi penuh)
+                </option>
+                <option value="verified_by_researcher">Terverifikasi oleh peneliti</option>
+                <option value="incomplete">Belum lengkap</option>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="f-proto">Protokol Pengukuran Baterai</Label>
+              <Input
+                id="f-proto"
+                required
+                value={form.batteryProtocol}
+                onChange={(e) =>
+                  setForm({ ...form, batteryProtocol: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3 border-t border-[#e5e5e0] pt-4">
+            <p className="editorial-kicker">
+              4 Tautan Sumber Bukti Wajib (http:// atau https://)
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="f-uprice">URL Harga</Label>
+                <Input
+                  id="f-uprice"
+                  type="url"
+                  required
+                  value={form.urlPrice}
+                  onChange={(e) => setForm({ ...form, urlPrice: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="f-uspec">URL Spesifikasi</Label>
+                <Input
+                  id="f-uspec"
+                  type="url"
+                  required
+                  value={form.urlSpec}
+                  onChange={(e) => setForm({ ...form, urlSpec: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="f-ubench">URL PassMark CPU Mark</Label>
+                <Input
+                  id="f-ubench"
+                  type="url"
+                  required
+                  value={form.urlBenchmark}
+                  onChange={(e) =>
+                    setForm({ ...form, urlBenchmark: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="f-ubat">URL Baterai (PSREF)</Label>
+                <Input
+                  id="f-ubat"
+                  type="url"
+                  required
+                  value={form.urlBattery}
+                  onChange={(e) => setForm({ ...form, urlBattery: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="f-notes">Catatan Audit &amp; Ketersediaan</Label>
+            <Textarea
+              id="f-notes"
+              rows={2}
+              value={form.evidenceNotes}
+              onChange={(e) => setForm({ ...form, evidenceNotes: e.target.value })}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 border-t border-[#e5e5e0] pt-4">
+            <Button variant="outline" onClick={() => setFormOpen(false)}>
+              Batal
+            </Button>
+            <Button type="submit" disabled={savingForm}>
+              {savingForm ? "Menyimpan..." : "Simpan Alternatif"}
+            </Button>
+          </div>
+        </form>
+      </SlideOverDrawer>
     </div>
   );
 }

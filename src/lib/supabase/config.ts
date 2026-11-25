@@ -21,6 +21,9 @@ export function getSupabaseServiceRoleKey(): string | null {
 }
 
 export function isSupabaseConfigured(): boolean {
+  if (getLocalStorePath()) {
+    return false;
+  }
   return Boolean(getSupabaseUrl() && getSupabaseAnonKey());
 }
 

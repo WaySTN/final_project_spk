@@ -7,7 +7,7 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
-import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -27,15 +27,15 @@ export function Button({
 }: ButtonProps) {
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-900 disabled:opacity-50",
+      "bg-[#111113] text-white hover:bg-[#27272a] border border-[#111113] disabled:opacity-45",
     secondary:
-      "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 border border-zinc-200 disabled:opacity-50",
+      "bg-[#f2f2ee] text-[#111113] hover:bg-[#e5e5e0] border border-[#e5e5e0] disabled:opacity-45",
     outline:
-      "bg-white text-zinc-900 hover:bg-zinc-50 border border-zinc-300 disabled:opacity-50",
+      "bg-white text-[#111113] hover:bg-[#f7f7f5] border border-[#d0d0c8] hover:border-[#111113]/40 disabled:opacity-45",
     ghost:
-      "bg-transparent text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 border border-transparent disabled:opacity-50",
+      "bg-transparent text-[#52524e] hover:bg-[#f2f2ee] hover:text-[#111113] border border-transparent disabled:opacity-45",
     danger:
-      "bg-red-700 text-white hover:bg-red-800 border border-red-700 disabled:opacity-50",
+      "bg-red-700 text-white hover:bg-red-800 border border-red-700 disabled:opacity-45",
   };
 
   const sizes: Record<ButtonSize, string> = {
@@ -48,7 +48,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap",
+        "inline-flex items-center justify-center gap-2 rounded-lg transition-all duration-150 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111113] focus-visible:ring-offset-2 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap",
         variants[variant],
         sizes[size],
         className,
@@ -62,7 +62,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-zinc-200 bg-white text-zinc-900",
+        "rounded-lg border border-[#e5e5e0] bg-white text-[#111113]",
         className,
       )}
       {...props}
@@ -73,7 +73,10 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col gap-1 border-b border-zinc-100 px-5 py-4", className)}
+      className={cn(
+        "flex flex-col gap-1 border-b border-[#e5e5e0]/80 px-5 py-4",
+        className,
+      )}
       {...props}
     />
   );
@@ -82,7 +85,10 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn("text-base font-semibold tracking-tight text-zinc-900", className)}
+      className={cn(
+        "text-[15px] font-semibold tracking-[-0.015em] text-[#111113]",
+        className,
+      )}
       {...props}
     />
   );
@@ -92,7 +98,9 @@ export function CardDescription({
   className,
   ...props
 }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-zinc-500", className)} {...props} />;
+  return (
+    <p className={cn("text-xs sm:text-[13px] leading-relaxed text-[#787872]", className)} {...props} />
+  );
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -111,17 +119,17 @@ export function Badge({
   className?: string;
 }) {
   const tones: Record<BadgeTone, string> = {
-    neutral: "bg-zinc-100 text-zinc-700 border-zinc-200",
-    dark: "bg-zinc-900 text-white border-zinc-900",
-    success: "bg-emerald-50 text-emerald-800 border-emerald-200",
-    warning: "bg-amber-50 text-amber-800 border-amber-200",
-    error: "bg-red-50 text-red-800 border-red-200",
+    neutral: "bg-[#f2f2ee] text-[#52524e] border-[#e5e5e0]",
+    dark: "bg-[#111113] text-white border-[#111113]",
+    success: "bg-emerald-50/90 text-emerald-800 border-emerald-200/90",
+    warning: "bg-amber-50/90 text-amber-900 border-amber-200/90",
+    error: "bg-red-50/90 text-red-800 border-red-200/90",
   };
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] font-medium leading-4",
         tones[tone],
         className,
       )}
@@ -134,7 +142,7 @@ export function Badge({
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
   return (
     <label
-      className={cn("block text-xs font-medium text-zinc-700 mb-1.5", className)}
+      className={cn("block text-xs font-medium text-[#52524e] mb-1.5", className)}
       {...props}
     />
   );
@@ -144,7 +152,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   return (
     <input
       className={cn(
-        "h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/15 disabled:bg-zinc-50 disabled:text-zinc-500",
+        "h-10 w-full rounded-lg border border-[#d0d0c8] bg-white px-3 text-sm text-[#111113] placeholder:text-[#9c9c95] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10 disabled:bg-[#f7f7f5] disabled:text-[#787872]",
         className,
       )}
       {...props}
@@ -156,7 +164,7 @@ export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectE
   return (
     <select
       className={cn(
-        "h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/15 disabled:bg-zinc-50",
+        "h-10 w-full rounded-lg border border-[#d0d0c8] bg-white px-3 text-sm text-[#111113] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10 disabled:bg-[#f7f7f5]",
         className,
       )}
       {...props}
@@ -171,7 +179,7 @@ export function Textarea({
   return (
     <textarea
       className={cn(
-        "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/15 disabled:bg-zinc-50",
+        "w-full rounded-lg border border-[#d0d0c8] bg-white px-3 py-2.5 text-sm text-[#111113] placeholder:text-[#9c9c95] transition-colors focus:border-[#111113] focus:outline-none focus:ring-2 focus:ring-[#111113]/10 disabled:bg-[#f7f7f5]",
         className,
       )}
       {...props}
@@ -191,10 +199,10 @@ export function AlertBanner({
   className?: string;
 }) {
   const styles = {
-    neutral: "border-zinc-200 bg-zinc-50 text-zinc-800",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    warning: "border-amber-200 bg-amber-50 text-amber-950",
-    error: "border-red-200 bg-red-50 text-red-900",
+    neutral: "border-[#e5e5e0] border-l-[#111113] bg-[#f7f7f5] text-[#111113]",
+    success: "border-emerald-200 border-l-emerald-700 bg-emerald-50/70 text-emerald-950",
+    warning: "border-amber-200 border-l-amber-600 bg-amber-50/75 text-amber-950",
+    error: "border-red-200 border-l-red-700 bg-red-50/75 text-red-950",
   };
 
   const Icon =
@@ -210,15 +218,21 @@ export function AlertBanner({
     <div
       role={tone === "error" ? "alert" : "status"}
       className={cn(
-        "flex items-start gap-3 rounded-xl border p-4 text-sm",
+        "flex items-start gap-3 rounded-lg border border-l-2 px-4 py-3.5 text-sm",
         styles[tone],
         className,
       )}
     >
-      <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 opacity-85" aria-hidden="true" />
       <div className="min-w-0 flex-1 space-y-1">
-        {title && <p className="font-semibold leading-snug">{title}</p>}
-        <div className="leading-relaxed">{children}</div>
+        {title && (
+          <p className="text-[13px] font-semibold tracking-[-0.01em] leading-snug">
+            {title}
+          </p>
+        )}
+        <div className="text-xs sm:text-[13px] leading-relaxed opacity-90">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -236,21 +250,147 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50/70 px-6 py-12 text-center">
+    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[#d0d0c8] bg-[#f7f7f5]/70 px-6 py-14 text-center">
       {icon && (
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600">
+        <div className="mb-3.5 flex h-11 w-11 items-center justify-center rounded-lg border border-[#e5e5e0] bg-white text-[#52524e]">
           {icon}
         </div>
       )}
-      <h3 className="text-base font-semibold text-zinc-900">{title}</h3>
-      <p className="mt-1 max-w-md text-sm text-zinc-500">{description}</p>
-      {action && <div className="mt-5">{action}</div>}
+      <h3 className="text-base font-semibold tracking-[-0.015em] text-[#111113]">
+        {title}
+      </h3>
+      <p className="mt-1.5 max-w-md text-sm leading-relaxed text-[#787872]">
+        {description}
+      </p>
+      {action && <div className="mt-6">{action}</div>}
     </div>
   );
 }
 
 export function SkeletonBlock({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded-lg bg-zinc-100", className)} />;
+  return <div className={cn("animate-pulse rounded-lg bg-[#ededeb]", className)} />;
+}
+
+/**
+ * Crisp inline proportional progress bar for SAW scores (0..1) or AHP weights.
+ */
+export function ScoreBar({
+  value,
+  max = 1,
+  inverted = false,
+  className,
+}: {
+  value: number;
+  max?: number;
+  inverted?: boolean;
+  className?: string;
+}) {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  return (
+    <div
+      className={cn(
+        "h-1.5 w-full overflow-hidden rounded-full",
+        inverted ? "bg-white/15" : "bg-[#e5e5e0]",
+        className,
+      )}
+      aria-hidden="true"
+    >
+      <div
+        className={cn(
+          "h-full rounded-full transition-all duration-300",
+          inverted ? "bg-white" : "bg-[#111113]",
+        )}
+        style={{ width: `${pct.toFixed(2)}%` }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Compact visual CR threshold gauge relative to the 0.10 AHP consistency cutoff.
+ */
+export function CrGaugeBar({ cr }: { cr: number | null }) {
+  if (cr === null) return null;
+  const maxVisual = 0.5;
+  const pct = Math.max(0, Math.min(100, (cr / maxVisual) * 100));
+  const thresholdPct = (0.1 / maxVisual) * 100; // 20% mark
+  const passes = cr <= 0.1 + 1e-12;
+
+  return (
+    <div className="relative mt-1 h-1.5 w-24 rounded-full bg-[#e5e5e0]" aria-hidden="true">
+      <div
+        className={cn(
+          "h-full rounded-full",
+          passes ? "bg-emerald-700" : "bg-red-700",
+        )}
+        style={{ width: `${Math.max(pct, cr === 0 ? 3 : pct)}%` }}
+      />
+      <span
+        className="absolute -top-0.5 bottom-[-2px] w-[1.5px] bg-[#111113]/60"
+        style={{ left: `${thresholdPct}%` }}
+        title="Ambang CR 0,10"
+      />
+    </div>
+  );
+}
+
+/**
+ * Accessible right-hand slide-over inspection/editing drawer for Admin workflows.
+ */
+export function SlideOverDrawer({
+  open,
+  onClose,
+  title,
+  subtitle,
+  ariaLabel,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  subtitle?: string;
+  ariaLabel?: string;
+  children: ReactNode;
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-[#111113]/45"
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel ?? title}
+    >
+      <div
+        className="fixed inset-0"
+        aria-hidden="true"
+        onClick={onClose}
+      />
+      <div className="animate-drawer-in relative z-10 flex h-full w-full max-w-2xl flex-col border-l border-[#e5e5e0] bg-white shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-[#e5e5e0] bg-[#f7f7f5] px-5 py-4">
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold tracking-[-0.015em] text-[#111113]">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="mt-0.5 text-xs text-[#787872] leading-relaxed">
+                {subtitle}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            aria-label="Tutup panel"
+            onClick={onClose}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#d0d0c8] bg-white text-[#52524e] hover:bg-[#f2f2ee] hover:text-[#111113] cursor-pointer"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-5">{children}</div>
+      </div>
+    </div>
+  );
 }
 
 export function formatStockStatusLabel(status: string): {
@@ -261,7 +401,7 @@ export function formatStockStatusLabel(status: string): {
     case "confirmed_available":
       return { label: "Stok terkonfirmasi", tone: "success" };
     case "indexed_in_stock":
-      return { label: "Tercatat tersedia di indeks", tone: "neutral" };
+      return { label: "Tercatat di indeks", tone: "neutral" };
     case "confirmation_required":
       return { label: "Perlu konfirmasi penjual", tone: "warning" };
     case "withdrawn_series":
@@ -283,6 +423,6 @@ export function formatEvidenceStatusLabel(status: string): {
     case "incomplete":
       return { label: "Bukti belum lengkap", tone: "error" };
     default:
-      return { label: "Provisional (belum konfirmasi penuh)", tone: "warning" };
+      return { label: "Provisional", tone: "warning" };
   }
 }

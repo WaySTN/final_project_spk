@@ -19,13 +19,15 @@ export function PublicationBanner({
           : `Snapshot Penelitian Terverifikasi · Audit ${formatDateJakarta(payload.observedAt)}`
       }
     >
-      <div className="space-y-1.5">
-        <p className="text-xs sm:text-sm">{payload.bannerText}</p>
-        <div className="flex flex-wrap items-center gap-2 pt-0.5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs sm:text-[13px]">{payload.bannerText}</p>
+        <div className="flex shrink-0 flex-wrap items-center gap-1.5">
           <Badge tone={isProvisional ? "warning" : "success"}>
-            Status: {isProvisional ? "Provisional" : "Final"}
+            {isProvisional ? "Provisional" : "Final"}
           </Badge>
-          <Badge tone="neutral">{payload.scenarioLabel}</Badge>
+          <span className="font-mono text-[10px] uppercase tracking-[0.08em] opacity-75">
+            {payload.saw.items.length} kandidat
+          </span>
         </div>
       </div>
     </AlertBanner>
@@ -42,13 +44,13 @@ export function NoPublicationState() {
         <div className="flex flex-wrap justify-center gap-3">
           <Link
             href="/metodologi"
-            className="inline-flex h-10 items-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
+            className="inline-flex h-10 items-center rounded-lg border border-[#d0d0c8] bg-white px-4 text-sm font-medium text-[#111113] hover:bg-[#f7f7f5]"
           >
             Pelajari Metodologi
           </Link>
           <Link
             href="/admin"
-            className="inline-flex h-10 items-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800"
+            className="inline-flex h-10 items-center rounded-lg bg-[#111113] px-4 text-sm font-medium text-white hover:bg-[#27272a]"
           >
             Masuk Panel Admin
           </Link>
