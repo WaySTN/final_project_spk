@@ -7,9 +7,10 @@ Dokumen ini menjelaskan langkah persiapan production pada **Supabase** dan **Ver
 ## 1. Persiapan Supabase Production
 
 1. Buat proyek baru di [Supabase](https://supabase.com/) (pilih region terdekat, mis. `ap-southeast-1` Singapore).
-2. Buka **SQL Editor** dan jalankan dua migrasi secara berurutan:
+2. Buka **SQL Editor** dan jalankan tiga migrasi secara berurutan:
    - [`supabase/migrations/202611250001_initial_schema.sql`](../supabase/migrations/202611250001_initial_schema.sql)
    - [`supabase/migrations/202611250002_rls_and_seed.sql`](../supabase/migrations/202611250002_rls_and_seed.sql)
+   - [`supabase/migrations/202611250003_table_grants.sql`](../supabase/migrations/202611250003_table_grants.sql)
    *(Atau gunakan Supabase CLI: `supabase link --project-ref <REF>` lalu `supabase db push`.)*
 3. Verifikasi bahwa **Row Level Security (RLS)** aktif pada seluruh 13 tabel dan 6 baris `criteria` (`C1`–`C6`) telah ter-seed.
 4. Matikan pendaftaran akun publik jika tidak diperlukan di **Authentication → Providers → Email**.

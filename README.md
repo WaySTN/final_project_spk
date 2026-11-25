@@ -61,6 +61,7 @@ Program Studi Sistem Informasi, Fakultas Ilmu Komputer, Universitas Pembangunan 
    Jalankan berkas migrasi secara berurutan di Supabase SQL Editor atau via Supabase CLI (`supabase db push`):
    - `supabase/migrations/202611250001_initial_schema.sql`
    - `supabase/migrations/202611250002_rls_and_seed.sql`
+   - `supabase/migrations/202611250003_table_grants.sql`
 
 5. **Buat akun Administrator (Provisioning Manual):**
    Tidak ada pendaftaran admin publik. Buat pengguna di **Supabase Dashboard → Authentication → Users**, lalu tetapkan perannya sebagai `admin` melalui SQL Editor:
