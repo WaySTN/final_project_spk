@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push("/admin");
+      router.replace("/admin");
       router.refresh();
     } catch {
       setError("Gagal terhubung ke server autentikasi. Silakan coba lagi.");

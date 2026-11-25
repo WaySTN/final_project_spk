@@ -1,7 +1,7 @@
 # Status Proyek — LaptopMatch SPK AHP–SAW
 
 **Tanggal pembaruan terakhir:** 25 November 2026  
-**Status keseluruhan:** Implementasi lokal lengkap (MVP P0 + P1 `/bandingkan`), seluruh pengujian otomatis lulus; menunggu kredensial Supabase/Vercel dan persetujuan pemilik untuk deployment publik.
+**Status keseluruhan:** Terhubung penuh ke Supabase Production (`bdjazyjkavqguwgjiqjw.supabase.co`) dengan RLS terverifikasi live, data penelitian asli terimpor & snapshot `provisional` aktif, kode sudah di-push ke GitHub (`WaySTN/final_project_spk` branch `main`); siap diuji lokal (`http://localhost:3000`) dan di-deploy ke Vercel.
 
 ## Ringkasan Progres per Fase
 

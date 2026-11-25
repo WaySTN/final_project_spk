@@ -76,7 +76,7 @@ export function AdminShell({
     setLoggingOut(true);
     try {
       await fetch("/api/admin/auth/logout", { method: "POST" });
-      router.push("/admin/login");
+      router.replace("/admin/login");
       router.refresh();
     } finally {
       setLoggingOut(false);

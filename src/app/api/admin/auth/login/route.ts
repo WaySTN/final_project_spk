@@ -1,3 +1,5 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, handleRouteError } from "@/lib/api/response";
@@ -8,8 +10,12 @@ import {
   signLocalAdminToken,
   verifyWriteOrigin,
 } from "@/lib/auth/session";
-import { isLocalTestMode, isSupabaseConfigured } from "@/lib/supabase/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  getSupabaseAnonKey,
+  getSupabaseUrl,
+  isLocalTestMode,
+  isSupabaseConfigured,
+} from "@/lib/supabase/config";
 
 export const runtime = "nodejs";
 
@@ -38,7 +44,35 @@ export async function POST(request: Request) {
       apiError(401, "INVALID_CREDENTIALS", "Email atau kata sandi tidak valid.");
 
     if (isSupabaseConfigured()) {
-      const supabase = await createServerSupabaseClient();
+      const cookieStore = await cookies();
+      const pendingCookies: Array<{
+        name: string;
+        value: string;
+        options?: Parameters<NextResponse["cookies"]["set"]>[2];
+      }> = [];
+
+      const supabase = createServerClient(
+        getSupabaseUrl()!,
+        getSupabaseAnonKey()!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll();
+            },
+            setAll(cookiesToSet) {
+              for (const cookie of cookiesToSet) {
+                pendingCookies.push(cookie);
+                try {
+                  cookieStore.set(cookie.name, cookie.value, cookie.options);
+                } catch {
+                  // Handled below via explicit NextResponse cookies
+                }
+              }
+            },
+          },
+        },
+      );
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: body.email,
         password: body.password,
@@ -63,7 +97,7 @@ export async function POST(request: Request) {
         );
       }
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         data: {
           user: {
             id: data.user.id,
@@ -74,6 +108,12 @@ export async function POST(request: Request) {
         error: null,
         meta: { mode: "supabase" },
       });
+
+      for (const { name, value, options } of pendingCookies) {
+        response.cookies.set(name, value, options);
+      }
+
+      return response;
     }
 
     if (isLocalTestMode()) {

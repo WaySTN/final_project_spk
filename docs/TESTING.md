@@ -59,7 +59,10 @@ Berkas uji: [`tests/e2e/full-workflow.spec.ts`](../tests/e2e/full-workflow.spec.
 
 ---
 
-## 4. Cakupan yang Belum Diverifikasi Secara Live (Terbatas Kredensial Eksternal)
+## 4. Verifikasi Live Supabase Production & Cakupan Tersisa
 
-- **Eksekusi migrasi SQL & RLS pada proyek Supabase cloud aktif:** Skema SQL, trigger immutability, fungsi `publish_snapshot_atomic`, dan kebijakan RLS telah ditulis lengkap di `supabase/migrations/`, namun belum dijalankan terhadap instance Supabase cloud karena kredensial proyek Supabase production belum disediakan.
-- **Deployment Vercel live URL:** Build produksi Next.js telah lulus lokal; deployment publik ke GitHub/Vercel belum dilakukan sesuai aturan menunggu persetujuan dan kredensial pemilik proyek.
+- **Migrasi SQL, RLS & Impor Data Asli pada Supabase Cloud (`bdjazyjkavqguwgjiqjw.supabase.co`):** **LULUS TERVERIFIKASI LIVE**
+  - 3 migrasi SQL (`0001`, `0002`, `0003`) berhasil diterapkan; 6 kriteria `C1`–`C6` ter-seed; 1 akun `admin` aktif pada `public.profiles`.
+  - `npm run import:research --publish-provisional` berhasil mengimpor 33/33 respons asli, 7 alternatif audit revisi (28 tautan sumber), menghitung AHP 17 (`CR = 0,00127449`) & AHP 33 (`CR = 0,01233169`), SAW S1 (`A7 0,953349` vs `A6 0,953327`), S2 (`A6 0,963921`), S3 (`A2 0,979739`), serta menerbitkan snapshot `provisional`.
+  - Pengujian klien anonim (`NEXT_PUBLIC_SUPABASE_ANON_KEY`) mengonfirmasi `survey_responses`, `response_batches`, `ahp_runs`, `ahp_individual_results`, `alternatives`, dan `profiles` 100% terblokir RLS (0 baris bocor), sementara `current_public_publication` hanya mengembalikan snapshot ter-sanitasi tanpa kebocoran data mentah responden.
+- **Deployment Vercel live URL:** Build produksi Next.js lulus lokal dan kode sudah di-push ke `https://github.com/WaySTN/final_project_spk.git` (`main`); deployment Vercel menunggu impor proyek oleh pemilik di dashboard Vercel.
