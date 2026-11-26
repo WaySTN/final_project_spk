@@ -58,9 +58,11 @@ describe("Research Baseline Regression Test (Actual Excel Files vs PRD & Audit W
     expect(laptopPreview.summary.eligibleRows).toBe(7);
 
     // Every alternative has 4 valid http/https sources and conservative provisional status
+    expect(laptopPreview.c6Metric).toBe("battery_hours");
     for (const row of laptopPreview.rows) {
       expect(row.sources).toHaveLength(4);
       expect(row.evidenceStatus).toBe("provisional_unconfirmed");
+      expect(row.batteryHours).not.toBeNull();
     }
 
     // Run full AHP + SAW + Sensitivity suite directly from parsed raw data
@@ -82,7 +84,7 @@ describe("Research Baseline Regression Test (Actual Excel Files vs PRD & Audit W
           C3: alt.ramGb,
           C4: alt.ssdGb,
           C5: alt.weightKg,
-          C6: alt.batteryHours,
+          C6: alt.batteryHours!,
         },
       })),
     );

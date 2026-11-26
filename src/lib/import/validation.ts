@@ -13,7 +13,7 @@ export function computeSha256(buffer: Buffer | Uint8Array): string {
 
 export interface FileValidationResult {
   ok: boolean;
-  extension: ".xlsx" | ".csv" | null;
+  extension: ".xlsx" | ".csv" | ".json" | null;
   error?: string;
 }
 
@@ -24,9 +24,11 @@ export interface FileValidationResult {
 export function validateUploadedFile(
   filename: string,
   buffer: Buffer,
+  options?: { allowJson?: boolean },
 ): FileValidationResult {
   const cleanName = filename.trim();
   const lower = cleanName.toLowerCase();
+  const allowJson = options?.allowJson ?? false;
 
   if (!cleanName) {
     return { ok: false, extension: null, error: "Nama berkas tidak boleh kosong." };
@@ -40,17 +42,21 @@ export function validateUploadedFile(
     };
   }
 
-  const extension: ".xlsx" | ".csv" | null = lower.endsWith(".xlsx")
+  const extension: ".xlsx" | ".csv" | ".json" | null = lower.endsWith(".xlsx")
     ? ".xlsx"
     : lower.endsWith(".csv")
       ? ".csv"
-      : null;
+      : allowJson && lower.endsWith(".json")
+        ? ".json"
+        : null;
 
   if (!extension) {
     return {
       ok: false,
       extension: null,
-      error: "Format berkas tidak didukung. Unggah berkas .xlsx atau .csv.",
+      error: allowJson
+        ? "Format berkas tidak didukung. Unggah berkas .json, .xlsx, atau .csv."
+        : "Format berkas tidak didukung. Unggah berkas .xlsx atau .csv.",
     };
   }
 
@@ -135,8 +141,6 @@ export function parseSurveyTimestamp(raw: unknown): {
   }
 
   if (raw instanceof Date && !Number.isNaN(raw.getTime())) {
-    // ExcelJS parses Excel dates as UTC timestamps representing local Excel clock time.
-    // Interpret year/month/day/hour/min/sec as Asia/Jakarta (+07:00) to avoid local-machine timezone drift.
     const y = raw.getUTCFullYear();
     const m = raw.getUTCMonth();
     const d = raw.getUTCDate();
@@ -152,7 +156,6 @@ export function parseSurveyTimestamp(raw: unknown): {
   }
 
   if (typeof raw === "number" && Number.isFinite(raw) && raw > 25_000 && raw < 80_000) {
-    // Excel 1900 epoch (with leap-year bug offset): 1899-12-30T00:00:00 Asia/Jakarta (+07:00)
     const excelEpochJakartaUtcMs = Date.UTC(1899, 11, 30, -7, 0, 0, 0);
     const utcMs = Math.round(excelEpochJakartaUtcMs + raw * 86_400_000);
     return {
@@ -166,7 +169,6 @@ export function parseSurveyTimestamp(raw: unknown): {
     return { rawTimestamp: "", submittedAt: null };
   }
 
-  // Numeric string representing Excel serial
   if (/^\d{5}(\.\d+)?$/.test(text)) {
     const serial = Number(text);
     if (Number.isFinite(serial) && serial > 25_000 && serial < 80_000) {
@@ -179,7 +181,6 @@ export function parseSurveyTimestamp(raw: unknown): {
     }
   }
 
-  // ISO-8601 with explicit timezone offset or Z
   if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/.test(text)) {
     const parsed = new Date(text);
     if (!Number.isNaN(parsed.getTime())) {
@@ -187,7 +188,6 @@ export function parseSurveyTimestamp(raw: unknown): {
     }
   }
 
-  // ISO-like without timezone: treat as Asia/Jakarta (+07:00)
   const isoLocal = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/.exec(text);
   if (isoLocal) {
     const utcMs = Date.UTC(
@@ -201,7 +201,6 @@ export function parseSurveyTimestamp(raw: unknown): {
     return { rawTimestamp: text, submittedAt: new Date(utcMs).toISOString() };
   }
 
-  // Ambiguous slash dates (e.g. 04/05/2026) are not guessed per PRD §5.2
   return { rawTimestamp: text, submittedAt: null };
 }
 
@@ -221,7 +220,7 @@ export const alternativeSourceSchema = z.object({
   notes: z.string().trim().max(500).optional().default(""),
 });
 
-export const alternativeDraftSchema = z.object({
+export const alternativeDraftBaseSchema = z.object({
   code: z
     .string()
     .trim()
@@ -239,8 +238,18 @@ export const alternativeDraftSchema = z.object({
   ramGb: z.number().positive("Kapasitas RAM harus lebih dari 0."),
   ssdGb: z.number().positive("Kapasitas SSD harus lebih dari 0."),
   weightKg: z.number().positive("Berat laptop harus lebih dari 0.").max(10),
-  batteryHours: z.number().positive("Durasi baterai (jam) harus lebih dari 0.").max(48),
-  batteryWh: z.number().positive().max(200).nullable().optional(),
+  batteryHours: z
+    .number()
+    .positive("Durasi baterai (jam) harus lebih dari 0.")
+    .max(48)
+    .nullable()
+    .optional(),
+  batteryWh: z
+    .number()
+    .positive("Kapasitas baterai (Wh) harus lebih dari 0.")
+    .max(200)
+    .nullable()
+    .optional(),
   seller: z.string().trim().min(1, "Nama penjual wajib diisi.").max(160),
   active: z.boolean().default(true),
   stockStatus: z.enum([
@@ -254,6 +263,9 @@ export const alternativeDraftSchema = z.object({
   evidenceStatus: z.enum(["provisional_unconfirmed", "verified_by_researcher", "incomplete"]),
   batteryProtocol: z.string().trim().min(5).max(300),
   evidenceNotes: z.string().trim().max(1000).default(""),
+  sourceDateRecorded: z.string().trim().max(60).optional().default(""),
+  sourceStatusRecorded: z.string().trim().max(160).optional().default(""),
+  selectionReason: z.string().trim().max(400).optional().default(""),
   sources: z
     .array(alternativeSourceSchema)
     .refine(
@@ -272,3 +284,14 @@ export const alternativeDraftSchema = z.object({
       },
     ),
 });
+
+export const alternativeDraftSchema = alternativeDraftBaseSchema.refine(
+  (data) =>
+    (typeof data.batteryWh === "number" && data.batteryWh > 0) ||
+    (typeof data.batteryHours === "number" && data.batteryHours > 0),
+  {
+    message:
+      "Minimal salah satu nilai baterai positif wajib diisi (kapasitas Wh untuk dataset UAS atau durasi jam untuk dataset historis).",
+    path: ["batteryWh"],
+  },
+);

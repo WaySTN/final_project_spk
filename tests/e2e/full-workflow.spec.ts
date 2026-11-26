@@ -18,16 +18,16 @@ function getSurveyFilePath(): string {
   return path.join(PRIVATE_DIR, match);
 }
 
-function getLaptopFilePath(): string {
-  const target = path.join(PRIVATE_DIR, "SPK_Kelompok_13_Audit_SAW_Revisi.xlsx");
+function getUasDatasetJsonPath(): string {
+  const target = path.join(PRIVATE_DIR, "LaptopMatch_Dataset_33_Regression.json");
   if (!fs.existsSync(target)) {
-    throw new Error("Audit SAW Revisi XLSX not found in research/private/");
+    throw new Error("LaptopMatch_Dataset_33_Regression.json not found in research/private/");
   }
   return target;
 }
 
-test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () => {
-  test("E01 & E12: anonymous blocked from admin, and public shows honest empty state before publication", async ({
+test.describe.serial("LaptopMatch UAS 33-Alternative End-to-End Acceptance Suite (E01–E12)", () => {
+  test("E01 & E12: anonymous blocked from admin (incl. sensitivity), and public shows honest empty state before publication", async ({
     page,
     request,
   }) => {
@@ -38,6 +38,7 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
       "/api/admin/alternatives",
       "/api/admin/ahp/runs",
       "/api/admin/saw/runs",
+      "/api/admin/sensitivity",
       "/api/admin/publications",
     ]) {
       const res = await request.get(endpoint);
@@ -55,7 +56,7 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
     await expect(
       page.getByText("Belum ada snapshot rekomendasi yang dipublikasikan"),
     ).toBeVisible();
-    await expect(page.getByText("0,953349")).toHaveCount(0);
+    await expect(page.getByText("0,834354")).toHaveCount(0);
 
     await page.goto("/rekomendasi");
     await expect(
@@ -63,10 +64,10 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
     ).toBeVisible();
   });
 
-  test("E02–E09: full admin workflow (login, bad file rejection, real XLSX import, AHP, SAW S1/S2/S3, sealed immutability, final gate block, provisional publish, XLSX export, logout)", async ({
+  test("E02–E09: full UAS admin workflow (login, bad file rejection, 33-resp XLSX, 33-alt JSON + 9 archived, AHP, SAW, 37-scenario sensitivity, dynamic draft edit, final gate block, provisional publish, 8-sheet XLSX export, logout)", async ({
     page,
   }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(90_000);
     // E02: Wrong password shows generic error
     await page.goto("/admin/login");
     await page.getByLabel("Email administrator").fill(ADMIN_EMAIL);
@@ -81,6 +82,11 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
     await expect(
       page.getByRole("heading", { name: "Ringkasan Penelitian LaptopMatch" }),
     ).toBeVisible();
+
+    // Verify Admin Kriteria shows C6 Wh proxy & Complete AHP Scale
+    await page.goto("/admin/kriteria");
+    await expect(page.getByText("Kapasitas baterai", { exact: false }).first()).toBeVisible();
+    await expect(page.getByText("Skala Pembobotan AHP Lengkap")).toBeVisible();
 
     // E04: Upload bad CSV -> validation error, no partial commit
     await page.goto("/admin/responden");
@@ -110,15 +116,17 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
     await page.getByRole("button", { name: "1. Preview & Validasi" }).click();
     await expect(page.getByText("Duplikat SHA-256")).toBeVisible();
 
-    // Import real audit laptop workbook (7 alternatives)
+    // Import real UAS 33-alternative JSON (33 active across 8 brands + 9 archived excluded)
     await page.goto("/admin/alternatif");
-    const laptopPath = getLaptopFilePath();
-    await page.locator("#laptop-file").setInputFiles(laptopPath);
+    const datasetJsonPath = getUasDatasetJsonPath();
+    await page.locator("#laptop-file").setInputFiles(datasetJsonPath);
     await page.getByRole("button", { name: "1. Preview Alternatif" }).click();
     await expect(page.getByText("Lolos Validasi")).toBeVisible();
+    await expect(page.getByText(/33\/33 eligible · 8 merek · C6 Wh · 9 arsip dikeluarkan/i)).toBeVisible();
     await page.getByRole("button", { name: "2. Simpan sebagai Draft Baru" }).click();
     await expect(page.getByText(/berhasil diimpor sebagai draft/i)).toBeVisible();
-    await expect(page.getByText("Lenovo IdeaPad Slim 3 14IAH8 83EQ0077ID")).toBeVisible();
+    await expect(page.getByText("Megabook T1 14 16/512")).toBeVisible();
+    await expect(page.getByText("Arsip Kandidat Dikeluarkan (9 Kandidat)")).toBeVisible();
 
     // E05a: Compute AHP S1 (consistent_only -> 17) & AHP S2 (all_eligible -> 33)
     await page.goto("/admin/perhitungan/ahp");
@@ -130,19 +138,15 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
     await page.getByRole("button", { name: "Hitung AHP Sekarang" }).click();
     await expect(page.getByText("0,01233169").first()).toBeVisible();
 
-    // E05b: Compute SAW S1 (7 alt, 17 consistent), S2 (7 alt, 33 resp), S3 (5 alt no A6/A7)
+    // E05b: Compute SAW UAS primary (33 alts, 17 consistent -> A33 #1 0,834354, A29 #2 0,830314, A11 #33 0,601888)
     await page.goto("/admin/perhitungan/saw");
-    await page.locator("#saw-scenario").selectOption("primary_7_consistent");
+    await page.locator("#saw-scenario").selectOption("primary_33_consistent");
     await page.getByRole("button", { name: "Hitung SAW Sekarang" }).click();
-    await expect(page.getByText("0,953349").first()).toBeVisible();
-    await expect(page.getByText("0,953327").first()).toBeVisible();
+    await expect(page.getByText("0,834354").first()).toBeVisible();
+    await expect(page.getByText("0,830314").first()).toBeVisible();
+    await expect(page.getByText("0,601888").first()).toBeVisible();
 
-    // Compute S3 (5 alternatives without A6/A7 -> A2 #1 0,979739)
-    await page.locator("#saw-scenario").selectOption("sensitivity_5_no_a6_a7");
-    await page.getByRole("button", { name: "Hitung SAW Sekarang" }).click();
-    await expect(page.getByText("0,979739").first()).toBeVisible();
-
-    // Compute S2 using the 33-response AHP run
+    // Compute sensitivity_33_all using the 33-response AHP run
     const ahpSelect = page.locator("#saw-ahp");
     const allAhpOpt = await ahpSelect
       .locator("option", { hasText: "Semua" })
@@ -150,17 +154,51 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
       .getAttribute("value");
     expect(allAhpOpt).toBeTruthy();
     await ahpSelect.selectOption(allAhpOpt!);
-    await page.locator("#saw-scenario").selectOption("sensitivity_7_all");
+    await page.locator("#saw-scenario").selectOption("sensitivity_33_all");
     await page.getByRole("button", { name: "Hitung SAW Sekarang" }).click();
-    await expect(page.getByText("0,963921").first()).toBeVisible();
+    await expect(page.getByText(/Perhitungan SAW selesai/i)).toBeVisible();
 
-    // E06: Verify dataset v1 is now sealed; duplicating to draft v2 preserves immutability
+    // UAS Mandatory: Weight Sensitivity Workbench (/admin/perhitungan/sensitivitas)
+    await page.goto("/admin/perhitungan/sensitivitas");
+    await expect(page.getByTestId("sensitivity-active-winner")).toContainText("A33");
+    await expect(page.getByTestId("sensitivity-weight-sum")).toContainText("1,00000000");
+
+    // Clicking C2 +20% switches winner to A29 while preserving weight sum = 1
+    await page.getByTestId("sensitivity-cell-C2-20").click();
+    await expect(page.getByTestId("sensitivity-active-winner")).toContainText("A29");
+    await expect(page.getByTestId("sensitivity-weight-sum")).toContainText("1,00000000");
+
+    // Run custom server simulation (C6 -20% -> A29) without mutating persisted state
+    await page.locator("#sens-crit").selectOption("C6");
+    await page.locator("#sens-delta").fill("-20");
+    await page.getByTestId("sensitivity-custom-run").click();
+    await expect(page.getByTestId("sensitivity-active-winner")).toContainText("A29");
+    await expect(page.getByTestId("sensitivity-weight-sum")).toContainText("1,00000000");
+
+    // E06 + Dynamic Recalculation: Dataset v1 is sealed; duplicate to draft v2, edit A29 price -> recompute SAW
     await page.goto("/admin/alternatif");
     await expect(page.getByText("Dataset berstatus Sealed (Immutable)")).toBeVisible();
     await page.getByRole("button", { name: "Gandakan ke Draft" }).click();
     await expect(page.getByText(/Draft baru v2 berhasil dibuat/i)).toBeVisible();
 
-    // E08: Attempt final publish before completing human review -> blocked with explicit reasons
+    // Filter to A29 and lower price from 10.6M to 9.25M on draft v2
+    await page.getByLabel("Cari alternatif pada dataset aktif").fill("A29");
+    await page.getByRole("button", { name: "Ubah" }).first().click();
+    await page.locator("#f-price").fill("9250000");
+    await page.getByRole("button", { name: "Simpan Alternatif" }).click();
+    await expect(page.getByText(/Alternatif A29 berhasil disimpan/i)).toBeVisible();
+
+    // Run SAW on draft v2 -> A29 dynamically becomes #1 while v1 remains A33 #1!
+    await page.goto("/admin/perhitungan/saw");
+    const dsSelect = page.locator("#saw-dataset");
+    const v2Opt = await dsSelect.locator("option", { hasText: "v2" }).first().getAttribute("value");
+    expect(v2Opt).toBeTruthy();
+    await dsSelect.selectOption(v2Opt!);
+    await page.locator("#saw-scenario").selectOption("custom");
+    await page.getByRole("button", { name: "Hitung SAW Sekarang" }).click();
+    await expect(page.getByText(/Peringkat #1: A29/i)).toBeVisible();
+
+    // E08: Attempt final publish on primary_33_consistent before completing human review -> blocked
     await page.goto("/admin/riwayat");
     await page.locator("#pub-status").selectOption("final");
     await page.getByRole("button", { name: /Publikasikan sebagai FINAL/i }).click();
@@ -169,14 +207,14 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
       page.getByText(/Konfirmasi independensi & keaslian respons kuesioner tambahan/i),
     ).toBeVisible();
 
-    // E07: Publish S1 as provisional
+    // E07: Publish primary_33_consistent as provisional
     await page.locator("#pub-status").selectOption("provisional");
     await page
       .getByRole("button", { name: /Publikasikan sebagai PROVISIONAL/i })
       .click();
     await expect(page.getByText(/berhasil dipublikasikan dengan status PROVISIONAL/i)).toBeVisible();
 
-    // E09: Export XLSX via authenticated session
+    // E09: Export 8-sheet XLSX via authenticated session
     await page.goto("/admin/laporan");
     const exportHref = await page
       .getByRole("link", { name: "Unduh XLSX" })
@@ -198,15 +236,16 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
     await expect(page).toHaveURL(/\/admin\/login/);
   });
 
-  test("E07, E10 & E11: public website renders published provisional snapshot, filters without altering global rank, leaks zero raw rows, and passes 360px mobile overflow check", async ({
+  test("E07, E10 & E11: public website renders 33-alt provisional snapshot, brand filter keeps global rank intact, leaks zero raw rows, and passes 360px mobile overflow check", async ({
     page,
     request,
   }) => {
-    // Public API check: sanitized payload only, zero private survey leakage
+    // Public API check: sanitized payload with 33 alts + 37 sensitivity scenarios, zero private survey leakage
     const pubApi = await request.get("/api/public/recommendation");
     expect(pubApi.status()).toBe(200);
     const pubText = await pubApi.text();
-    expect(pubText).toContain("Lenovo IdeaPad Slim 3 14IAH8");
+    expect(pubText).toContain("Megabook T1 14");
+    expect(pubText).toContain("battery_wh");
     expect(pubText).not.toContain("bebas kak manut aja");
     expect(pubText).not.toContain("Sastra mesin");
     expect(pubText).not.toContain("46337.422259");
@@ -216,33 +255,37 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
     await expect(
       page.getByText(/Validasi respons\/sumber belum seluruhnya dikonfirmasi/i),
     ).toBeVisible();
-    await expect(page.getByText("0,953349").first()).toBeVisible();
+    await expect(page.getByText("0,834354").first()).toBeVisible();
+    await expect(page.getByText(/8 merek/i).first()).toBeVisible();
 
-    // E11: Public search/filter on /rekomendasi keeps global rank & score intact
+    // E11: Public brand filter on /rekomendasi keeps global rank & score intact
     await page.goto("/rekomendasi");
-    await expect(page.getByText("Filter tampilan, bukan perhitungan ulang")).toBeVisible();
-    await expect(page.getByTestId("ranking-row-A7")).toContainText("#1");
-    await expect(page.getByTestId("ranking-row-A2")).toContainText("#3");
+    await expect(page.getByText("Filter tampilan, peringkat global tetap")).toBeVisible();
+    await expect(page.getByTestId("ranking-row-A33")).toContainText("#1");
+    await expect(page.getByTestId("ranking-row-A29")).toContainText("#2");
 
-    await page.locator("#rec-ram").selectOption("8");
-    await expect(page.getByTestId("ranking-row-A7")).toHaveCount(0);
-    // A2 MUST retain global rank #3 and score 0,887581 when filtered!
-    await expect(page.getByTestId("ranking-row-A2")).toContainText("#3");
-    await expect(page.getByTestId("ranking-score-A2")).toContainText("0,887581");
+    await page.locator("#rec-brand").selectOption("Axioo");
+    await expect(page.getByTestId("ranking-row-A33")).toHaveCount(0);
+    // A29 MUST retain global rank #2 and score 0,830314 when filtered!
+    await expect(page.getByTestId("ranking-row-A29")).toContainText("#2");
+    await expect(page.getByTestId("ranking-score-A29")).toContainText("0,830314");
 
-    // Detail page with 4 sources
-    await page.goto("/laptop/A7");
-    await expect(page.getByText("Peringkat #1 dari 7")).toBeVisible();
+    // Detail page for A33 with Wh proxy note and 4 sources
+    await page.goto("/laptop/A33");
+    await expect(page.getByText("Peringkat #1 dari 33")).toBeVisible();
+    await expect(page.getByText("75 Wh").first()).toBeVisible();
     await expect(page.getByText("Sumber Harga Penawaran")).toBeVisible();
-    await expect(page.getByText("Sumber Durasi Baterai (Lenovo PSREF)")).toBeVisible();
+    await expect(page.getByText("Sumber Kapasitas Baterai (Wh)")).toBeVisible();
 
-    // Methodology page with matrices, sensitivity & DOIs
+    // Methodology page with matrices, interactive 37-scenario sensitivity & DOIs
     await page.goto("/metodologi");
     await expect(page.getByText("Matriks Perbandingan Gabungan (AIJ)")).toBeVisible();
-    await expect(page.getByText("Analisis Sensitivitas Lintas Skenario")).toBeVisible();
+    await expect(page.getByTestId("weight-sensitivity-explorer")).toBeVisible();
+    await page.getByTestId("sensitivity-cell-C2-20").click();
+    await expect(page.getByTestId("sensitivity-active-winner")).toContainText("A29");
     await expect(page.getByText("https://doi.org/10.1504/IJSSCI.2008.017590")).toBeVisible();
 
-    // Compare page (P1)
+    // Compare page
     await page.goto("/bandingkan");
     await expect(
       page.getByRole("heading", { name: "Bandingkan Alternatif Laptop" }),
@@ -253,7 +296,16 @@ test.describe.serial("LaptopMatch End-to-End Acceptance Suite (E01–E12)", () =
 
     // E10: 360px mobile responsive check — zero page-level horizontal overflow
     await page.setViewportSize({ width: 360, height: 800 });
-    for (const route of ["/", "/rekomendasi", "/laptop", "/laptop/A7", "/metodologi", "/tentang", "/admin/login"]) {
+    for (const route of [
+      "/",
+      "/rekomendasi",
+      "/laptop",
+      "/laptop/A33",
+      "/bandingkan",
+      "/metodologi",
+      "/tentang",
+      "/admin/login",
+    ]) {
       await page.goto(route);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,

@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   Scale,
+  SlidersHorizontal,
   Users,
   X,
 } from "lucide-react";
@@ -47,6 +48,11 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/admin/perhitungan/ahp", label: "Perhitungan AHP", icon: Scale },
       { href: "/admin/perhitungan/saw", label: "Perhitungan SAW", icon: Calculator },
+      {
+        href: "/admin/perhitungan/sensitivitas",
+        label: "Analisis Sensitivitas",
+        icon: SlidersHorizontal,
+      },
     ],
   },
   {

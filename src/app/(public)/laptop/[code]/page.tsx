@@ -9,7 +9,11 @@ import {
   formatEvidenceStatusLabel,
   formatStockStatusLabel,
 } from "@/components/ui/primitives";
-import { CRITERIA, type CriterionCode } from "@/lib/decision";
+import {
+  getCriteriaForMetric,
+  type C6MetricType,
+  type CriterionCode,
+} from "@/lib/decision";
 import {
   formatDateJakarta,
   formatDecimal,
@@ -21,14 +25,28 @@ import { getRepository } from "@/lib/repositories";
 
 export const dynamic = "force-dynamic";
 
-const SOURCE_LABELS: Record<string, string> = {
-  price: "Sumber Harga Penawaran",
-  spec: "Sumber Spesifikasi Produk",
-  benchmark: "Sumber Benchmark PassMark CPU Mark",
-  battery: "Sumber Durasi Baterai (Lenovo PSREF)",
-};
+function getSourceLabel(sourceType: string, c6Metric: C6MetricType): string {
+  switch (sourceType) {
+    case "price":
+      return "Sumber Harga Penawaran";
+    case "spec":
+      return "Sumber Spesifikasi Produk";
+    case "benchmark":
+      return "Sumber Benchmark PassMark CPU Mark";
+    case "battery":
+      return c6Metric === "battery_wh"
+        ? "Sumber Kapasitas Baterai (Wh)"
+        : "Sumber Durasi Baterai (Lenovo PSREF)";
+    default:
+      return sourceType;
+  }
+}
 
-function formatRawCriterionValue(code: CriterionCode, val: number): string {
+function formatRawCriterionValue(
+  code: CriterionCode,
+  val: number,
+  c6Metric: C6MetricType,
+): string {
   switch (code) {
     case "C1":
       return formatIdr(val);
@@ -40,6 +58,10 @@ function formatRawCriterionValue(code: CriterionCode, val: number): string {
     case "C5":
       return `${formatDecimal(val, 2)} kg`;
     case "C6":
+      if (c6Metric === "battery_wh") {
+        const digits = Number.isInteger(val) ? 0 : 2;
+        return `${formatDecimal(val, digits)} Wh`;
+      }
       return `${formatDecimal(val, 1)} jam`;
   }
 }
@@ -65,6 +87,8 @@ export default async function LaptopDetailPage({
     notFound();
   }
 
+  const c6Metric: C6MetricType = payload.c6Metric ?? payload.saw.c6Metric ?? "battery_wh";
+  const activeCriteria = getCriteriaForMetric(c6Metric);
   const stockBadge = formatStockStatusLabel(item.stockStatus);
   const evBadge = formatEvidenceStatusLabel(item.evidenceStatus);
 
@@ -99,6 +123,9 @@ export default async function LaptopDetailPage({
               </Badge>
               <span className="font-mono text-xs font-semibold text-[#1e293b]">
                 {item.code}
+              </span>
+              <span className="rounded bg-[#eff4fa] px-2 py-0.5 font-mono text-[11px] font-medium text-[#1e3a5f]">
+                {item.brand}
               </span>
               <span className="text-[#cbd5e1]">/</span>
               <span className="font-mono text-xs text-[#64748b]">SKU {item.sku}</span>
@@ -173,7 +200,7 @@ export default async function LaptopDetailPage({
 
         {/* Mobile per-criterion cards */}
         <div className="space-y-3 md:hidden">
-          {CRITERIA.map((c) => {
+          {activeCriteria.map((c) => {
             const raw = item.criteriaValues[c.code];
             const norm = item.normalizedValues[c.code];
             const weight = payload.ahp.weightsByCode[c.code];
@@ -201,7 +228,7 @@ export default async function LaptopDetailPage({
                       Nilai (xᵢⱼ)
                     </span>
                     <span className="font-mono font-semibold tabular-nums text-[#1e293b]">
-                      {formatRawCriterionValue(c.code, raw)}
+                      {formatRawCriterionValue(c.code, raw, c6Metric)}
                     </span>
                   </div>
                   <div className="rounded bg-[#f8fafc] p-2">
@@ -209,7 +236,7 @@ export default async function LaptopDetailPage({
                       Basis ({ext.extremaType})
                     </span>
                     <span className="font-mono tabular-nums text-[#475569]">
-                      {formatRawCriterionValue(c.code, ext.value)}
+                      {formatRawCriterionValue(c.code, ext.value, c6Metric)}
                     </span>
                   </div>
                 </div>
@@ -245,7 +272,7 @@ export default async function LaptopDetailPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e2e8f0]/75 tabular-nums">
-                {CRITERIA.map((c) => {
+                {activeCriteria.map((c) => {
                   const raw = item.criteriaValues[c.code];
                   const norm = item.normalizedValues[c.code];
                   const weight = payload.ahp.weightsByCode[c.code];
@@ -263,10 +290,10 @@ export default async function LaptopDetailPage({
                         {c.attribute}
                       </td>
                       <td className="px-3 py-3.5 text-right font-mono text-xs font-medium text-[#1e293b]">
-                        {formatRawCriterionValue(c.code, raw)}
+                        {formatRawCriterionValue(c.code, raw, c6Metric)}
                       </td>
                       <td className="px-3 py-3.5 text-right font-mono text-xs text-[#64748b]">
-                        {ext.extremaType} {formatRawCriterionValue(c.code, ext.value)}
+                        {ext.extremaType} {formatRawCriterionValue(c.code, ext.value, c6Metric)}
                       </td>
                       <td className="px-3 py-3.5 text-right">
                         <span className="font-mono text-xs text-[#475569]">
@@ -301,16 +328,29 @@ export default async function LaptopDetailPage({
       </section>
 
       <AlertBanner tone="neutral" title="Catatan Protokol Pengukuran Berat (C5) & Baterai (C6)">
-        Protokol baterai: <strong>{item.batteryProtocol}</strong>.{" "}
-        {item.batteryWh !== null && (
+        {c6Metric === "battery_wh" ? (
           <>
-            Kapasitas baterai <strong>{item.batteryWh} Wh</strong> dicatat hanya sebagai
-            metadata tambahan dan tidak menggantikan durasi pemutaran video lokal 1080p dalam
-            jam pada perhitungan SAW.
+            Kriteria C6 pada snapshot ini menggunakan{" "}
+            <strong>kapasitas baterai dalam satuan Watt-hour ({item.batteryWh} Wh)</strong>{" "}
+            sebagai indikator pendekatan (proksi) daya tahan baterai. Dengan asumsi konsumsi
+            daya yang setara, kapasitas energi yang lebih besar berpotensi memberikan durasi
+            penggunaan lebih panjang, namun{" "}
+            <strong>bukan jaminan durasi pemakaian aktual (jam)</strong> karena dipengaruhi
+            efisiensi prosesor, layar, dan beban kerja.
+          </>
+        ) : (
+          <>
+            Protokol baterai historis: <strong>{item.batteryProtocol}</strong>.{" "}
+            {item.batteryWh !== null && (
+              <>
+                Kapasitas baterai <strong>{item.batteryWh} Wh</strong> dicatat hanya sebagai
+                metadata tambahan pada dataset historis ini.
+              </>
+            )}
           </>
         )}{" "}
-        Nilai berat C5 berasal dari publikasi resmi pabrikan (sebagian merupakan berat mulai /
-        starting weight).
+        Nilai berat C5 berasal dari publikasi resmi pabrikan atau dokumentasi SKU (sebagian
+        merupakan berat mulai / starting weight).
       </AlertBanner>
 
       {/* 4 Provenance Dossier Cards */}
@@ -336,7 +376,7 @@ export default async function LaptopDetailPage({
                   <Badge tone="neutral">Tingkat: {src.evidenceLevel}</Badge>
                 </div>
                 <h3 className="text-sm font-semibold text-[#1e293b]">
-                  {SOURCE_LABELS[src.sourceType] ?? src.sourceType}
+                  {getSourceLabel(src.sourceType, c6Metric)}
                 </h3>
                 <p className="text-xs leading-relaxed text-[#475569]">{src.notes}</p>
               </div>

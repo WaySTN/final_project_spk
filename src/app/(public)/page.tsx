@@ -11,8 +11,9 @@ import {
   ScoreBar,
   formatStockStatusLabel,
 } from "@/components/ui/primitives";
-import { CRITERIA } from "@/lib/decision";
+import { getCriteriaForMetric } from "@/lib/decision";
 import {
+  formatBatteryValue,
   formatDateJakarta,
   formatDecimal,
   formatIdr,
@@ -28,12 +29,22 @@ export default async function HomePage() {
   const publication = await repo.getCurrentPublication();
   const payload = publication?.publicPayload ?? null;
 
+  const c6Metric = payload?.c6Metric ?? payload?.saw.c6Metric ?? "battery_wh";
+  const activeCriteria = getCriteriaForMetric(c6Metric);
+  const brands = payload
+    ? (payload.researchSummary.brands ??
+        Array.from(new Set(payload.saw.items.map((i) => i.brand))).sort((a, b) =>
+          a.localeCompare(b, "id"),
+        ))
+    : [];
+  const brandCount = payload?.researchSummary.brandCount ?? brands.length;
+
   const topThree = payload?.saw.items.slice(0, 3) ?? [];
   const topOne = topThree[0] ?? null;
   const topTwo = topThree[1] ?? null;
 
   const sortedWeights = payload
-    ? [...CRITERIA]
+    ? [...activeCriteria]
         .map((c) => ({
           criterion: c,
           weight: payload.ahp.weightsByCode[c.code],
@@ -127,14 +138,14 @@ export default async function HomePage() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <span className="font-mono text-[11px] text-[#64748b]">
-                            #01 · {topOne.code} · {topOne.cpuName}
+                            #01 · {topOne.code} · {topOne.brand} · {topOne.cpuName}
                           </span>
                           <p className="mt-0.5 truncate text-base font-semibold tracking-[-0.02em] text-[#1e293b]">
                             {topOne.model}
                           </p>
                           <p className="font-mono text-xs text-[#64748b] tabular-nums">
                             {formatIdr(topOne.priceIdr)} · {topOne.ramGb} GB RAM ·{" "}
-                            {formatDecimal(topOne.weightKg, 2)} kg
+                            {formatBatteryValue(topOne, c6Metric)}
                           </p>
                         </div>
                         <div className="shrink-0 text-right">
@@ -163,10 +174,12 @@ export default async function HomePage() {
                         </div>
                       )}
 
-                      {payload.saw.topMargin !== null && payload.saw.topMargin < 0.001 && (
+                      {payload.saw.topMargin !== null && payload.saw.topMargin < 0.01 && (
                         <p className="rounded-md border border-amber-200/80 bg-amber-50/80 px-2.5 py-1.5 font-mono text-[11px] text-amber-900 tabular-nums">
-                          Δ Margin #1 vs #2: {formatDecimal(payload.saw.topMargin, 6)} (sangat
-                          tipis — sensitif)
+                          Δ Margin #1 vs #2: {formatDecimal(payload.saw.topMargin, 6)}
+                          {payload.weightSensitivity
+                            ? ` · ${payload.weightSensitivity.baselineWinnerCode} stabil ${payload.weightSensitivity.baselineWinnerWinsCount}/${payload.weightSensitivity.perturbedScenarioCount} skenario`
+                            : " (tipis — sensitif)"}
                         </p>
                       )}
                     </div>
@@ -248,7 +261,7 @@ export default async function HomePage() {
             </p>
             <p className="mt-1 text-xs text-[#64748b]">
               {payload
-                ? `Audit ${formatDateJakarta(payload.observedAt)}`
+                ? `${brandCount} merek · Audit ${formatDateJakarta(payload.observedAt)}`
                 : "Menunggu publikasi"}
             </p>
           </div>
@@ -256,10 +269,10 @@ export default async function HomePage() {
           <div className="px-4 py-6 sm:px-6 sm:py-7">
             <p className="editorial-kicker">02 / Kriteria Tetap</p>
             <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[#1e293b] sm:text-4xl">
-              {CRITERIA.length}
+              {activeCriteria.length}
             </p>
             <p className="mt-1 text-xs text-[#64748b]">
-              2 Cost (C1, C5) · 4 Benefit
+              2 Cost (C1, C5) · 4 Benefit ({c6Metric === "battery_wh" ? "C6 Wh" : "C6 jam"})
             </p>
           </div>
 
@@ -316,22 +329,35 @@ export default async function HomePage() {
             <>
               <PublicationBanner payload={payload} />
 
-              {payload.saw.topMargin !== null && payload.saw.topMargin < 0.001 && (
-                <AlertBanner tone="neutral" title="Selisih peringkat #1 dan #2 sangat tipis">
-                  Skor <strong>{payload.saw.items[0]?.code}</strong> (
+              {payload.saw.topMargin !== null && payload.saw.topMargin < 0.01 && (
+                <AlertBanner tone="neutral" title="Selisih peringkat #1 dan #2 relatif tipis">
+                  Skor <strong>{payload.saw.items[0]?.code}</strong> ({payload.saw.items[0]?.brand},{" "}
                   <span className="font-mono">
                     {formatDecimal(payload.saw.items[0]?.score ?? 0, 6)}
                   </span>
-                  ) hanya unggul{" "}
+                  ) unggul{" "}
                   <strong className="font-mono">
                     {formatDecimal(payload.saw.topMargin, 6)}
                   </strong>{" "}
-                  dari <strong>{payload.saw.items[1]?.code}</strong> (
+                  dari <strong>{payload.saw.items[1]?.code}</strong> ({payload.saw.items[1]?.brand},{" "}
                   <span className="font-mono">
                     {formatDecimal(payload.saw.items[1]?.score ?? 0, 6)}
                   </span>
-                  ). Peringkat sensitif terhadap perubahan bobot maupun ketersediaan stok —
-                  tinjau analisis sensitivitas di halaman{" "}
+                  ).
+                  {payload.weightSensitivity && (
+                    <>
+                      {" "}
+                      Pada uji sensitivitas {payload.weightSensitivity.perturbedScenarioCount} skenario
+                      perubahan satu bobot (±5%, ±10%, ±20%),{" "}
+                      <strong>{payload.weightSensitivity.baselineWinnerCode}</strong> bertahan pada{" "}
+                      <strong>
+                        {payload.weightSensitivity.baselineWinnerWinsCount}/
+                        {payload.weightSensitivity.perturbedScenarioCount}
+                      </strong>{" "}
+                      skenario ({formatDecimal(payload.weightSensitivity.baselineWinnerStabilityPct, 2)}%).
+                    </>
+                  )}{" "}
+                  Tinjau simulasi interaktif di halaman{" "}
                   <Link href="/metodologi#sensitivitas" className="font-semibold text-[#1e3a5f] underline">
                     Metodologi
                   </Link>
@@ -364,7 +390,7 @@ export default async function HomePage() {
                             </span>
                           </div>
                           <span className="font-mono text-[11px] text-[#64748b]">
-                            SKU {item.sku}
+                            {item.brand}
                           </span>
                         </div>
 
@@ -414,10 +440,10 @@ export default async function HomePage() {
                           </div>
                           <div>
                             <dt className="font-mono text-[10px] uppercase text-[#64748b]">
-                              Video 1080p
+                              {c6Metric === "battery_wh" ? "Baterai (Wh)" : "Video 1080p"}
                             </dt>
                             <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
-                              {formatDecimal(item.batteryHours, 1)} jam
+                              {formatBatteryValue(item, c6Metric)}
                             </dd>
                           </div>
                         </dl>
@@ -448,7 +474,7 @@ export default async function HomePage() {
                     </h3>
                   </div>
                   <div className="divide-y divide-[#e2e8f0]/75">
-                    {CRITERIA.map((c) => {
+                    {activeCriteria.map((c) => {
                       const w = payload.ahp.weightsByCode[c.code];
                       return (
                         <div key={c.code} className="space-y-1.5 px-5 py-3">
@@ -533,13 +559,13 @@ export default async function HomePage() {
               },
               {
                 step: "03",
-                title: "Audit Sumber Terbatas",
-                desc: "Setiap kandidat pada rentang Rp9–11 juta wajib menyertakan 4 tautan bukti: harga penawaran, spesifikasi SKU, PassMark CPU Mark, dan durasi video 1080p PSREF.",
+                title: "Audit Sumber Lintas Merek",
+                desc: "Setiap kandidat pada rentang Rp9–11 juta wajib menyertakan 4 tautan bukti: harga penawaran, spesifikasi SKU, PassMark CPU Mark, dan baterai resmi (kapasitas Wh sebagai proksi daya tahan).",
               },
               {
                 step: "04",
-                title: "Normalisasi & Sensitivitas",
-                desc: "SAW menormalisasi cost (min/x) dan benefit (x/max) tanpa pembulatan perantara, lengkap dengan simulasi 33 respons serta 5 alternatif tanpa A6/A7.",
+                title: "Normalisasi & 37 Sensitivitas",
+                desc: "SAW menormalisasi cost (min/x) dan benefit (x/max) tanpa pembulatan perantara, dilengkapi 37 skenario sensitivitas perubahan satu bobot (±5%, ±10%, ±20%) dengan total bobot tetap 1.",
               },
             ].map((item) => (
               <div
@@ -569,11 +595,11 @@ export default async function HomePage() {
                 Transparansi Sumber &amp; Batasan Ruang Lingkup
               </div>
               <p className="text-xs leading-relaxed text-[#475569]">
-                Alternatif baseline terbatas pada tujuh konfigurasi Lenovo demi keseragaman
-                pengukuran daya tahan baterai (estimasi maksimum pemutaran video lokal 1080p
-                pada 150 nit dari Lenovo PSREF). Hasil merefleksikan preferensi panel
-                responden mahasiswa dan snapshot harga pada tanggal audit — bukan seluruh
-                pasar laptop Indonesia dan bukan jaminan stok real-time.
+                {payload
+                  ? c6Metric === "battery_wh"
+                    ? `Snapshot aktif mencakup ${payload.researchSummary.alternativeCount} alternatif dari ${brandCount} merek (${brands.join(", ")}) hasil seleksi dari ${payload.researchSummary.candidateCount ?? payload.researchSummary.alternativeCount} kandidat pada audit ${formatDateJakarta(payload.observedAt)}. Kriteria C6 menggunakan kapasitas energi baterai (Wh) sebagai proksi daya tahan baterai dengan asumsi konsumsi daya setara — bukan jaminan durasi penggunaan aktual, bukan seluruh pasar Indonesia, dan bukan jaminan stok real-time.`
+                    : `Snapshot historis ini mencakup ${payload.researchSummary.alternativeCount} alternatif pada audit ${formatDateJakarta(payload.observedAt)} dengan satuan baterai video lokal 1080p (jam). Hasil merefleksikan preferensi panel responden mahasiswa dan snapshot harga bertanggal.`
+                  : "Sistem mendukung snapshot audit lintas merek pada rentang Rp9.000.000–Rp11.000.000 berdasarkan preferensi panel mahasiswa (AHP) dan data spesifikasi bersumber (SAW)."}
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-3 text-xs font-medium">

@@ -68,3 +68,39 @@ export function isSafeHttpUrl(url: string | null | undefined): boolean {
     return false;
   }
 }
+
+/**
+ * Natural numeric comparator for non-contiguous alternative codes (A1, A2, ..., A10, ..., A42).
+ * Preserves original code numbers without lexicographical misordering (e.g. A10 before A2).
+ */
+export function compareAlternativeCodes(a: string, b: string): number {
+  const ma = /^([A-Za-z]+)(\d+)$/.exec(a.trim());
+  const mb = /^([A-Za-z]+)(\d+)$/.exec(b.trim());
+  if (ma && mb && ma[1]!.toUpperCase() === mb[1]!.toUpperCase()) {
+    return Number(ma[2]) - Number(mb[2]);
+  }
+  return a.localeCompare(b, "en", { numeric: true });
+}
+
+export function formatRelativeDeltaPercent(delta: number): string {
+  if (!Number.isFinite(delta) || Math.abs(delta) < 1e-12) return "Baseline";
+  const pct = Math.round(delta * 100);
+  return pct > 0 ? `+${pct}%` : `${pct}%`;
+}
+
+export function formatBatteryValue(
+  item: { batteryWh: number | null; batteryHours: number | null },
+  c6Metric: "battery_wh" | "battery_hours" = "battery_wh",
+): string {
+  if (c6Metric === "battery_hours") {
+    if (item.batteryHours !== null && Number.isFinite(item.batteryHours)) {
+      return `${formatDecimal(item.batteryHours, 1)} jam`;
+    }
+    return "-";
+  }
+  if (item.batteryWh !== null && Number.isFinite(item.batteryWh)) {
+    const digits = Number.isInteger(item.batteryWh) ? 0 : 2;
+    return `${formatDecimal(item.batteryWh, digits)} Wh`;
+  }
+  return "-";
+}

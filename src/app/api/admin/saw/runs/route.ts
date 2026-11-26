@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { apiError, apiSuccess, handleRouteError } from "@/lib/api/response";
 import { requireAdmin, verifyWriteOrigin } from "@/lib/auth/session";
-import { runSaw } from "@/lib/decision";
+import { runSaw, runWeightSensitivitySuite } from "@/lib/decision";
 import { isSafeHttpUrl } from "@/lib/formatting";
 import { getRepository } from "@/lib/repositories";
 
@@ -15,12 +15,14 @@ const createSawRunSchema = z.object({
   excludeCodes: z.array(z.string()).optional(),
   scenario: z
     .enum([
+      "primary_33_consistent",
+      "sensitivity_33_all",
       "primary_7_consistent",
       "sensitivity_7_all",
       "sensitivity_5_no_a6_a7",
       "custom",
     ])
-    .default("primary_7_consistent"),
+    .optional(),
 });
 
 export async function GET() {
@@ -56,7 +58,22 @@ export async function POST(request: Request) {
       return apiError(404, "DATASET_NOT_FOUND", "Dataset alternatif laptop tidak ditemukan.");
     }
 
-    if (!ahpDetail.run.passesCr && body.scenario === "primary_7_consistent") {
+    const c6Metric = dsDetail.dataset.c6Metric ?? "battery_hours";
+    const resolvedScenario =
+      body.scenario ??
+      (c6Metric === "battery_wh"
+        ? ahpDetail.run.mode === "all_eligible"
+          ? "sensitivity_33_all"
+          : "primary_33_consistent"
+        : ahpDetail.run.mode === "all_eligible"
+          ? "sensitivity_7_all"
+          : "primary_7_consistent");
+
+    if (
+      !ahpDetail.run.passesCr &&
+      (resolvedScenario === "primary_33_consistent" ||
+        resolvedScenario === "primary_7_consistent")
+    ) {
       return apiError(
         422,
         "AHP_NOT_CONSISTENT",
@@ -71,7 +88,7 @@ export async function POST(request: Request) {
       selected = selected.filter((a) => allowedSet.has(a.id));
     }
 
-    if (body.scenario === "sensitivity_5_no_a6_a7") {
+    if (resolvedScenario === "sensitivity_5_no_a6_a7") {
       selected = selected.filter((a) => a.code !== "A6" && a.code !== "A7");
     } else if (body.excludeCodes && body.excludeCodes.length > 0) {
       const excluded = new Set(body.excludeCodes.map((c) => c.toUpperCase()));
@@ -86,7 +103,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate all 4 sources exist for every selected alternative
+    // Validate all 4 sources and version-appropriate C6 metric exist for every selected alternative
     for (const alt of selected) {
       const validTypes = new Set(
         alt.sources.filter((s) => isSafeHttpUrl(s.url)).map((s) => s.sourceType),
@@ -101,6 +118,15 @@ export async function POST(request: Request) {
           422,
           "INCOMPLETE_SOURCES",
           `Alternatif ${alt.code} belum memiliki keempat sumber bukti yang valid (harga, spesifikasi, benchmark, baterai).`,
+        );
+      }
+
+      const c6Value = c6Metric === "battery_wh" ? alt.batteryWh : alt.batteryHours;
+      if (c6Value === null || !Number.isFinite(c6Value) || c6Value <= 0) {
+        return apiError(
+          422,
+          "MISSING_C6_VALUE",
+          `Alternatif ${alt.code} belum memiliki nilai kriteria C6 (${c6Metric === "battery_wh" ? "kapasitas baterai Wh" : "durasi baterai jam"}) yang valid.`,
         );
       }
     }
@@ -119,11 +145,25 @@ export async function POST(request: Request) {
           C3: alt.ramGb,
           C4: alt.ssdGb,
           C5: alt.weightKg,
-          C6: alt.batteryHours,
+          C6: (c6Metric === "battery_wh" ? alt.batteryWh : alt.batteryHours)!,
         },
       })),
-      scenario: body.scenario,
+      scenario: resolvedScenario,
+      c6Metric,
       ahpMode: ahpDetail.run.mode,
+    });
+
+    const weightSensitivity = runWeightSensitivitySuite({
+      baseWeights: ahpDetail.run.weights,
+      baselineItems: sawOutput.results.map((r) => ({
+        code: r.code,
+        model: r.model,
+        normalizedValues: r.normalizedValues,
+        weightedValues: r.weightedValues,
+        criteriaValues: r.criteriaValues,
+        score: r.score,
+        rank: r.rank,
+      })),
     });
 
     const savedRun = await repo.saveSawRun({
@@ -131,6 +171,8 @@ export async function POST(request: Request) {
         ahpRunId: ahpDetail.run.id,
         datasetId: dsDetail.dataset.id,
         scenario: sawOutput.scenario,
+        c6Metric: sawOutput.c6Metric,
+        c6Unit: sawOutput.c6Metric === "battery_hours" ? "jam" : "Wh",
         algorithmVersion: sawOutput.algorithmVersion,
         inputSnapshot: {
           ahpMode: ahpDetail.run.mode,
@@ -140,8 +182,11 @@ export async function POST(request: Request) {
           alternativeCodes: selected.map((a) => a.code),
           observedAt: dsDetail.dataset.observedAt,
           datasetVersion: dsDetail.dataset.version,
+          c6Metric: sawOutput.c6Metric,
+          c6Unit: sawOutput.c6Metric === "battery_hours" ? "jam" : "Wh",
         },
         normalizationExtrema: sawOutput.extrema,
+        weightSensitivity,
         topMargin: sawOutput.topMargin,
         warnings: sawOutput.warnings,
         caveats: sawOutput.caveats,
@@ -170,9 +215,11 @@ export async function POST(request: Request) {
         ahpRunId: savedRun.ahpRunId,
         datasetId: savedRun.datasetId,
         scenario: savedRun.scenario,
+        c6Metric: savedRun.c6Metric,
         alternativeCount: sawOutput.results.length,
         winnerCode: sawOutput.results[0]?.code ?? null,
         winnerScore: sawOutput.results[0]?.score ?? null,
+        sensitivityStabilityPct: weightSensitivity.baselineWinnerStabilityPct,
       },
     });
 
@@ -180,6 +227,7 @@ export async function POST(request: Request) {
       {
         run: savedRun,
         results: sawOutput.results,
+        weightSensitivity,
       },
       {},
       201,

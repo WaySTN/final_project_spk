@@ -25,7 +25,9 @@ export async function GET(
     // Gather matching sensitivity runs on same dataset if available
     const allSawRuns = await repo.listSawRuns();
     const s2Run = allSawRuns.find(
-      (r) => r.datasetId === detail.run.datasetId && r.scenario === "sensitivity_7_all",
+      (r) =>
+        r.datasetId === detail.run.datasetId &&
+        (r.scenario === "sensitivity_33_all" || r.scenario === "sensitivity_7_all"),
     );
     const s3Run = allSawRuns.find(
       (r) => r.datasetId === detail.run.datasetId && r.scenario === "sensitivity_5_no_a6_a7",

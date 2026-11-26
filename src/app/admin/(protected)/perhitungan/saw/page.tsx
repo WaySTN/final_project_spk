@@ -20,7 +20,8 @@ export default async function AdminSawPage() {
         </h1>
         <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#64748b]">
           Transparansi penuh dari matriks keputusan X, nilai ekstrem normalisasi, matriks R,
-          kontribusi berbobot setiap kriteria, hingga peringkat akhir pada skenario S1, S2, dan S3.
+          kontribusi berbobot setiap kriteria, hingga peringkat akhir pada dataset UAS 33
+          alternatif maupun dataset historis.
         </p>
       </div>
 

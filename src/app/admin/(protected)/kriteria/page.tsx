@@ -9,7 +9,11 @@ import {
   CardTitle,
   ScoreBar,
 } from "@/components/ui/primitives";
-import { ACADEMIC_REFERENCES, CRITERIA } from "@/lib/decision";
+import {
+  ACADEMIC_REFERENCES,
+  CRITERIA,
+  SAATY_SIMPLIFIED_SCALE,
+} from "@/lib/decision";
 import { formatDecimal, formatWeightPercent } from "@/lib/formatting";
 import { getRepository } from "@/lib/repositories";
 
@@ -38,10 +42,13 @@ export default async function AdminKriteriaPage() {
         </p>
       </div>
 
-      <AlertBanner tone="neutral" title="Aturan integritas kriteria">
-        Definisi operasional, urutan C1–C6, atribut cost/benefit, serta protokol pengukuran
-        C6 (video lokal 1080p @ 150 nit dalam satuan jam, bukan kapasitas Wh) bersifat tetap
-        untuk versi penelitian ini agar konsisten dengan instrumen kuesioner 15 pasangan.
+      <AlertBanner tone="neutral" title="Aturan integritas kriteria & proksi baterai C6 (UAS)">
+        Enam kriteria (C1–C6) memiliki atribut cost/benefit tetap agar selaras dengan instrumen
+        kuesioner 15 perbandingan berpasangan. Pada versi penelitian UAS (33 alternatif lintas 8
+        merek), kriteria C6 menggunakan <strong>kapasitas baterai (Wh)</strong> sebagai indikator
+        pendekatan daya tahan baterai dengan asumsi konsumsi daya setara — bukan jaminan jam
+        pemakaian aktual. Dataset historis v1 (7 alternatif Lenovo) tetap mempertahankan satuan
+        aslinya (jam video lokal 1080p PSREF).
       </AlertBanner>
 
       <Card>
@@ -198,6 +205,55 @@ export default async function AdminKriteriaPage() {
               </tbody>
             </table>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Complete AHP Scale Explanation (UAS Requirement) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Skala Pembobotan AHP Lengkap (Saaty Disederhanakan)</CardTitle>
+          <CardDescription>
+            Instrumen kuesioner menggunakan sembilan nilai perbandingan:{" "}
+            <span className="font-mono text-[#1e293b]">
+              &#123;1, 3, 5, 7, 9, 1/3, 1/5, 1/7, 1/9&#125;
+            </span>
+            . Nilai antara genap (<span className="font-mono">2, 4, 6, 8</span>) tidak digunakan
+            agar pilihan kategori tetap tegas bagi responden mahasiswa pada 15 perbandingan daring.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="overflow-x-auto rounded-lg border border-[#e2e8f0]">
+            <table className="w-full min-w-[600px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
+                  <th className="px-4 py-2.5">Nilai Utama</th>
+                  <th className="px-4 py-2.5">Nilai Kebalikan (Resiprokal)</th>
+                  <th className="px-4 py-2.5">Tingkat Kepentingan &amp; Makna Operasional</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]/80 text-xs">
+                {SAATY_SIMPLIFIED_SCALE.map((s) => (
+                  <tr key={s.token} className="hover:bg-[#f8fafc]/60">
+                    <td className="px-4 py-3 font-mono font-semibold text-[#1e3a5f]">
+                      {s.token}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-[#475569]">
+                      {s.reciprocal} ({s.token === "1" ? "1,0000" : formatDecimal(1 / Number(s.token), 4)})
+                    </td>
+                    <td className="px-4 py-3 text-[#1e293b]">{s.meaning}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs leading-relaxed text-[#64748b]">
+            <strong className="text-[#1e293b]">Catatan metode pengumpulan data:</strong> Berdasarkan
+            hasil konsultasi kelompok dengan dosen pengampu SPK, 33 data kuesioner mahasiswa yang
+            telah terkumpul (17 konsisten CR ≤ 0,10; 16 tidak konsisten) digunakan langsung untuk
+            pembobotan AHP tanpa wawancara tambahan. Pengujian konsistensi menggunakan Random Index{" "}
+            <span className="font-mono">RI = 1,24</span> untuk{" "}
+            <span className="font-mono">n = 6</span> kriteria.
+          </p>
         </CardContent>
       </Card>
     </div>

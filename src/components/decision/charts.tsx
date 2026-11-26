@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Bar,
   BarChart,
@@ -121,7 +122,11 @@ const CRITERION_SHADES: Record<CriterionCode, string> = {
 };
 
 export function SawContributionChart({ items }: { items: SawContributionItem[] }) {
-  const data = items.map((item) => ({
+  const [showAll, setShowAll] = useState(items.length <= 12);
+  const visibleItems = showAll ? items : items.slice(0, 12);
+  const chartHeight = Math.max(300, visibleItems.length * 28 + 64);
+
+  const data = visibleItems.map((item) => ({
     code: item.code,
     C1: Number(item.weightedValues.C1.toFixed(6)),
     C2: Number(item.weightedValues.C2.toFixed(6)),
@@ -132,63 +137,83 @@ export function SawContributionChart({ items }: { items: SawContributionItem[] }
   }));
 
   return (
-    <div
-      className="h-80 w-full"
-      role="img"
-      aria-label="Grafik kontribusi berbobot tiap kriteria terhadap nilai preferensi SAW laptop"
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          layout="vertical"
-          margin={{ top: 8, right: 16, left: 4, bottom: 8 }}
-        >
-          <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" horizontal={false} />
-          <XAxis
-            type="number"
-            domain={[0, 1]}
-            tick={{ fill: "#64748b", fontSize: 11, fontFamily: "var(--font-mono)" }}
-            axisLine={{ stroke: "#cbd5e1" }}
-            tickLine={false}
-          />
-          <YAxis
-            type="category"
-            dataKey="code"
-            width={36}
-            tick={{
-              fill: "#1e293b",
-              fontSize: 12,
-              fontWeight: 600,
-              fontFamily: "var(--font-mono)",
-            }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip
-            formatter={(val) => formatDecimal(Number(val ?? 0), 6)}
-            cursor={{ fill: "#f8fafc" }}
-            contentStyle={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #cbd5e1",
-              borderRadius: "6px",
-              fontSize: "12px",
-              fontFamily: "var(--font-mono)",
-              boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
-            }}
-          />
-          <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-          {CRITERIA.map((c) => (
-            <Bar
-              key={c.code}
-              dataKey={c.code}
-              name={`${c.code} ${c.shortName}`}
-              stackId="saw"
-              fill={CRITERION_SHADES[c.code]}
-              barSize={22}
+    <div className="space-y-3">
+      {items.length > 12 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="font-mono text-[11px] text-[#64748b]">
+            Menampilkan {visibleItems.length} dari {items.length} alternatif
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowAll((prev) => !prev)}
+            className="inline-flex h-8 items-center rounded-md border border-[#cbd5e1] bg-[#f8fafc] px-3 font-mono text-[11px] font-medium text-[#1e3a5f] transition-colors hover:border-[#1e3a5f] hover:bg-[#eff4fa] cursor-pointer"
+          >
+            {showAll
+              ? "Ringkas 12 Peringkat Teratas"
+              : `Tampilkan Seluruh ${items.length} Alternatif`}
+          </button>
+        </div>
+      )}
+
+      <div
+        style={{ height: `${chartHeight}px` }}
+        className="w-full"
+        role="img"
+        aria-label="Grafik kontribusi berbobot tiap kriteria terhadap nilai preferensi SAW laptop"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{ top: 8, right: 16, left: 4, bottom: 8 }}
+          >
+            <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" horizontal={false} />
+            <XAxis
+              type="number"
+              domain={[0, 1]}
+              tick={{ fill: "#64748b", fontSize: 11, fontFamily: "var(--font-mono)" }}
+              axisLine={{ stroke: "#cbd5e1" }}
+              tickLine={false}
             />
-          ))}
-        </BarChart>
-      </ResponsiveContainer>
+            <YAxis
+              type="category"
+              dataKey="code"
+              width={40}
+              tick={{
+                fill: "#1e293b",
+                fontSize: 11,
+                fontWeight: 600,
+                fontFamily: "var(--font-mono)",
+              }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip
+              formatter={(val) => formatDecimal(Number(val ?? 0), 6)}
+              cursor={{ fill: "#f8fafc" }}
+              contentStyle={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #cbd5e1",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontFamily: "var(--font-mono)",
+                boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
+              }}
+            />
+            <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
+            {CRITERIA.map((c) => (
+              <Bar
+                key={c.code}
+                dataKey={c.code}
+                name={`${c.code} ${c.shortName}`}
+                stackId="saw"
+                fill={CRITERION_SHADES[c.code]}
+                barSize={18}
+              />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

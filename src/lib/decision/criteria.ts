@@ -1,10 +1,11 @@
 import type {
   AcademicReference,
+  C6MetricType,
   CriterionCode,
   CriterionDefinition,
 } from "./types";
 
-export const ALGORITHM_VERSION = "ahp-saw-v1.0.0";
+export const ALGORITHM_VERSION = "ahp-saw-v2.0.0";
 export const CRITERIA_COUNT = 6;
 export const AHP_RI_6 = 1.24;
 export const AHP_CR_THRESHOLD = 0.1;
@@ -16,7 +17,12 @@ export const SAW_TIE_TOLERANCE = 1e-12;
 export const RESEARCH_TARGET_CONSISTENT_COUNT = 12;
 export const PRICE_MIN_IDR = 9_000_000;
 export const PRICE_MAX_IDR = 11_000_000;
-export const RESEARCH_AUDIT_DATE = "2026-11-25";
+export const RESEARCH_AUDIT_DATE = "2026-11-26";
+export const LEGACY_AUDIT_DATE = "2026-11-25";
+
+export const DEFAULT_SENSITIVITY_DELTAS: readonly number[] = [
+  -0.2, -0.1, -0.05, 0.05, 0.1, 0.2,
+] as const;
 
 export const CRITERION_CODES: readonly CriterionCode[] = [
   "C1",
@@ -108,10 +114,10 @@ export const ACADEMIC_REFERENCES: readonly AcademicReference[] = [
   {
     id: "ardiansyah-2025",
     authors: "Ardiansyah, M., Adriansyah, M., & Wijaya, T. M. P.",
-    year: 2025,
+    year: 2024,
     title:
       "Sistem penunjang keputusan pemilihan laptop terbaik menggunakan metode SAW (Simple Additive Weighting)",
-    journal: "Journal of Technology and System Information, 2(1), 1–13",
+    journal: "Journal of Technology and System Information, 2(1), artikel 13 (edisi Januari 2025)",
     doi: "https://doi.org/10.47134/jtsi.v2i1.3398",
     usageContext:
       "Rujukan penerapan metode Simple Additive Weighting (SAW) pada pemeringkatan alternatif laptop.",
@@ -125,11 +131,11 @@ export const ACADEMIC_REFERENCES: readonly AcademicReference[] = [
     journal: "INFORMS Transactions on Education, 14(3), 109–119",
     doi: "https://doi.org/10.1287/ited.2013.0124",
     usageContext:
-      "Landasan transparansi aturan normalisasi SAW dan peringatan bahwa perubahan himpunan alternatif mengubah basis normalisasi.",
+      "Landasan transparansi aturan normalisasi SAW dan peringatan bahwa pemilihan normalisasi atau perubahan himpunan alternatif memengaruhi skor.",
   },
 ] as const;
 
-export const CRITERIA: readonly CriterionDefinition[] = [
+const COMMON_CRITERIA_C1_TO_C5: readonly CriterionDefinition[] = [
   {
     code: "C1",
     ordinal: 1,
@@ -139,8 +145,10 @@ export const CRITERIA: readonly CriterionDefinition[] = [
     attribute: "cost",
     definition:
       "Harga penawaran ritel laptop dalam rentang anggaran penelitian Rp9.000.000–Rp11.000.000 inklusif. Semakin rendah harga, semakin menguntungkan.",
-    measurementSource: "Penawaran ritel terpilih pada snapshot audit 25 November 2026 (bukan harga real-time dan tidak termasuk ongkos kirim).",
-    notes: "Satu penawaran dicatat per konfigurasi SKU; bukan klaim harga termurah seluruh pasar.",
+    measurementSource:
+      "Penawaran ritel terpilih pada snapshot audit 26 November 2026 (bukan harga real-time dan tidak termasuk ongkos kirim).",
+    notes:
+      "Satu penawaran terdokumentasi dicatat per konfigurasi SKU; bukan klaim harga termurah seluruh pasar maupun jaminan stok.",
     referenceIds: ["ardhana-indriyanti-2025", "mukharir-wardoyo-2021", "ardiansyah-2025"],
   },
   {
@@ -151,8 +159,9 @@ export const CRITERIA: readonly CriterionDefinition[] = [
     unit: "PassMark CPU Mark",
     attribute: "benefit",
     definition:
-      "Skor benchmark sintetis PassMark CPU Mark untuk mengukur kemampuan komputasi prosesor secara objektif. Semakin tinggi skor, semakin baik.",
-    measurementSource: "PassMark Software (cpubenchmark.net) pada tanggal audit 25 November 2026.",
+      "Skor benchmark sintetis PassMark CPU Mark untuk mengukur kemampuan komputasi model prosesor secara objektif. Semakin tinggi skor, semakin baik.",
+    measurementSource:
+      "PassMark Software (cpubenchmark.net) skor model prosesor pada audit 26 November 2026 (bukan uji unit laptop).",
     notes: "Benchmark standar lintas prosesor Intel dan AMD.",
     referenceIds: ["ardhana-indriyanti-2025", "mukharir-wardoyo-2021"],
   },
@@ -165,7 +174,8 @@ export const CRITERIA: readonly CriterionDefinition[] = [
     attribute: "benefit",
     definition:
       "Kapasitas memori RAM terpasang bawaan pabrikan pada konfigurasi SKU yang ditawarkan. Semakin besar kapasitas RAM, semakin baik untuk multitasking dan pemrograman.",
-    measurementSource: "Spesifikasi resmi Lenovo PSREF / dokumentasi penjual sesuai kode SKU.",
+    measurementSource:
+      "Spesifikasi resmi pabrikan / dokumentasi penjual sesuai konfigurasi SKU lintas merek.",
     notes: "Menggunakan RAM bawaan terpasang, bukan kapasitas maksimum upgrade.",
     referenceIds: ["ardhana-indriyanti-2025", "ardiansyah-2025"],
   },
@@ -178,8 +188,10 @@ export const CRITERIA: readonly CriterionDefinition[] = [
     attribute: "benefit",
     definition:
       "Kapasitas penyimpanan Solid State Drive (SSD) terpasang bawaan pada konfigurasi SKU. Semakin besar penyimpanan, semakin baik.",
-    measurementSource: "Spesifikasi resmi Lenovo PSREF / dokumentasi penjual sesuai kode SKU.",
-    notes: "Pada 7 alternatif baseline seluruhnya berkapasitas 512 GB sehingga menghasilkan nilai normalisasi 1,000000 dan kontribusi seragam; kriteria tetap dipertahankan agar konsisten dengan instrumen AHP.",
+    measurementSource:
+      "Spesifikasi resmi pabrikan / dokumentasi penjual sesuai konfigurasi SKU (1 TB dicatat sebagai 1.000 GB desimal pada A41).",
+    notes:
+      "Pada dataset revisi 33 alternatif kapasitas SSD bervariasi (256 GB, 512 GB, dan 1.000 GB).",
     referenceIds: ["ardhana-indriyanti-2025", "ardiansyah-2025"],
   },
   {
@@ -191,23 +203,49 @@ export const CRITERIA: readonly CriterionDefinition[] = [
     attribute: "cost",
     definition:
       "Bobot fisik laptop sesuai publikasi resmi pabrikan untuk mendukung mobilitas mahasiswa di kampus. Semakin ringan, semakin menguntungkan.",
-    measurementSource: "Dokumentasi Lenovo PSREF (sebagian merupakan berat mulai / starting weight).",
+    measurementSource:
+      "Publikasi spesifikasi resmi pabrikan / listing SKU (sebagian merupakan berat mulai / starting weight).",
     notes: "Bukan hasil penimbangan aktual unit fisik oleh peneliti.",
     referenceIds: ["ardhana-indriyanti-2025"],
   },
-  {
-    code: "C6",
-    ordinal: 6,
-    name: "Daya tahan baterai",
-    shortName: "Baterai",
-    unit: "jam",
-    attribute: "benefit",
-    definition:
-      "Estimasi maksimum durasi pemutaran video lokal 1080p pada kecerahan layar 150 nit berdasarkan dokumentasi resmi Lenovo PSREF. Semakin lama durasi, semakin baik.",
-    measurementSource: "Lenovo PSREF tingkat seri dan kapasitas baterai (Wh disimpan sebagai metadata tambahan, bukan nilai penilaian).",
-    notes: "Bukan kapasitas Wh, bukan MobileMark, dan bukan klaim durasi pemakaian kuliah aktual sehari-hari.",
-    referenceIds: ["ardhana-indriyanti-2025"],
-  },
+] as const;
+
+export const C6_BATTERY_WH_DEFINITION: CriterionDefinition = {
+  code: "C6",
+  ordinal: 6,
+  name: "Kapasitas baterai",
+  shortName: "Baterai",
+  unit: "Wh",
+  attribute: "benefit",
+  definition:
+    "Kapasitas energi baterai dalam satuan Watt-hour (Wh) sebagai indikator pendekatan (proksi) daya tahan baterai. Dengan asumsi konsumsi daya yang setara, kapasitas lebih besar berpotensi memberikan durasi penggunaan lebih panjang.",
+  measurementSource:
+    "Spesifikasi resmi pabrikan / dokumentasi SKU lintas 8 merek (snapshot audit 26 November 2026).",
+  notes:
+    "Kapasitas Wh bukan ukuran langsung durasi pemakaian aktual karena efisiensi prosesor, layar, dan beban kerja berbeda. Bobot C6 tetap berasal dari preferensi daya tahan baterai pada instrumen kuesioner awal.",
+  referenceIds: ["ardhana-indriyanti-2025"],
+};
+
+export const C6_BATTERY_HOURS_LEGACY_DEFINITION: CriterionDefinition = {
+  code: "C6",
+  ordinal: 6,
+  name: "Daya tahan baterai",
+  shortName: "Baterai",
+  unit: "jam",
+  attribute: "benefit",
+  definition:
+    "Estimasi maksimum durasi pemutaran video lokal 1080p pada kecerahan layar 150 nit berdasarkan dokumentasi resmi Lenovo PSREF (dataset historis 7 alternatif).",
+  measurementSource:
+    "Lenovo PSREF tingkat seri dan kapasitas baterai (Wh disimpan sebagai metadata tambahan pada dataset historis).",
+  notes:
+    "Definisi historis khusus dataset v1 (7 alternatif Lenovo, 25 November 2026); bukan klaim durasi pemakaian kuliah aktual.",
+  referenceIds: ["ardhana-indriyanti-2025"],
+};
+
+/** Default criteria definition matching the latest UAS 33-alternative specification (C6 = Wh). */
+export const CRITERIA: readonly CriterionDefinition[] = [
+  ...COMMON_CRITERIA_C1_TO_C5,
+  C6_BATTERY_WH_DEFINITION,
 ] as const;
 
 export const CRITERIA_BY_CODE: Readonly<Record<CriterionCode, CriterionDefinition>> =
@@ -218,3 +256,17 @@ export const CRITERIA_BY_CODE: Readonly<Record<CriterionCode, CriterionDefinitio
     },
     {} as Record<CriterionCode, CriterionDefinition>,
   );
+
+/** Returns version-accurate criteria metadata (Wh for UAS 33-alt datasets, jam for historical 7-alt datasets). */
+export function getCriteriaForMetric(
+  c6Metric: C6MetricType = "battery_wh",
+): readonly CriterionDefinition[] {
+  if (c6Metric === "battery_hours") {
+    return [...COMMON_CRITERIA_C1_TO_C5, C6_BATTERY_HOURS_LEGACY_DEFINITION];
+  }
+  return CRITERIA;
+}
+
+export function getC6UnitForMetric(c6Metric: C6MetricType): "Wh" | "jam" {
+  return c6Metric === "battery_hours" ? "jam" : "Wh";
+}

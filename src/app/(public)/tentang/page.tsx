@@ -60,10 +60,10 @@ export default function TentangPage() {
               Yang Dilakukan Sistem
             </h2>
             <ul className="list-disc pl-4 space-y-2 text-xs sm:text-[13px] leading-relaxed text-[#475569]">
-              <li>Membaca data kuesioner asli 15 pasangan perbandingan dan menguji CR tiap responden.</li>
+              <li>Membaca data kuesioner asli 15 pasangan perbandingan dan menguji CR tiap responden (CR ≤ 0,10).</li>
               <li>Mengagregasi matriks 6×6 via rata-rata geometrik (AIJ) dan menghitung bobot eigenvector power iteration.</li>
-              <li>Menormalisasi 6 kriteria SAW (cost/benefit), menampilkan kontribusi tiap sel, dan menjalankan sensitivitas S1/S2/S3.</li>
-              <li>Menyediakan 4 tautan bukti sumber per kandidat dan ekspor laporan audit Excel 7-sheet.</li>
+              <li>Menormalisasi 6 kriteria SAW (cost/benefit) pada 33 alternatif lintas 8 merek (C6 kapasitas Wh sebagai proksi daya tahan baterai) serta menjalankan 37 skenario analisis sensitivitas bobot.</li>
+              <li>Menyediakan 4 tautan bukti sumber per kandidat, arsip 9 kandidat dikeluarkan, dan ekspor laporan audit Excel 8-sheet.</li>
             </ul>
           </div>
 

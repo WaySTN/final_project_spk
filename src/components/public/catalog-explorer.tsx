@@ -11,30 +11,63 @@ import {
   Select,
   formatStockStatusLabel,
 } from "@/components/ui/primitives";
-import { formatDecimal, formatIdr, formatInteger } from "@/lib/formatting";
+import {
+  formatBatteryValue,
+  formatDecimal,
+  formatIdr,
+  formatInteger,
+} from "@/lib/formatting";
+import type { C6MetricType } from "@/lib/decision";
 import type { PublicLaptopRankingItem } from "@/lib/repositories/types";
 
-export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] }) {
+export function CatalogExplorer({
+  items,
+  c6Metric = "battery_wh",
+}: {
+  items: PublicLaptopRankingItem[];
+  c6Metric?: C6MetricType;
+}) {
   const [query, setQuery] = useState("");
+  const [brand, setBrand] = useState("all");
   const [ram, setRam] = useState("all");
+  const [ssd, setSsd] = useState("all");
   const [maxPrice, setMaxPrice] = useState("all");
+
+  const brands = useMemo(
+    () =>
+      Array.from(new Set(items.map((i) => i.brand))).sort((a, b) =>
+        a.localeCompare(b, "id"),
+      ),
+    [items],
+  );
+  const ramOptions = useMemo(
+    () => Array.from(new Set(items.map((i) => i.ramGb))).sort((a, b) => a - b),
+    [items],
+  );
+  const ssdOptions = useMemo(
+    () => Array.from(new Set(items.map((i) => i.ssdGb))).sort((a, b) => a - b),
+    [items],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return items.filter((item) => {
       if (q) {
-        const hay = `${item.code} ${item.model} ${item.sku} ${item.cpuName}`.toLowerCase();
+        const hay =
+          `${item.code} ${item.brand} ${item.model} ${item.sku} ${item.cpuName} ${item.seller}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
+      if (brand !== "all" && item.brand !== brand) return false;
       if (ram !== "all" && item.ramGb !== Number(ram)) return false;
+      if (ssd !== "all" && item.ssdGb !== Number(ssd)) return false;
       if (maxPrice !== "all" && item.priceIdr > Number(maxPrice)) return false;
       return true;
     });
-  }, [items, query, ram, maxPrice]);
+  }, [items, query, brand, ram, ssd, maxPrice]);
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4 sm:p-5 grid gap-3.5 sm:grid-cols-3">
+      <div className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4 sm:p-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div>
           <Label htmlFor="cat-search">Cari model, SKU, atau prosesor</Label>
           <div className="relative">
@@ -46,10 +79,21 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
               id="cat-search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Mis. 83EQ0077ID, V14, Core i5..."
+              placeholder="Mis. A33, TECNO, Axioo, Core i5..."
               className="pl-9"
             />
           </div>
+        </div>
+        <div>
+          <Label htmlFor="cat-brand">Merek ({brands.length})</Label>
+          <Select id="cat-brand" value={brand} onChange={(e) => setBrand(e.target.value)}>
+            <option value="all">Semua Merek</option>
+            {brands.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </Select>
         </div>
         <div>
           <Label htmlFor="cat-price">Filter harga maksimum</Label>
@@ -69,8 +113,22 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
           <Label htmlFor="cat-ram">Kapasitas RAM</Label>
           <Select id="cat-ram" value={ram} onChange={(e) => setRam(e.target.value)}>
             <option value="all">Semua RAM</option>
-            <option value="8">8 GB</option>
-            <option value="16">16 GB</option>
+            {ramOptions.map((gb) => (
+              <option key={gb} value={String(gb)}>
+                {gb} GB
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="cat-ssd">Kapasitas SSD</Label>
+          <Select id="cat-ssd" value={ssd} onChange={(e) => setSsd(e.target.value)}>
+            <option value="all">Semua SSD</option>
+            {ssdOptions.map((gb) => (
+              <option key={gb} value={String(gb)}>
+                {gb === 1000 ? "1.000 GB (1 TB)" : `${gb} GB`}
+              </option>
+            ))}
           </Select>
         </div>
       </div>
@@ -98,7 +156,9 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
                     <div className="flex items-center gap-2 font-mono text-xs">
                       <span className="font-semibold text-[#1e293b]">{item.code}</span>
                       <span className="text-[#cbd5e1]">/</span>
-                      <span className="text-[11px] text-[#64748b]">{item.sku}</span>
+                      <span className="text-[11px] font-medium text-[#1e3a5f]">
+                        {item.brand}
+                      </span>
                     </div>
                     <Badge tone={item.rank === 1 ? "dark" : "neutral"}>
                       Rank #{item.rank}
@@ -120,7 +180,7 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
                         <span className="text-lg font-semibold tracking-[-0.02em] tabular-nums text-[#1e293b]">
                           {formatIdr(item.priceIdr)}
                         </span>
-                        <span className="font-mono text-xs font-semibold tabular-nums text-[#475569]">
+                        <span className="font-mono text-xs font-semibold tabular-nums text-[#1e3a5f]">
                           SAW {formatDecimal(item.score, 6)}
                         </span>
                       </div>
@@ -154,10 +214,10 @@ export function CatalogExplorer({ items }: { items: PublicLaptopRankingItem[] })
                       </div>
                       <div className="py-1.5 pl-2">
                         <dt className="font-mono text-[10px] uppercase text-[#64748b]">
-                          C6 Video 1080p
+                          {c6Metric === "battery_wh" ? "C6 Baterai (Wh)" : "C6 Video 1080p"}
                         </dt>
                         <dd className="mt-0.5 font-mono font-medium tabular-nums text-[#1e293b]">
-                          {formatDecimal(item.batteryHours, 1)} jam
+                          {formatBatteryValue(item, c6Metric)}
                         </dd>
                       </div>
                     </dl>

@@ -18,8 +18,9 @@ export default async function AdminAlternatifPage() {
           Alternatif Laptop &amp; Audit Sumber Bukti
         </h1>
         <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#64748b]">
-          Kelola versi dataset laptop pada kisaran harga Rp9.000.000–Rp11.000.000 lengkap
-          dengan tautan harga, spesifikasi, benchmark CPU Mark, dan durasi baterai PSREF.
+          Kelola versi dataset laptop pada kisaran harga Rp9.000.000–Rp11.000.000 lintas merek
+          lengkap dengan 4 tautan bukti sumber, definisi baterai C6 (Wh / jam), serta arsip
+          kandidat yang dikeluarkan.
         </p>
       </div>
 

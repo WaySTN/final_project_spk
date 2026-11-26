@@ -40,7 +40,11 @@ export default async function BandingkanPage({
       ) : (
         <>
           <PublicationBanner payload={payload} />
-          <CompareWorkbench items={payload.saw.items} initialCodes={initialCodes} />
+          <CompareWorkbench
+            items={payload.saw.items}
+            initialCodes={initialCodes}
+            c6Metric={payload.c6Metric ?? payload.saw.c6Metric ?? "battery_wh"}
+          />
         </>
       )}
     </div>

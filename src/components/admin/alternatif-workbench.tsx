@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -8,6 +9,7 @@ import {
   type FormEvent,
 } from "react";
 import {
+  Archive,
   CheckCircle2,
   Copy,
   Edit3,
@@ -16,6 +18,7 @@ import {
   Lock,
   Plus,
   Power,
+  Search,
 } from "lucide-react";
 import {
   AlertBanner,
@@ -35,8 +38,19 @@ import {
   formatEvidenceStatusLabel,
   formatStockStatusLabel,
 } from "@/components/ui/primitives";
-import { PRICE_MAX_IDR, PRICE_MIN_IDR, RESEARCH_AUDIT_DATE } from "@/lib/decision";
-import { formatDateJakarta, formatIdr, formatInteger } from "@/lib/formatting";
+import {
+  PRICE_MAX_IDR,
+  PRICE_MIN_IDR,
+  RESEARCH_AUDIT_DATE,
+  type C6MetricType,
+} from "@/lib/decision";
+import {
+  formatBatteryValue,
+  formatDateJakarta,
+  formatDecimal,
+  formatIdr,
+  formatInteger,
+} from "@/lib/formatting";
 import type {
   EvidenceLevel,
   EvidenceStatus,
@@ -95,7 +109,7 @@ interface DraftFormState {
   specEvidenceLevel: EvidenceLevel;
 }
 
-function emptyDraftForm(): DraftFormState {
+function emptyDraftForm(c6Metric: C6MetricType = "battery_wh"): DraftFormState {
   return {
     code: "",
     brand: "Lenovo",
@@ -104,17 +118,19 @@ function emptyDraftForm(): DraftFormState {
     cpuName: "",
     priceIdr: "9500000",
     cpuMark: "",
-    ramGb: "8",
+    ramGb: "16",
     ssdGb: "512",
     weightKg: "1.40",
-    batteryHours: "12",
-    batteryWh: "47",
+    batteryHours: c6Metric === "battery_hours" ? "12" : "",
+    batteryWh: "50",
     seller: "",
     active: true,
     stockStatus: "unconfirmed",
     evidenceStatus: "provisional_unconfirmed",
     batteryProtocol:
-      "Lenovo PSREF — pemutaran video lokal 1080p @ 150 nit (tingkat seri/kapasitas)",
+      c6Metric === "battery_wh"
+        ? "Kapasitas energi baterai (Wh) sebagai proksi daya tahan baterai — asumsi konsumsi daya setara, bukan durasi pemakaian aktual."
+        : "Lenovo PSREF — pemutaran video lokal 1080p @ 150 nit (tingkat seri/kapasitas)",
     evidenceNotes: "",
     urlPrice: "",
     urlSpec: "",
@@ -138,7 +154,7 @@ function recordToForm(alt: AlternativeRecord): DraftFormState {
     ramGb: String(alt.ramGb),
     ssdGb: String(alt.ssdGb),
     weightKg: String(alt.weightKg),
-    batteryHours: String(alt.batteryHours),
+    batteryHours: alt.batteryHours !== null ? String(alt.batteryHours) : "",
     batteryWh: alt.batteryWh !== null ? String(alt.batteryWh) : "",
     seller: alt.seller,
     active: alt.active,
@@ -184,13 +200,41 @@ export function AlternatifWorkbench({
 
   // Slide-over CRUD drawer state
   const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState<DraftFormState>(emptyDraftForm());
+  const [form, setForm] = useState<DraftFormState>(
+    emptyDraftForm(initialSelectedDataset?.c6Metric ?? "battery_wh"),
+  );
   const [savingForm, setSavingForm] = useState(false);
+
+  // Table filter & excluded archive toggle
+  const [searchQuery, setSearchQuery] = useState("");
+  const [brandFilter, setBrandFilter] = useState("all");
+  const [showExcluded, setShowExcluded] = useState(false);
 
   const [feedback, setFeedback] = useState<{
     tone: "success" | "error" | "warning";
     message: string;
   } | null>(null);
+
+  const activeC6Metric: C6MetricType = selectedDataset?.c6Metric ?? "battery_wh";
+  const brands = useMemo(
+    () =>
+      Array.from(new Set(alternatives.map((a) => a.brand))).sort((a, b) =>
+        a.localeCompare(b, "id"),
+      ),
+    [alternatives],
+  );
+  const filteredAlternatives = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return alternatives.filter((alt) => {
+      if (brandFilter !== "all" && alt.brand !== brandFilter) return false;
+      if (q) {
+        const hay =
+          `${alt.code} ${alt.brand} ${alt.model} ${alt.sku} ${alt.cpuName} ${alt.seller}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [alternatives, searchQuery, brandFilter]);
 
   async function refreshDataset(targetId?: string) {
     setLoading(true);
@@ -369,7 +413,7 @@ export function AlternatifWorkbench({
       ramGb: Number(form.ramGb),
       ssdGb: Number(form.ssdGb),
       weightKg: Number(form.weightKg),
-      batteryHours: Number(form.batteryHours),
+      batteryHours: form.batteryHours.trim() ? Number(form.batteryHours) : null,
       batteryWh: form.batteryWh.trim() ? Number(form.batteryWh) : null,
       seller: form.seller.trim(),
       active: form.active,
@@ -449,29 +493,37 @@ export function AlternatifWorkbench({
         <AlertBanner tone={feedback.tone}>{feedback.message}</AlertBanner>
       )}
 
-      {/* Import Workbook Card */}
+      {/* Import Workbook / JSON Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Impor Dataset Alternatif Laptop (Workbook Audit Revisi / CSV)</CardTitle>
+          <CardTitle>Impor Dataset Alternatif Laptop (JSON 33 Alternatif / Workbook XLSX / CSV)</CardTitle>
           <CardDescription>
-            Membaca sheet{" "}
+            Mendukung{" "}
+            <code className="rounded bg-[#f1f5f9] px-1 py-0.5 font-mono text-[11px] text-[#1e293b]">
+              LaptopMatch_Dataset_33_Regression.json
+            </code>{" "}
+            (hanya bagian <code className="font-mono text-[11px]">alternatives</code> &amp; arsip{" "}
+            <code className="font-mono text-[11px]">excluded_candidates</code>), workbook 12-sheet{" "}
+            <code className="rounded bg-[#f1f5f9] px-1 py-0.5 font-mono text-[11px] text-[#1e293b]">
+              Kandidat / Sumber
+            </code>
+            , maupun workbook historis{" "}
             <code className="rounded bg-[#f1f5f9] px-1 py-0.5 font-mono text-[11px] text-[#1e293b]">
               Data Audit
-            </code>{" "}
-            lengkap beserta 4 URL sumber bukti. Setiap impor membuat versi dataset draft baru
-            tanpa menimpa histori.
+            </code>
+            . Impor bersifat idempotent (deteksi duplikat SHA-256) tanpa menimpa histori lama.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4">
             <div className="grid gap-4 sm:grid-cols-4">
               <div className="sm:col-span-2">
-                <Label htmlFor="laptop-file">Berkas alternatif (.xlsx / .csv)</Label>
+                <Label htmlFor="laptop-file">Berkas alternatif (.json / .xlsx / .csv)</Label>
                 <input
                   ref={fileInputRef}
                   id="laptop-file"
                   type="file"
-                  accept=".xlsx,.csv"
+                  accept=".json,.xlsx,.csv"
                   onChange={handleFileChange}
                   className="h-10 w-full rounded-lg border border-[#cbd5e1] bg-white px-3 pt-2 text-sm text-[#1e293b] transition-colors focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/10"
                 />
@@ -491,7 +543,7 @@ export function AlternatifWorkbench({
                   id="import-label"
                   value={importLabel}
                   onChange={(e) => setImportLabel(e.target.value)}
-                  placeholder="Mis. Audit SAW Revisi"
+                  placeholder="Mis. Dataset UAS 33 Alternatif"
                 />
               </div>
             </div>
@@ -520,7 +572,11 @@ export function AlternatifWorkbench({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-[#1e293b]">
                   Preview: {preview.filename} ({preview.sheetName}) —{" "}
-                  {preview.summary.eligibleRows}/{preview.summary.totalRows} eligible
+                  {preview.summary.eligibleRows}/{preview.summary.totalRows} eligible ·{" "}
+                  {preview.summary.brandCount} merek · C6 {preview.c6Unit}
+                  {preview.summary.excludedCount > 0
+                    ? ` · ${preview.summary.excludedCount} arsip dikeluarkan`
+                    : ""}
                 </p>
                 <Badge tone={preview.ok ? "success" : "error"}>
                   {preview.ok ? "Lolos Validasi" : "Ada Baris Invalid"}
@@ -532,16 +588,18 @@ export function AlternatifWorkbench({
                 </p>
               ))}
               {preview.rows.length > 0 && (
-                <div className="overflow-x-auto rounded-lg border border-[#e2e8f0] bg-white">
-                  <table className="w-full min-w-[640px] border-collapse text-xs">
-                    <thead>
+                <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-lg border border-[#e2e8f0] bg-white">
+                  <table className="w-full min-w-[680px] border-collapse text-xs">
+                    <thead className="sticky top-0 z-10">
                       <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#64748b]">
                         <th className="px-3 py-2.5">Kode</th>
-                        <th className="px-3 py-2.5">Model / SKU</th>
+                        <th className="px-3 py-2.5">Merek &amp; Model</th>
                         <th className="px-3 py-2.5 text-right">Harga</th>
                         <th className="px-3 py-2.5 text-right">CPU Mark</th>
                         <th className="px-3 py-2.5 text-right">RAM/SSD</th>
-                        <th className="px-3 py-2.5 text-right">kg / jam</th>
+                        <th className="px-3 py-2.5 text-right">
+                          kg / {preview.c6Unit}
+                        </th>
                         <th className="px-3 py-2.5">Status</th>
                       </tr>
                     </thead>
@@ -551,7 +609,12 @@ export function AlternatifWorkbench({
                           <td className="px-3 py-2 font-mono font-semibold text-[#1e293b]">
                             {r.code}
                           </td>
-                          <td className="px-3 py-2 text-[#1e293b]">{r.model}</td>
+                          <td className="px-3 py-2 text-[#1e293b]">
+                            <span className="mr-1.5 font-mono text-[10px] text-[#1e3a5f]">
+                              [{r.brand}]
+                            </span>
+                            {r.model}
+                          </td>
                           <td className="px-3 py-2 text-right font-mono tabular-nums">
                             {formatIdr(r.priceIdr)}
                           </td>
@@ -562,7 +625,8 @@ export function AlternatifWorkbench({
                             {r.ramGb} / {r.ssdGb} GB
                           </td>
                           <td className="px-3 py-2 text-right font-mono tabular-nums">
-                            {r.weightKg} kg / {r.batteryHours} jam
+                            {formatDecimal(r.weightKg, 2)} kg /{" "}
+                            {formatBatteryValue(r, preview.c6Metric)}
                           </td>
                           <td className="px-3 py-2">
                             {r.eligible ? (
@@ -590,7 +654,7 @@ export function AlternatifWorkbench({
               <CardTitle>Daftar Alternatif &amp; Sumber Bukti</CardTitle>
               <CardDescription>
                 {selectedDataset
-                  ? `Dataset v${selectedDataset.version} · Audit ${formatDateJakarta(selectedDataset.observedAt)} · Status: ${selectedDataset.status.toUpperCase()}`
+                  ? `Dataset v${selectedDataset.version} · ${alternatives.length} alternatif lintas ${brands.length} merek · C6 ${selectedDataset.c6Unit} · Audit ${formatDateJakarta(selectedDataset.observedAt)} · Status: ${selectedDataset.status.toUpperCase()}`
                   : "Pilih atau impor dataset alternatif terlebih dahulu."}
               </CardDescription>
             </div>
@@ -599,12 +663,12 @@ export function AlternatifWorkbench({
                 aria-label="Pilih versi dataset alternatif"
                 value={selectedId}
                 onChange={(e) => handleDatasetSwitch(e.target.value)}
-                className="w-full sm:w-auto sm:min-w-[220px]"
+                className="w-full sm:w-auto sm:min-w-[240px]"
               >
                 {datasets.length === 0 && <option value="">Belum ada dataset</option>}
                 {datasets.map((d) => (
                   <option key={d.id} value={d.id}>
-                    v{d.version} — {d.label} ({d.status})
+                    v{d.version} — {d.label} ({d.c6Unit} · {d.status})
                   </option>
                 ))}
               </Select>
@@ -620,7 +684,7 @@ export function AlternatifWorkbench({
                 <Button
                   size="sm"
                   onClick={() => {
-                    setForm(emptyDraftForm());
+                    setForm(emptyDraftForm(activeC6Metric));
                     setFormOpen(true);
                   }}
                 >
@@ -646,17 +710,49 @@ export function AlternatifWorkbench({
             </AlertBanner>
           )}
 
+          {alternatives.length > 0 && (
+            <div className="grid gap-3 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-3.5 sm:grid-cols-3">
+              <div className="relative sm:col-span-2">
+                <Search
+                  className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#64748b]"
+                  aria-hidden="true"
+                />
+                <Input
+                  aria-label="Cari alternatif pada dataset aktif"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari kode (A33, A29), merek, model, prosesor, atau penjual..."
+                  className="pl-9"
+                />
+              </div>
+              <Select
+                aria-label="Filter merek pada tabel admin"
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+              >
+                <option value="all">
+                  Semua Merek ({brands.length} merek · {alternatives.length} alt)
+                </option>
+                {brands.map((b) => (
+                  <option key={b} value={b}>
+                    {b} ({alternatives.filter((a) => a.brand === b).length})
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+
           {datasets.length === 0 ? (
             <EmptyState
               title="Belum ada dataset alternatif laptop"
-              description="Impor workbook SPK_Kelompok_13_Audit_SAW_Revisi.xlsx pada formulir di atas untuk mengisi 7 alternatif baseline beserta 4 tautan sumbernya."
+              description="Impor LaptopMatch_Dataset_33_Regression.json atau workbook SPK pada formulir di atas untuk mengisi 33 alternatif lintas 8 merek beserta 4 tautan sumbernya."
             />
           ) : loading ? (
             <p className="py-8 text-center text-sm text-[#64748b]">Memuat dataset...</p>
           ) : isMobile ? (
             /* Mobile Hardware Spec Sheet Cards (< 768px) */
             <div className="space-y-3">
-              {alternatives.map((alt) => {
+              {filteredAlternatives.map((alt) => {
                 const stockBadge = formatStockStatusLabel(alt.stockStatus);
                 const evBadge = formatEvidenceStatusLabel(alt.evidenceStatus);
                 return (
@@ -668,9 +764,12 @@ export function AlternatifWorkbench({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <span className="rounded bg-[#1e3a5f] px-2 py-0.5 font-mono text-xs font-semibold text-white">
                             {alt.code}
+                          </span>
+                          <span className="rounded bg-[#eff4fa] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[#1e3a5f]">
+                            {alt.brand}
                           </span>
                           {!alt.active && <Badge tone="neutral">Nonaktif</Badge>}
                         </div>
@@ -702,13 +801,15 @@ export function AlternatifWorkbench({
                       <div className="bg-[#f8fafc] p-2.5">
                         <p className="font-mono text-[10px] uppercase text-[#64748b]">Berat</p>
                         <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#1e293b]">
-                          {alt.weightKg} kg
+                          {formatDecimal(alt.weightKg, 2)} kg
                         </p>
                       </div>
                       <div className="bg-[#f8fafc] p-2.5">
-                        <p className="font-mono text-[10px] uppercase text-[#64748b]">Baterai C6</p>
+                        <p className="font-mono text-[10px] uppercase text-[#64748b]">
+                          Baterai C6 ({activeC6Metric === "battery_wh" ? "Wh" : "jam"})
+                        </p>
                         <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#1e293b]">
-                          {alt.batteryHours} jam
+                          {formatBatteryValue(alt, activeC6Metric)}
                         </p>
                       </div>
                     </div>
@@ -768,17 +869,19 @@ export function AlternatifWorkbench({
                 <thead>
                   <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#64748b]">
                     <th className="px-3.5 py-3">Kode</th>
-                    <th className="px-3.5 py-3">Model / SKU &amp; Prosesor</th>
+                    <th className="px-3.5 py-3">Merek, Model &amp; Prosesor</th>
                     <th className="px-3.5 py-3 text-right">Harga (C1)</th>
                     <th className="px-3.5 py-3 text-right">CPU (C2)</th>
                     <th className="px-3.5 py-3 text-right">RAM/SSD</th>
-                    <th className="px-3.5 py-3 text-right">Berat / Baterai</th>
+                    <th className="px-3.5 py-3 text-right">
+                      Berat / {activeC6Metric === "battery_wh" ? "Baterai Wh" : "Video Jam"}
+                    </th>
                     <th className="px-3.5 py-3">Status &amp; Sumber</th>
                     <th className="px-3.5 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e8f0]/80">
-                  {alternatives.map((alt) => {
+                  {filteredAlternatives.map((alt) => {
                     const stockBadge = formatStockStatusLabel(alt.stockStatus);
                     const evBadge = formatEvidenceStatusLabel(alt.evidenceStatus);
                     return (
@@ -799,7 +902,12 @@ export function AlternatifWorkbench({
                           )}
                         </td>
                         <td className="px-3.5 py-3.5">
-                          <p className="font-medium text-[#1e293b]">{alt.model}</p>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="rounded bg-[#eff4fa] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[#1e3a5f]">
+                              {alt.brand}
+                            </span>
+                            <p className="font-medium text-[#1e293b]">{alt.model}</p>
+                          </div>
                           <p className="text-xs text-[#64748b]">
                             {alt.cpuName} · {alt.seller}
                           </p>
@@ -814,10 +922,9 @@ export function AlternatifWorkbench({
                           {alt.ramGb} GB / {alt.ssdGb} GB
                         </td>
                         <td className="px-3.5 py-3.5 text-right font-mono text-xs tabular-nums whitespace-nowrap">
-                          <p className="text-[#1e293b]">{alt.weightKg} kg</p>
+                          <p className="text-[#1e293b]">{formatDecimal(alt.weightKg, 2)} kg</p>
                           <p className="text-[11px] text-[#64748b]">
-                            {alt.batteryHours} jam
-                            {alt.batteryWh ? ` (${alt.batteryWh} Wh)` : ""}
+                            {formatBatteryValue(alt, activeC6Metric)}
                           </p>
                         </td>
                         <td className="space-y-1.5 px-3.5 py-3.5">
@@ -874,6 +981,82 @@ export function AlternatifWorkbench({
           )}
         </CardContent>
       </Card>
+
+      {/* Excluded Candidates Audit Archive (Read-Only, Never Included in SAW) */}
+      {selectedDataset && selectedDataset.excludedCandidates.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Archive className="h-4 w-4 text-[#64748b]" aria-hidden="true" />
+                  Arsip Kandidat Dikeluarkan ({selectedDataset.excludedCandidates.length} Kandidat)
+                </CardTitle>
+                <CardDescription>
+                  Disimpan semata untuk transparansi seleksi dari{" "}
+                  {selectedDataset.candidateCount ??
+                    alternatives.length + selectedDataset.excludedCandidates.length}{" "}
+                  kandidat menjadi {alternatives.length} alternatif aktif —{" "}
+                  <strong>tidak pernah dimasukkan ke pemeringkatan SAW utama</strong>.
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowExcluded((v) => !v)}
+              >
+                {showExcluded ? "Sembunyikan Arsip" : "Tampilkan Arsip Audit"}
+              </Button>
+            </div>
+          </CardHeader>
+          {showExcluded && (
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[780px] border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[10px] uppercase tracking-[0.06em] text-[#64748b]">
+                      <th className="px-4 py-2.5">Kode</th>
+                      <th className="px-4 py-2.5">Merek &amp; Model</th>
+                      <th className="px-3 py-2.5 text-right">Harga Tercatat</th>
+                      <th className="px-4 py-2.5">Status Tercatat</th>
+                      <th className="px-4 py-2.5">Alasan Dikeluarkan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e2e8f0]/80">
+                    {selectedDataset.excludedCandidates.map((ex) => (
+                      <tr key={ex.code} className="bg-[#f8fafc]/40">
+                        <td className="px-4 py-3 font-mono font-semibold text-[#64748b]">
+                          {ex.code}
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-[#1e293b]">
+                            [{ex.brand}] {ex.model}
+                          </p>
+                          <p className="text-[11px] text-[#64748b]">
+                            {ex.cpuName} · {ex.seller}
+                          </p>
+                        </td>
+                        <td className="px-3 py-3 text-right font-mono tabular-nums text-[#475569]">
+                          {ex.priceIdr ? formatIdr(ex.priceIdr) : "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge tone="neutral">{ex.sourceStatusRecorded || "Dikeluarkan"}</Badge>
+                        </td>
+                        <td className="px-4 py-3 text-[#475569]">
+                          <p className="font-medium text-[#1e293b]">{ex.selectionReason}</p>
+                          {ex.evidenceNotes && (
+                            <p className="mt-0.5 text-[11px] text-[#64748b]">{ex.evidenceNotes}</p>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
 
       {/* Slide-Over CRUD Drawer */}
       <SlideOverDrawer
@@ -995,39 +1178,68 @@ export function AlternatifWorkbench({
                 <Input
                   id="f-weight"
                   type="number"
-                  step="0.01"
+                  step="0.001"
                   required
                   min={0.1}
                   value={form.weightKg}
                   onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
                 />
               </div>
-              <div>
-                <Label htmlFor="f-bat">C6 Baterai Video 1080p (jam)</Label>
-                <Input
-                  id="f-bat"
-                  type="number"
-                  step="0.1"
-                  required
-                  min={0.5}
-                  value={form.batteryHours}
-                  onChange={(e) => setForm({ ...form, batteryHours: e.target.value })}
-                />
-              </div>
+              {activeC6Metric === "battery_wh" ? (
+                <div>
+                  <Label htmlFor="f-wh">C6 Kapasitas Baterai (Wh) — Wajib</Label>
+                  <Input
+                    id="f-wh"
+                    type="number"
+                    step="0.01"
+                    required
+                    min={1}
+                    max={200}
+                    value={form.batteryWh}
+                    onChange={(e) => setForm({ ...form, batteryWh: e.target.value })}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <Label htmlFor="f-bat">C6 Baterai Video 1080p (jam) — Wajib</Label>
+                  <Input
+                    id="f-bat"
+                    type="number"
+                    step="0.1"
+                    required
+                    min={0.5}
+                    value={form.batteryHours}
+                    onChange={(e) => setForm({ ...form, batteryHours: e.target.value })}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
           <div className="grid gap-3 border-t border-[#e2e8f0] pt-4 sm:grid-cols-3">
-            <div>
-              <Label htmlFor="f-wh">Baterai Wh (opsional)</Label>
-              <Input
-                id="f-wh"
-                type="number"
-                step="0.1"
-                value={form.batteryWh}
-                onChange={(e) => setForm({ ...form, batteryWh: e.target.value })}
-              />
-            </div>
+            {activeC6Metric === "battery_wh" ? (
+              <div>
+                <Label htmlFor="f-bat">Durasi Jam (opsional, tidak dipakai di SAW Wh)</Label>
+                <Input
+                  id="f-bat"
+                  type="number"
+                  step="0.1"
+                  value={form.batteryHours}
+                  onChange={(e) => setForm({ ...form, batteryHours: e.target.value })}
+                />
+              </div>
+            ) : (
+              <div>
+                <Label htmlFor="f-wh">Baterai Wh (opsional, metadata)</Label>
+                <Input
+                  id="f-wh"
+                  type="number"
+                  step="0.1"
+                  value={form.batteryWh}
+                  onChange={(e) => setForm({ ...form, batteryWh: e.target.value })}
+                />
+              </div>
+            )}
             <div>
               <Label htmlFor="f-seller">Penjual</Label>
               <Input

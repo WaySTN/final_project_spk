@@ -291,7 +291,7 @@ export async function parseSurveyFile(
     unknownHeaders: [],
   };
 
-  if (!fileCheck.ok || !fileCheck.extension) {
+  if (!fileCheck.ok || !fileCheck.extension || fileCheck.extension === ".json") {
     return {
       ok: false,
       filename,
@@ -311,7 +311,7 @@ export async function parseSurveyFile(
         nearZeroCrCount: 0,
         allEqualCount: 0,
       },
-      errors: [fileCheck.error ?? "Berkas tidak valid."],
+      errors: [fileCheck.error ?? "Berkas tidak valid. Unggah berkas .xlsx atau .csv."],
       warnings: [],
     };
   }

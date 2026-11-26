@@ -1,5 +1,18 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { weightsArrayToRecord, type AhpMatrix, type CriteriaNumericVector, type CriterionCode, type SawCriterionExtrema } from "@/lib/decision";
+import {
+  C6_BATTERY_HOURS_LEGACY_DEFINITION,
+  C6_BATTERY_WH_DEFINITION,
+  getC6UnitForMetric,
+  weightsArrayToRecord,
+  type AhpMatrix,
+  type C6MetricType,
+  type CriteriaNumericVector,
+  type CriterionCode,
+  type SawCriterionExtrema,
+  type WeightSensitivitySuiteResult,
+} from "@/lib/decision";
+import { compareAlternativeCodes } from "@/lib/formatting";
+import type { ExcludedCandidateRecord } from "@/lib/import";
 import {
   RepositoryError,
   type AdminOverviewStats,
@@ -60,6 +73,10 @@ function mapSurveyResponse(row: Record<string, unknown>): SurveyResponseRecord {
 }
 
 function mapDataset(row: Record<string, unknown>): AlternativeDatasetRecord {
+  const c6Metric: C6MetricType =
+    row.c6_metric === "battery_wh" ? "battery_wh" : "battery_hours";
+  const c6Unit: "Wh" | "jam" =
+    row.c6_unit === "Wh" || c6Metric === "battery_wh" ? "Wh" : "jam";
   return {
     id: String(row.id),
     version: Number(row.version),
@@ -67,6 +84,21 @@ function mapDataset(row: Record<string, unknown>): AlternativeDatasetRecord {
     sourceFilename: row.source_filename ? String(row.source_filename) : null,
     sourceHash: row.source_hash ? String(row.source_hash) : null,
     observedAt: String(row.observed_at),
+    c6Metric,
+    c6Unit,
+    c6Definition:
+      row.c6_definition && String(row.c6_definition).trim()
+        ? String(row.c6_definition)
+        : c6Metric === "battery_wh"
+          ? C6_BATTERY_WH_DEFINITION.definition
+          : C6_BATTERY_HOURS_LEGACY_DEFINITION.definition,
+    candidateCount:
+      row.candidate_count === null || row.candidate_count === undefined
+        ? null
+        : Number(row.candidate_count),
+    excludedCandidates: Array.isArray(row.excluded_candidates)
+      ? (row.excluded_candidates as ExcludedCandidateRecord[])
+      : [],
     createdBy: row.created_by ? String(row.created_by) : null,
     createdAt: String(row.created_at),
     status: row.status as AlternativeDatasetRecord["status"],
@@ -103,14 +135,23 @@ function mapAlternative(
     ramGb: Number(row.ram_gb),
     ssdGb: Number(row.ssd_gb),
     weightKg: Number(row.weight_kg),
-    batteryHours: Number(row.battery_hours),
-    batteryWh: row.battery_wh === null || row.battery_wh === undefined ? null : Number(row.battery_wh),
+    batteryHours:
+      row.battery_hours === null || row.battery_hours === undefined
+        ? null
+        : Number(row.battery_hours),
+    batteryWh:
+      row.battery_wh === null || row.battery_wh === undefined
+        ? null
+        : Number(row.battery_wh),
     seller: String(row.seller),
     active: Boolean(row.active),
     stockStatus: row.stock_status as AlternativeRecord["stockStatus"],
     evidenceStatus: row.evidence_status as AlternativeRecord["evidenceStatus"],
     batteryProtocol: String(row.battery_protocol),
     evidenceNotes: String(row.evidence_notes ?? ""),
+    sourceDateRecorded: String(row.source_date_recorded ?? ""),
+    sourceStatusRecorded: String(row.source_status_recorded ?? ""),
+    selectionReason: String(row.selection_reason ?? ""),
     createdAt: String(row.created_at),
     sources,
   };
@@ -143,17 +184,33 @@ function mapAhpRun(row: Record<string, unknown>): AhpRunRecord {
 }
 
 function mapSawRun(row: Record<string, unknown>): SawRunRecord {
+  const scenario = row.scenario as SawRunRecord["scenario"];
+  const c6Metric: C6MetricType =
+    row.c6_metric === "battery_wh"
+      ? "battery_wh"
+      : row.c6_metric === "battery_hours"
+        ? "battery_hours"
+        : String(scenario).includes("_33_")
+          ? "battery_wh"
+          : "battery_hours";
+  const c6Unit: "Wh" | "jam" =
+    row.c6_unit === "Wh" || c6Metric === "battery_wh" ? "Wh" : "jam";
+
   return {
     id: String(row.id),
     ahpRunId: String(row.ahp_run_id),
     datasetId: String(row.dataset_id),
-    scenario: row.scenario as SawRunRecord["scenario"],
+    scenario,
+    c6Metric,
+    c6Unit,
     algorithmVersion: String(row.algorithm_version),
     inputSnapshot: row.input_snapshot as SawRunRecord["inputSnapshot"],
     normalizationExtrema: row.normalization_extrema as Record<
       CriterionCode,
       SawCriterionExtrema
     >,
+    weightSensitivity:
+      (row.weight_sensitivity as WeightSensitivitySuiteResult | null | undefined) ?? null,
     topMargin:
       row.top_margin === null || row.top_margin === undefined
         ? null
@@ -393,10 +450,12 @@ export class SupabaseRepository implements DataRepository {
 
     if (altErr) throw new RepositoryError(500, "DB_ERROR", altErr.message);
 
-    const alternatives = ((altRows ?? []) as Array<Record<string, unknown>>).map((row) => {
-      const rawSources = (row.alternative_sources ?? []) as Record<string, unknown>[];
-      return mapAlternative(row, rawSources.map(mapSource));
-    });
+    const alternatives = ((altRows ?? []) as Array<Record<string, unknown>>)
+      .map((row) => {
+        const rawSources = (row.alternative_sources ?? []) as Record<string, unknown>[];
+        return mapAlternative(row, rawSources.map(mapSource));
+      })
+      .sort((a, b) => compareAlternativeCodes(a.code, b.code));
 
     return {
       dataset: mapDataset(dsRow as Record<string, unknown>),
@@ -410,6 +469,18 @@ export class SupabaseRepository implements DataRepository {
     const existing = await this.listAlternativeDatasets();
     const nextVersion = existing.reduce((max, d) => Math.max(max, d.version), 0) + 1;
 
+    const c6Metric: C6MetricType =
+      input.c6Metric ??
+      (input.alternatives.some((a) => a.batteryHours === null && a.batteryWh !== null)
+        ? "battery_wh"
+        : "battery_hours");
+    const c6Unit = input.c6Unit ?? getC6UnitForMetric(c6Metric);
+    const c6Definition =
+      input.c6Definition ??
+      (c6Metric === "battery_wh"
+        ? C6_BATTERY_WH_DEFINITION.definition
+        : C6_BATTERY_HOURS_LEGACY_DEFINITION.definition);
+
     const { data: dsRow, error: dsErr } = await this.client
       .from("alternative_datasets")
       .insert({
@@ -418,6 +489,13 @@ export class SupabaseRepository implements DataRepository {
         source_filename: input.sourceFilename,
         source_hash: input.sourceHash,
         observed_at: input.observedAt,
+        c6_metric: c6Metric,
+        c6_unit: c6Unit,
+        c6_definition: c6Definition,
+        candidate_count:
+          input.candidateCount ??
+          input.alternatives.length + (input.excludedCandidates?.length ?? 0),
+        excluded_candidates: input.excludedCandidates ?? [],
         created_by: input.createdBy,
         status: "draft",
         notes: input.notes ?? "",
@@ -446,14 +524,17 @@ export class SupabaseRepository implements DataRepository {
           ram_gb: alt.ramGb,
           ssd_gb: alt.ssdGb,
           weight_kg: alt.weightKg,
-          battery_hours: alt.batteryHours,
-          battery_wh: alt.batteryWh,
+          battery_hours: alt.batteryHours ?? null,
+          battery_wh: alt.batteryWh ?? null,
           seller: alt.seller,
           active: alt.active,
           stock_status: alt.stockStatus,
           evidence_status: alt.evidenceStatus,
           battery_protocol: alt.batteryProtocol,
           evidence_notes: alt.evidenceNotes,
+          source_date_recorded: alt.sourceDateRecorded ?? "",
+          source_status_recorded: alt.sourceStatusRecorded ?? "",
+          selection_reason: alt.selectionReason ?? "",
         })
         .select("id")
         .single();
@@ -496,6 +577,11 @@ export class SupabaseRepository implements DataRepository {
       sourceFilename: source.dataset.sourceFilename,
       sourceHash: source.dataset.sourceHash,
       observedAt: source.dataset.observedAt,
+      c6Metric: source.dataset.c6Metric,
+      c6Unit: source.dataset.c6Unit,
+      c6Definition: source.dataset.c6Definition,
+      candidateCount: source.dataset.candidateCount,
+      excludedCandidates: source.dataset.excludedCandidates,
       createdBy: actorId,
       notes: `Digandakan dari v${source.dataset.version}.`,
       alternatives: source.alternatives.map((a) => ({
@@ -517,6 +603,9 @@ export class SupabaseRepository implements DataRepository {
         evidenceStatus: a.evidenceStatus,
         batteryProtocol: a.batteryProtocol,
         evidenceNotes: a.evidenceNotes,
+        sourceDateRecorded: a.sourceDateRecorded,
+        sourceStatusRecorded: a.sourceStatusRecorded,
+        selectionReason: a.selectionReason,
         sources: a.sources.map((s) => ({
           sourceType: s.sourceType,
           url: s.url,
@@ -554,14 +643,17 @@ export class SupabaseRepository implements DataRepository {
       ram_gb: input.ramGb,
       ssd_gb: input.ssdGb,
       weight_kg: input.weightKg,
-      battery_hours: input.batteryHours,
-      battery_wh: input.batteryWh,
+      battery_hours: input.batteryHours ?? null,
+      battery_wh: input.batteryWh ?? null,
       seller: input.seller,
       active: input.active,
       stock_status: input.stockStatus,
       evidence_status: input.evidenceStatus,
       battery_protocol: input.batteryProtocol,
       evidence_notes: input.evidenceNotes,
+      source_date_recorded: input.sourceDateRecorded ?? "",
+      source_status_recorded: input.sourceStatusRecorded ?? "",
+      selection_reason: input.selectionReason ?? "",
     };
 
     if (altId) {
@@ -792,22 +884,28 @@ export class SupabaseRepository implements DataRepository {
 
     const results: SawResultRecord[] = (
       (resQuery.data ?? []) as Array<Record<string, unknown>>
-    ).map((row) => {
-      const altRef = row.alternatives as { code?: string; model?: string } | null;
-      return {
-        id: String(row.id),
-        runId: String(row.run_id),
-        alternativeId: String(row.alternative_id),
-        alternativeCode: String(altRef?.code ?? ""),
-        alternativeModel: String(altRef?.model ?? ""),
-        criteriaValues: row.criteria_values as CriteriaNumericVector,
-        normalizedValues: row.normalized_values as CriteriaNumericVector,
-        weightedValues: row.weighted_values as CriteriaNumericVector,
-        score: Number(row.score),
-        rank: Number(row.rank),
-        isTied: Boolean(row.is_tied),
-      };
-    });
+    )
+      .map((row) => {
+        const altRef = row.alternatives as { code?: string; model?: string } | null;
+        return {
+          id: String(row.id),
+          runId: String(row.run_id),
+          alternativeId: String(row.alternative_id),
+          alternativeCode: String(altRef?.code ?? ""),
+          alternativeModel: String(altRef?.model ?? ""),
+          criteriaValues: row.criteria_values as CriteriaNumericVector,
+          normalizedValues: row.normalized_values as CriteriaNumericVector,
+          weightedValues: row.weighted_values as CriteriaNumericVector,
+          score: Number(row.score),
+          rank: Number(row.rank),
+          isTied: Boolean(row.is_tied),
+        };
+      })
+      .sort((a, b) =>
+        a.rank !== b.rank
+          ? a.rank - b.rank
+          : compareAlternativeCodes(a.alternativeCode, b.alternativeCode),
+      );
 
     return {
       run,
@@ -828,9 +926,12 @@ export class SupabaseRepository implements DataRepository {
         ahp_run_id: params.run.ahpRunId,
         dataset_id: params.run.datasetId,
         scenario: params.run.scenario,
+        c6_metric: params.run.c6Metric,
+        c6_unit: params.run.c6Unit,
         algorithm_version: params.run.algorithmVersion,
         input_snapshot: params.run.inputSnapshot,
         normalization_extrema: params.run.normalizationExtrema,
+        weight_sensitivity: params.run.weightSensitivity ?? null,
         top_margin: params.run.topMargin,
         warnings: params.run.warnings,
         caveats: params.run.caveats,

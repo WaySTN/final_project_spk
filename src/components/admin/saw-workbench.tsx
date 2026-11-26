@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calculator, Download, Play } from "lucide-react";
+import Link from "next/link";
+import { Calculator, Download, Play, SlidersHorizontal } from "lucide-react";
 import { SawContributionChart } from "@/components/decision/charts";
 import {
   AlertBanner,
@@ -17,7 +18,12 @@ import {
   ScoreBar,
   Select,
 } from "@/components/ui/primitives";
-import { CRITERIA, type SawScenarioKey } from "@/lib/decision";
+import {
+  buildDecisionEvaluation,
+  getCriteriaForMetric,
+  type C6MetricType,
+  type SawScenarioKey,
+} from "@/lib/decision";
 import {
   formatDateTimeJakarta,
   formatDecimal,
@@ -58,7 +64,10 @@ export function SawWorkbench({
       "",
   );
   const [datasetId, setDatasetId] = useState<string>(initialDatasets[0]?.id ?? "");
-  const [scenario, setScenario] = useState<SawScenarioKey>("primary_7_consistent");
+  const initialDsMetric: C6MetricType = initialDatasets[0]?.c6Metric ?? "battery_wh";
+  const [scenario, setScenario] = useState<SawScenarioKey>(
+    initialDsMetric === "battery_wh" ? "primary_33_consistent" : "primary_7_consistent",
+  );
   const [selectedRunId, setSelectedRunId] = useState<string>(
     initialSawRuns[0]?.id ?? "",
   );
@@ -69,6 +78,16 @@ export function SawWorkbench({
     tone: "success" | "error";
     message: string;
   } | null>(null);
+
+  function handleDatasetChange(newId: string) {
+    setDatasetId(newId);
+    const ds = initialDatasets.find((d) => d.id === newId);
+    if (ds) {
+      setScenario(
+        ds.c6Metric === "battery_wh" ? "primary_33_consistent" : "primary_7_consistent",
+      );
+    }
+  }
 
   useEffect(() => {
     if (!selectedRunId) return;
@@ -172,14 +191,14 @@ export function SawWorkbench({
               <Select
                 id="saw-dataset"
                 value={datasetId}
-                onChange={(e) => setDatasetId(e.target.value)}
+                onChange={(e) => handleDatasetChange(e.target.value)}
               >
                 {initialDatasets.length === 0 && (
                   <option value="">Belum ada dataset</option>
                 )}
                 {initialDatasets.map((d) => (
                   <option key={d.id} value={d.id}>
-                    v{d.version} — {d.label} ({d.status})
+                    v{d.version} — {d.label} ({d.c6Unit} · {d.status})
                   </option>
                 ))}
               </Select>
@@ -191,14 +210,20 @@ export function SawWorkbench({
                 value={scenario}
                 onChange={(e) => setScenario(e.target.value as SawScenarioKey)}
               >
+                <option value="primary_33_consistent">
+                  Utama UAS — 33 Alternatif (17 Konsisten · C6 Wh)
+                </option>
+                <option value="sensitivity_33_all">
+                  Pembanding UAS — 33 Alternatif (33 Responden)
+                </option>
                 <option value="primary_7_consistent">
-                  S1 — Utama (7 Alternatif · 17 Konsisten)
+                  Historis S1 — 7 Alternatif (17 Konsisten · C6 jam)
                 </option>
                 <option value="sensitivity_7_all">
-                  S2 — Sensitivitas (7 Alternatif · 33 Responden)
+                  Historis S2 — 7 Alternatif (33 Responden)
                 </option>
                 <option value="sensitivity_5_no_a6_a7">
-                  S3 — Risiko Stok (5 Alternatif Tanpa A6 &amp; A7)
+                  Historis S3 — 5 Alternatif Tanpa A6 &amp; A7
                 </option>
                 <option value="custom">Kustom (Semua Alternatif Aktif)</option>
               </Select>
@@ -240,13 +265,22 @@ export function SawWorkbench({
                 </Select>
               </div>
               {selectedRunId && (
-                <a
-                  href={`/api/admin/export/${selectedRunId}`}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#cbd5e1] bg-white px-3 text-xs font-medium text-[#1e293b] transition-colors hover:border-[#1e3a5f]/40 hover:bg-[#f8fafc]"
-                >
-                  <Download className="h-3.5 w-3.5" aria-hidden="true" />
-                  Ekspor XLSX Run Ini
-                </a>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href="/admin/perhitungan/sensitivitas"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#1e3a5f]/30 bg-[#eff4fa] px-3 text-xs font-medium text-[#1e3a5f] transition-colors hover:bg-[#e2ecf7]"
+                  >
+                    <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+                    Sensitivitas 37 Skenario
+                  </Link>
+                  <a
+                    href={`/api/admin/export/${selectedRunId}`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#cbd5e1] bg-white px-3 text-xs font-medium text-[#1e293b] transition-colors hover:border-[#1e3a5f]/40 hover:bg-[#f8fafc]"
+                  >
+                    <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                    Ekspor XLSX Run Ini
+                  </a>
+                </div>
               )}
             </div>
           )}
@@ -263,13 +297,39 @@ export function SawWorkbench({
         <p className="py-8 text-center text-sm text-[#64748b]">
           Memuat matriks keputusan, normalisasi, dan peringkat SAW...
         </p>
-      ) : (
+      ) : (() => {
+        const detailC6Metric: C6MetricType =
+          detail.run.c6Metric ?? detail.dataset.c6Metric ?? "battery_wh";
+        const detailC6Unit = detail.run.c6Unit ?? detail.dataset.c6Unit ?? (detailC6Metric === "battery_wh" ? "Wh" : "jam");
+        const activeCriteria = getCriteriaForMetric(detailC6Metric);
+        const evaluation = buildDecisionEvaluation({
+          items: detail.results.map((r) => ({
+            code: r.alternativeCode,
+            model: r.alternativeModel,
+            score: r.score,
+            rank: r.rank,
+            weightedValues: r.weightedValues,
+          })),
+          weightSensitivity: detail.run.weightSensitivity ?? null,
+          c6Metric: detailC6Metric,
+        });
+
+        const formatC6Raw = (val: number) => {
+          if (detailC6Metric === "battery_wh") {
+            const digits = Number.isInteger(val) ? 0 : 2;
+            return `${formatDecimal(val, digits)} Wh`;
+          }
+          return `${formatDecimal(val, 1)} jam`;
+        };
+
+        return (
         <>
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="dark">{getScenarioLabel(detail.run.scenario)}</Badge>
             <Badge tone="neutral">
               Dataset v{detail.dataset.version} · Audit {detail.dataset.observedAt}
             </Badge>
+            <Badge tone="neutral">C6: {detailC6Unit}</Badge>
             <Badge tone="neutral">
               CR AHP = {formatDecimal(detail.ahpRun.cr, 8)}
             </Badge>
@@ -289,7 +349,7 @@ export function SawWorkbench({
           )}
 
           {/* Step 1: Decision Matrix X + Extrema */}
-          <Card>
+          <Card id="saw-matrix-x">
             <CardHeader>
               <CardTitle>Tahap 1 — Matriks Keputusan (X) &amp; Nilai Ekstrem Kolom</CardTitle>
               <CardDescription>
@@ -311,7 +371,7 @@ export function SawWorkbench({
                       <th className="px-3 py-2.5 text-right">C3 RAM</th>
                       <th className="px-3 py-2.5 text-right">C4 SSD</th>
                       <th className="px-3 py-2.5 text-right">C5 Berat</th>
-                      <th className="px-3 py-2.5 text-right">C6 Baterai</th>
+                      <th className="px-3 py-2.5 text-right">C6 Baterai ({detailC6Unit})</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e2e8f0]/80 font-mono text-xs tabular-nums">
@@ -336,10 +396,10 @@ export function SawWorkbench({
                           {r.criteriaValues.C4} GB
                         </td>
                         <td className="px-3 py-2.5 text-right text-[#475569]">
-                          {formatDecimal(r.criteriaValues.C5, 2)} kg
+                          {formatDecimal(r.criteriaValues.C5, 3)} kg
                         </td>
                         <td className="px-3 py-2.5 text-right text-[#475569]">
-                          {formatDecimal(r.criteriaValues.C6, 1)} jam
+                          {formatC6Raw(r.criteriaValues.C6)}
                         </td>
                       </tr>
                     ))}
@@ -360,10 +420,10 @@ export function SawWorkbench({
                         max {detail.run.normalizationExtrema.C4.value}
                       </td>
                       <td className="px-3 py-2.5 text-right">
-                        min {formatDecimal(detail.run.normalizationExtrema.C5.value, 2)}
+                        min {formatDecimal(detail.run.normalizationExtrema.C5.value, 3)}
                       </td>
                       <td className="px-3 py-2.5 text-right">
-                        max {formatDecimal(detail.run.normalizationExtrema.C6.value, 1)}
+                        max {formatC6Raw(detail.run.normalizationExtrema.C6.value)}
                       </td>
                     </tr>
                   </tbody>
@@ -373,7 +433,7 @@ export function SawWorkbench({
           </Card>
 
           {/* Step 2: Normalization Matrix R */}
-          <Card>
+          <Card id="saw-matrix-r">
             <CardHeader>
               <CardTitle>Tahap 2 — Matriks Normalisasi (R)</CardTitle>
               <CardDescription>
@@ -389,7 +449,7 @@ export function SawWorkbench({
                       <th className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-[#f8fafc] px-4 py-2.5">
                         Kode
                       </th>
-                      {CRITERIA.map((c) => (
+                      {activeCriteria.map((c) => (
                         <th key={c.code} className="px-3 py-2.5 text-right">
                           {c.code} ({c.attribute})
                         </th>
@@ -402,7 +462,7 @@ export function SawWorkbench({
                         <td className="sticky left-0 z-10 border-r border-[#e2e8f0] bg-white px-4 py-2.5 font-semibold text-[#1e293b]">
                           {r.alternativeCode}
                         </td>
-                        {CRITERIA.map((c) => (
+                        {activeCriteria.map((c) => (
                           <td
                             key={c.code}
                             className="px-3 py-2.5 text-right text-[#475569]"
@@ -419,27 +479,37 @@ export function SawWorkbench({
           </Card>
 
           {/* Step 3: Weighted Contributions & Final Ranking */}
-          <Card>
+          <Card id="saw-contributions">
             <CardHeader>
               <CardTitle>
                 Tahap 3 — Kontribusi Berbobot (wⱼ · rᵢⱼ) &amp; Pemeringkatan Akhir
               </CardTitle>
               <CardDescription>
                 Bobot AHP:{" "}
-                {CRITERIA.map(
+                {activeCriteria.map(
                   (c) =>
                     `${c.code} ${formatWeightPercent(detail.ahpRun.weightsByCode[c.code], 2)}`,
                 ).join(" · ")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {evaluation.insights.length > 0 && (
+                <AlertBanner tone="neutral" title="Ringkasan Evaluasi Hasil Keputusan">
+                  <ul className="list-disc space-y-1 pl-4 text-xs">
+                    {evaluation.insights.map((ins, i) => (
+                      <li key={i}>{ins}</li>
+                    ))}
+                  </ul>
+                </AlertBanner>
+              )}
+
               <div className="overflow-x-auto rounded-lg border border-[#e2e8f0]">
                 <table className="w-full min-w-[840px] border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748b]">
                       <th className="px-3.5 py-2.5">Rank</th>
                       <th className="px-3.5 py-2.5">Kode &amp; Model</th>
-                      {CRITERIA.map((c) => (
+                      {activeCriteria.map((c) => (
                         <th key={c.code} className="px-2.5 py-2.5 text-right">
                           {c.code}
                         </th>
@@ -453,7 +523,7 @@ export function SawWorkbench({
                         key={r.id}
                         className={
                           r.rank === 1
-                            ? "bg-[#f8fafc] font-medium"
+                            ? "bg-[#eff4fa]/60 font-medium"
                             : "transition-colors hover:bg-[#f8fafc]/60"
                         }
                       >
@@ -470,7 +540,7 @@ export function SawWorkbench({
                             {r.alternativeModel}
                           </span>
                         </td>
-                        {CRITERIA.map((c) => (
+                        {activeCriteria.map((c) => (
                           <td
                             key={c.code}
                             className="px-2.5 py-3 text-right font-mono text-xs text-[#475569]"
@@ -480,7 +550,7 @@ export function SawWorkbench({
                         ))}
                         <td className="px-3.5 py-3 text-right">
                           <div className="ml-auto w-28 space-y-1">
-                            <p className="font-mono text-sm font-bold text-[#1e293b]">
+                            <p className="font-mono text-sm font-bold text-[#1e3a5f]">
                               {formatDecimal(r.score, 6)}
                             </p>
                             <ScoreBar value={r.score} max={1} />
@@ -508,7 +578,8 @@ export function SawWorkbench({
             </CardContent>
           </Card>
         </>
-      )}
+        );
+      })()}
     </div>
   );
 }

@@ -1,17 +1,20 @@
 import type {
   AhpMatrix,
   AhpMode,
+  C6MetricType,
   CriteriaNumericVector,
   CriterionCode,
   ParsedPairwiseAnswer,
   SawCriterionExtrema,
   SawScenarioKey,
   SensitivityRankRow,
+  WeightSensitivitySuiteResult,
 } from "@/lib/decision";
 import type {
   AlternativeSourceType,
   EvidenceLevel,
   EvidenceStatus,
+  ExcludedCandidateRecord,
   ParsedLaptopAlternative,
   ParsedSurveyRow,
   StockStatus,
@@ -58,6 +61,11 @@ export interface AlternativeDatasetRecord {
   sourceFilename: string | null;
   sourceHash: string | null;
   observedAt: string;
+  c6Metric: C6MetricType;
+  c6Unit: "Wh" | "jam";
+  c6Definition: string;
+  candidateCount: number | null;
+  excludedCandidates: ExcludedCandidateRecord[];
   createdBy: string | null;
   createdAt: string;
   status: "draft" | "sealed";
@@ -87,7 +95,7 @@ export interface AlternativeRecord {
   ramGb: number;
   ssdGb: number;
   weightKg: number;
-  batteryHours: number;
+  batteryHours: number | null;
   batteryWh: number | null;
   seller: string;
   active: boolean;
@@ -95,6 +103,9 @@ export interface AlternativeRecord {
   evidenceStatus: EvidenceStatus;
   batteryProtocol: string;
   evidenceNotes: string;
+  sourceDateRecorded: string;
+  sourceStatusRecorded: string;
+  selectionReason: string;
   createdAt: string;
   sources: AlternativeSourceRecord[];
 }
@@ -146,6 +157,8 @@ export interface SawRunRecord {
   ahpRunId: string;
   datasetId: string;
   scenario: SawScenarioKey;
+  c6Metric: C6MetricType;
+  c6Unit: "Wh" | "jam";
   algorithmVersion: string;
   inputSnapshot: {
     ahpMode: AhpMode;
@@ -155,8 +168,11 @@ export interface SawRunRecord {
     alternativeCodes: string[];
     observedAt: string;
     datasetVersion: number;
+    c6Metric?: C6MetricType;
+    c6Unit?: "Wh" | "jam";
   };
   normalizationExtrema: Record<CriterionCode, SawCriterionExtrema>;
+  weightSensitivity?: WeightSensitivitySuiteResult | null;
   topMargin: number | null;
   warnings: string[];
   caveats: string[];
@@ -199,13 +215,15 @@ export interface PublicLaptopRankingItem {
   ramGb: number;
   ssdGb: number;
   weightKg: number;
-  batteryHours: number;
+  batteryHours: number | null;
   batteryWh: number | null;
   seller: string;
   stockStatus: StockStatus;
   evidenceStatus: EvidenceStatus;
   batteryProtocol: string;
   evidenceNotes: string;
+  sourceDateRecorded?: string;
+  sourceStatusRecorded?: string;
   sources: Array<{
     sourceType: AlternativeSourceType;
     url: string;
@@ -222,7 +240,7 @@ export interface PublicLaptopRankingItem {
 }
 
 export interface PublicRecommendationPayload {
-  schemaVersion: "1.0";
+  schemaVersion: "1.0" | "2.0";
   publicationStatus: "provisional" | "final";
   observedAt: string;
   publishedAt: string;
@@ -230,12 +248,18 @@ export interface PublicRecommendationPayload {
   caveats: string;
   scenario: SawScenarioKey;
   scenarioLabel: string;
+  c6Metric?: C6MetricType;
+  c6Unit?: "Wh" | "jam";
   researchSummary: {
     totalResponses: number;
     eligibleResponses: number;
     consistentResponses: number;
     inconsistentResponses: number;
     alternativeCount: number;
+    brandCount?: number;
+    brands?: string[];
+    candidateCount?: number;
+    excludedCandidateCount?: number;
     useCaseBreakdown: Array<{ label: string; count: number; percentage: number }>;
   };
   ahp: {
@@ -254,6 +278,8 @@ export interface PublicRecommendationPayload {
   saw: {
     runId: string;
     algorithmVersion: string;
+    c6Metric?: C6MetricType;
+    c6Unit?: "Wh" | "jam";
     extrema: Record<CriterionCode, SawCriterionExtrema>;
     topMargin: number | null;
     warnings: string[];
@@ -266,6 +292,7 @@ export interface PublicRecommendationPayload {
     rankComparison: SensitivityRankRow[];
     notes: string[];
   };
+  weightSensitivity?: WeightSensitivitySuiteResult | null;
 }
 
 export interface PublicationRecord {
@@ -323,9 +350,28 @@ export interface CreateAlternativeDatasetInput {
   sourceFilename: string | null;
   sourceHash: string | null;
   observedAt: string;
+  c6Metric?: C6MetricType;
+  c6Unit?: "Wh" | "jam";
+  c6Definition?: string;
+  candidateCount?: number | null;
+  excludedCandidates?: ExcludedCandidateRecord[];
   createdBy: string | null;
   notes?: string;
-  alternatives: Omit<ParsedLaptopAlternative, "rowNo" | "validationErrors" | "eligible">[];
+  alternatives: Array<
+    Omit<
+      ParsedLaptopAlternative,
+      | "rowNo"
+      | "validationErrors"
+      | "eligible"
+      | "sourceDateRecorded"
+      | "sourceStatusRecorded"
+      | "selectionReason"
+    > & {
+      sourceDateRecorded?: string;
+      sourceStatusRecorded?: string;
+      selectionReason?: string;
+    }
+  >;
 }
 
 export interface UpsertAlternativeInput {
@@ -341,7 +387,7 @@ export interface UpsertAlternativeInput {
   ramGb: number;
   ssdGb: number;
   weightKg: number;
-  batteryHours: number;
+  batteryHours: number | null;
   batteryWh: number | null;
   seller: string;
   active: boolean;
@@ -349,6 +395,9 @@ export interface UpsertAlternativeInput {
   evidenceStatus: EvidenceStatus;
   batteryProtocol: string;
   evidenceNotes: string;
+  sourceDateRecorded?: string;
+  sourceStatusRecorded?: string;
+  selectionReason?: string;
   sources: Array<{
     sourceType: AlternativeSourceType;
     url: string;

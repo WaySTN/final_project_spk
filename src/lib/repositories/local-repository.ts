@@ -2,6 +2,13 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import {
+  C6_BATTERY_HOURS_LEGACY_DEFINITION,
+  C6_BATTERY_WH_DEFINITION,
+  getC6UnitForMetric,
+  type C6MetricType,
+} from "@/lib/decision";
+import { compareAlternativeCodes } from "@/lib/formatting";
+import {
   RepositoryError,
   type AdminOverviewStats,
   type AhpIndividualResultRecord,
@@ -216,16 +223,49 @@ export class LocalJsonRepository implements DataRepository {
 
   async listAlternativeDatasets(): Promise<AlternativeDatasetRecord[]> {
     const store = this.read();
-    return [...store.alternativeDatasets].sort((a, b) => b.version - a.version);
+    return [...store.alternativeDatasets]
+      .map((d) => ({
+        ...d,
+        c6Metric: (d.c6Metric ?? "battery_hours") as C6MetricType,
+        c6Unit: (d.c6Unit ?? getC6UnitForMetric(d.c6Metric ?? "battery_hours")) as "Wh" | "jam",
+        c6Definition:
+          d.c6Definition ??
+          (d.c6Metric === "battery_wh"
+            ? C6_BATTERY_WH_DEFINITION.definition
+            : C6_BATTERY_HOURS_LEGACY_DEFINITION.definition),
+        candidateCount: d.candidateCount ?? null,
+        excludedCandidates: d.excludedCandidates ?? [],
+      }))
+      .sort((a, b) => b.version - a.version);
   }
 
   async getAlternativeDataset(datasetId: string) {
     const store = this.read();
-    const dataset = store.alternativeDatasets.find((d) => d.id === datasetId);
-    if (!dataset) return null;
+    const rawDataset = store.alternativeDatasets.find((d) => d.id === datasetId);
+    if (!rawDataset) return null;
+    const c6Metric: C6MetricType = rawDataset.c6Metric ?? "battery_hours";
+    const dataset: AlternativeDatasetRecord = {
+      ...rawDataset,
+      c6Metric,
+      c6Unit: rawDataset.c6Unit ?? getC6UnitForMetric(c6Metric),
+      c6Definition:
+        rawDataset.c6Definition ??
+        (c6Metric === "battery_wh"
+          ? C6_BATTERY_WH_DEFINITION.definition
+          : C6_BATTERY_HOURS_LEGACY_DEFINITION.definition),
+      candidateCount: rawDataset.candidateCount ?? null,
+      excludedCandidates: rawDataset.excludedCandidates ?? [],
+    };
     const alternatives = store.alternatives
       .filter((a) => a.datasetId === datasetId)
-      .sort((a, b) => a.code.localeCompare(b.code, "en"));
+      .map((a) => ({
+        ...a,
+        batteryHours: a.batteryHours ?? null,
+        sourceDateRecorded: a.sourceDateRecorded ?? "",
+        sourceStatusRecorded: a.sourceStatusRecorded ?? "",
+        selectionReason: a.selectionReason ?? "",
+      }))
+      .sort((a, b) => compareAlternativeCodes(a.code, b.code));
     return { dataset, alternatives };
   }
 
@@ -236,6 +276,18 @@ export class LocalJsonRepository implements DataRepository {
     const nextVersion =
       store.alternativeDatasets.reduce((max, d) => Math.max(max, d.version), 0) + 1;
 
+    const c6Metric: C6MetricType =
+      input.c6Metric ??
+      (input.alternatives.some((a) => a.batteryHours === null && a.batteryWh !== null)
+        ? "battery_wh"
+        : "battery_hours");
+    const c6Unit = input.c6Unit ?? getC6UnitForMetric(c6Metric);
+    const c6Definition =
+      input.c6Definition ??
+      (c6Metric === "battery_wh"
+        ? C6_BATTERY_WH_DEFINITION.definition
+        : C6_BATTERY_HOURS_LEGACY_DEFINITION.definition);
+
     const datasetId = crypto.randomUUID();
     const now = new Date().toISOString();
     const dataset: AlternativeDatasetRecord = {
@@ -245,6 +297,13 @@ export class LocalJsonRepository implements DataRepository {
       sourceFilename: input.sourceFilename,
       sourceHash: input.sourceHash,
       observedAt: input.observedAt,
+      c6Metric,
+      c6Unit,
+      c6Definition,
+      candidateCount:
+        input.candidateCount ??
+        input.alternatives.length + (input.excludedCandidates?.length ?? 0),
+      excludedCandidates: input.excludedCandidates ?? [],
       createdBy: input.createdBy,
       createdAt: now,
       status: "draft",
@@ -266,14 +325,17 @@ export class LocalJsonRepository implements DataRepository {
         ramGb: alt.ramGb,
         ssdGb: alt.ssdGb,
         weightKg: alt.weightKg,
-        batteryHours: alt.batteryHours,
-        batteryWh: alt.batteryWh,
+        batteryHours: alt.batteryHours ?? null,
+        batteryWh: alt.batteryWh ?? null,
         seller: alt.seller,
         active: alt.active,
         stockStatus: alt.stockStatus,
         evidenceStatus: alt.evidenceStatus,
         batteryProtocol: alt.batteryProtocol,
         evidenceNotes: alt.evidenceNotes,
+        sourceDateRecorded: alt.sourceDateRecorded ?? "",
+        sourceStatusRecorded: alt.sourceStatusRecorded ?? "",
+        selectionReason: alt.selectionReason ?? "",
         createdAt: now,
         sources: alt.sources.map((s) => ({
           id: crypto.randomUUID(),
@@ -308,6 +370,11 @@ export class LocalJsonRepository implements DataRepository {
       sourceFilename: source.dataset.sourceFilename,
       sourceHash: source.dataset.sourceHash,
       observedAt: source.dataset.observedAt,
+      c6Metric: source.dataset.c6Metric,
+      c6Unit: source.dataset.c6Unit,
+      c6Definition: source.dataset.c6Definition,
+      candidateCount: source.dataset.candidateCount,
+      excludedCandidates: source.dataset.excludedCandidates,
       createdBy: actorId,
       notes: `Digandakan dari dataset v${source.dataset.version} (${source.dataset.id}).`,
       alternatives: source.alternatives.map((a) => ({
@@ -329,6 +396,9 @@ export class LocalJsonRepository implements DataRepository {
         evidenceStatus: a.evidenceStatus,
         batteryProtocol: a.batteryProtocol,
         evidenceNotes: a.evidenceNotes,
+        sourceDateRecorded: a.sourceDateRecorded,
+        sourceStatusRecorded: a.sourceStatusRecorded,
+        selectionReason: a.selectionReason,
         sources: a.sources.map((s) => ({
           sourceType: s.sourceType,
           url: s.url,
@@ -390,14 +460,17 @@ export class LocalJsonRepository implements DataRepository {
         ramGb: input.ramGb,
         ssdGb: input.ssdGb,
         weightKg: input.weightKg,
-        batteryHours: input.batteryHours,
-        batteryWh: input.batteryWh,
+        batteryHours: input.batteryHours ?? null,
+        batteryWh: input.batteryWh ?? null,
         seller: input.seller,
         active: input.active,
         stockStatus: input.stockStatus,
         evidenceStatus: input.evidenceStatus,
         batteryProtocol: input.batteryProtocol,
         evidenceNotes: input.evidenceNotes,
+        sourceDateRecorded: input.sourceDateRecorded ?? existing.sourceDateRecorded ?? "",
+        sourceStatusRecorded: input.sourceStatusRecorded ?? existing.sourceStatusRecorded ?? "",
+        selectionReason: input.selectionReason ?? existing.selectionReason ?? "",
         sources: input.sources.map((s) => ({
           id: crypto.randomUUID(),
           alternativeId: existing.id,
@@ -438,14 +511,17 @@ export class LocalJsonRepository implements DataRepository {
       ramGb: input.ramGb,
       ssdGb: input.ssdGb,
       weightKg: input.weightKg,
-      batteryHours: input.batteryHours,
-      batteryWh: input.batteryWh,
+      batteryHours: input.batteryHours ?? null,
+      batteryWh: input.batteryWh ?? null,
       seller: input.seller,
       active: input.active,
       stockStatus: input.stockStatus,
       evidenceStatus: input.evidenceStatus,
       batteryProtocol: input.batteryProtocol,
       evidenceNotes: input.evidenceNotes,
+      sourceDateRecorded: input.sourceDateRecorded ?? "",
+      sourceStatusRecorded: input.sourceStatusRecorded ?? "",
+      selectionReason: input.selectionReason ?? "",
       createdAt: now,
       sources: input.sources.map((s) => ({
         id: crypto.randomUUID(),
@@ -534,27 +610,51 @@ export class LocalJsonRepository implements DataRepository {
 
   async listSawRuns(): Promise<SawRunRecord[]> {
     const store = this.read();
-    return [...store.sawRuns].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return [...store.sawRuns]
+      .map((r) => {
+        const c6Metric: C6MetricType =
+          r.c6Metric ??
+          (r.scenario.includes("_33_") ? "battery_wh" : "battery_hours");
+        return {
+          ...r,
+          c6Metric,
+          c6Unit: r.c6Unit ?? getC6UnitForMetric(c6Metric),
+          weightSensitivity: r.weightSensitivity ?? null,
+        };
+      })
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   async getSawRunDetail(runId: string) {
     const store = this.read();
-    const run = store.sawRuns.find((r) => r.id === runId);
-    if (!run) return null;
+    const rawRun = store.sawRuns.find((r) => r.id === runId);
+    if (!rawRun) return null;
+    const c6Metric: C6MetricType =
+      rawRun.c6Metric ??
+      (rawRun.scenario.includes("_33_") ? "battery_wh" : "battery_hours");
+    const run: SawRunRecord = {
+      ...rawRun,
+      c6Metric,
+      c6Unit: rawRun.c6Unit ?? getC6UnitForMetric(c6Metric),
+      weightSensitivity: rawRun.weightSensitivity ?? null,
+    };
     const results = store.sawResults
       .filter((r) => r.runId === runId)
       .sort((a, b) =>
         a.rank !== b.rank
           ? a.rank - b.rank
-          : a.alternativeCode.localeCompare(b.alternativeCode, "en"),
+          : compareAlternativeCodes(a.alternativeCode, b.alternativeCode),
       );
     const ahpRun = store.ahpRuns.find((a) => a.id === run.ahpRunId);
-    const dataset = store.alternativeDatasets.find((d) => d.id === run.datasetId);
-    if (!ahpRun || !dataset) return null;
-    const alternatives = store.alternatives
-      .filter((a) => a.datasetId === dataset.id)
-      .sort((a, b) => a.code.localeCompare(b.code, "en"));
-    return { run, results, ahpRun, dataset, alternatives };
+    const dsDetail = await this.getAlternativeDataset(run.datasetId);
+    if (!ahpRun || !dsDetail) return null;
+    return {
+      run,
+      results,
+      ahpRun,
+      dataset: dsDetail.dataset,
+      alternatives: dsDetail.alternatives,
+    };
   }
 
   async saveSawRun(params: {

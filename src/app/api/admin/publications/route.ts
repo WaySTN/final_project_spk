@@ -2,6 +2,7 @@ import { z } from "zod";
 import { apiError, apiSuccess, handleRouteError } from "@/lib/api/response";
 import { requireAdmin, verifyWriteOrigin } from "@/lib/auth/session";
 import {
+  buildDefaultPublicationCaveats,
   buildSanitizedPublicPayload,
   validatePublicationGates,
 } from "@/lib/publication/sanitize";
@@ -14,14 +15,7 @@ const publishSchema = z.object({
   sawRunId: z.string().uuid("ID perhitungan SAW utama tidak valid."),
   sensitivityRunIds: z.array(z.string().uuid()).optional().default([]),
   intendedStatus: z.enum(["provisional", "final"]),
-  caveats: z
-    .string()
-    .trim()
-    .max(2000)
-    .optional()
-    .default(
-      "Snapshot penelitian terbatas pada 7 konfigurasi Lenovo pada rentang Rp9.000.000–Rp11.000.000 berdasarkan data audit 25 November 2026. Independensi respons tambahan dan konfirmasi stok ritel langsung belum seluruhnya diverifikasi.",
-    ),
+  caveats: z.string().trim().max(2000).optional(),
   qualityReview: z
     .object({
       primaryRuleVerified: z.boolean().default(false),
@@ -106,7 +100,9 @@ export async function POST(request: Request) {
     if (sensIds.length === 0) {
       const allRuns = await repo.listSawRuns();
       const s2 = allRuns.find(
-        (r) => r.datasetId === sawDetail.run.datasetId && r.scenario === "sensitivity_7_all",
+        (r) =>
+          r.datasetId === sawDetail.run.datasetId &&
+          (r.scenario === "sensitivity_33_all" || r.scenario === "sensitivity_7_all"),
       );
       const s3 = allRuns.find(
         (r) => r.datasetId === sawDetail.run.datasetId && r.scenario === "sensitivity_5_no_a6_a7",
@@ -118,24 +114,36 @@ export async function POST(request: Request) {
     for (const sId of sensIds) {
       const d = await repo.getSawRunDetail(sId);
       if (!d) continue;
-      if (d.run.scenario === "sensitivity_7_all") {
+      if (d.run.scenario === "sensitivity_33_all" || d.run.scenario === "sensitivity_7_all") {
         sensitivityAllEligible = { ahpRun: d.ahpRun, sawResults: d.results };
       } else if (d.run.scenario === "sensitivity_5_no_a6_a7") {
         sensitivityWithoutA6A7 = { sawResults: d.results };
       }
     }
 
+    const brandCount = new Set(alternativesInRun.map((a) => a.brand)).size;
+    const effectiveCaveats =
+      body.caveats && body.caveats.trim().length > 0
+        ? body.caveats.trim()
+        : buildDefaultPublicationCaveats({
+            alternativeCount: alternativesInRun.length,
+            brandCount,
+            observedAt: sawDetail.dataset.observedAt,
+            c6Metric: sawDetail.run.c6Metric ?? sawDetail.dataset.c6Metric,
+          });
+
     const publishedAt = new Date().toISOString();
     const publicPayload = buildSanitizedPublicPayload({
       status: body.intendedStatus,
       observedAt: sawDetail.dataset.observedAt,
       publishedAt,
-      caveats: body.caveats,
+      caveats: effectiveCaveats,
       responses: batchDetail.responses,
       ahpRun: sawDetail.ahpRun,
       sawRun: sawDetail.run,
       sawResults: sawDetail.results,
       alternatives: alternativesInRun,
+      dataset: sawDetail.dataset,
       sensitivityAllEligible,
       sensitivityWithoutA6A7,
     });
@@ -146,7 +154,7 @@ export async function POST(request: Request) {
       publicPayload,
       status: body.intendedStatus,
       reviewedBy: admin.id,
-      caveats: body.caveats,
+      caveats: effectiveCaveats,
       qualityReview: body.qualityReview,
     });
 

@@ -1,15 +1,19 @@
 import { ArrowUpRight } from "lucide-react";
 import { CriteriaWeightsChart } from "@/components/decision/charts";
 import { PairwiseMatrixTable } from "@/components/decision/matrix-table";
+import { WeightSensitivityExplorer } from "@/components/decision/weight-sensitivity-explorer";
 import { PublicationBanner } from "@/components/public/publication-banner";
 import { AlertBanner, Badge, ScoreBar } from "@/components/ui/primitives";
 import {
   ACADEMIC_REFERENCES,
-  CRITERIA,
   PAIRWISE_DEFINITIONS,
   SAATY_SIMPLIFIED_SCALE,
+  buildDecisionEvaluation,
+  getCriteriaForMetric,
+  type C6MetricType,
 } from "@/lib/decision";
 import {
+  formatBatteryValue,
   formatDecimal,
   formatIdr,
   formatInteger,
@@ -34,6 +38,15 @@ export default async function MetodologiPage() {
   const repo = await getRepository();
   const publication = await repo.getCurrentPublication();
   const payload = publication?.publicPayload ?? null;
+  const c6Metric: C6MetricType = payload?.c6Metric ?? payload?.saw.c6Metric ?? "battery_wh";
+  const activeCriteria = getCriteriaForMetric(c6Metric);
+  const evaluation = payload
+    ? buildDecisionEvaluation({
+        items: payload.saw.items,
+        weightSensitivity: payload.weightSensitivity ?? null,
+        c6Metric,
+      })
+    : null;
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:py-12 space-y-8">
@@ -114,7 +127,7 @@ export default async function MetodologiPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e8f0]/70">
-                  {CRITERIA.map((c) => (
+                  {activeCriteria.map((c) => (
                     <tr key={c.code} className="align-top">
                       <td className="px-4 py-3 font-mono text-xs font-semibold text-[#1e293b]">
                         {c.code}
@@ -172,6 +185,13 @@ export default async function MetodologiPage() {
                   bukan representasi populasi seluruh mahasiswa.
                 </p>
                 <p>
+                  <strong className="text-[#1e293b]">Status data kuesioner (Konsultasi Dosen):</strong>{" "}
+                  Berdasarkan hasil konsultasi kelompok dengan dosen pengampu mata kuliah SPK,
+                  data 33 respons kuesioner mahasiswa yang telah terkumpul (17 konsisten CR ≤
+                  0,10 dan 16 tidak konsisten) diizinkan digunakan langsung tanpa wawancara
+                  tambahan.
+                </p>
+                <p>
                   <strong className="text-[#1e293b]">Dasar 15 pertanyaan:</strong> Segitiga
                   atas matriks 6×6 memiliki <code className="font-mono">n(n−1)/2 = 15</code>{" "}
                   pasangan unik; diagonal bernilai 1 dan bawah diagonal diisi kebalikannya.
@@ -181,7 +201,16 @@ export default async function MetodologiPage() {
               <div className="min-w-0 rounded-lg border border-[#e2e8f0] bg-white p-5 space-y-4">
                 <div>
                   <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-[#1e293b]">
-                    Skala Saaty Disederhanakan (Tanpa Nilai Genap)
+                    Skala Pembobotan AHP Lengkap (1, 3, 5, 7, 9 &amp; Resiprokal)
+                  </p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-[#64748b]">
+                    Skala perbandingan memakai 9 titik ganjil dan kebalikannya:{" "}
+                    <span className="font-mono text-[#1e293b]">
+                      &#123;1, 3, 5, 7, 9, 1/3, 1/5, 1/7, 1/9&#125;
+                    </span>
+                    . Nilai antara genap (<span className="font-mono">2, 4, 6, 8</span>) tidak
+                    digunakan agar kategori penilaian lebih ringkas, tegas, dan mengurangi beban
+                    kognitif mahasiswa pada 15 perbandingan daring.
                   </p>
                   <div className="mt-2.5 overflow-x-auto rounded border border-[#e2e8f0]">
                     <table className="w-full border-collapse text-xs">
@@ -333,7 +362,7 @@ export default async function MetodologiPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#e2e8f0]/70 tabular-nums">
-                        {CRITERIA.map((c) => (
+                        {activeCriteria.map((c) => (
                           <tr key={c.code}>
                             <td className="px-3.5 py-2.5 font-medium text-[#1e293b]">
                               <span className="font-mono text-[#64748b] mr-1.5">
@@ -400,7 +429,9 @@ export default async function MetodologiPage() {
                           <th className="px-3 py-2.5 text-right">C3</th>
                           <th className="px-3 py-2.5 text-right">C4</th>
                           <th className="px-3 py-2.5 text-right">C5 (kg)</th>
-                          <th className="px-3 py-2.5 text-right">C6 (jam)</th>
+                          <th className="px-3 py-2.5 text-right">
+                            C6 ({c6Metric === "battery_wh" ? "Wh" : "jam"})
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#e2e8f0]/70 font-mono tabular-nums">
@@ -410,6 +441,9 @@ export default async function MetodologiPage() {
                               {item.code}
                             </td>
                             <td className="px-3 py-2.5 font-sans text-[#1e293b]">
+                              <span className="mr-1.5 font-mono text-[10px] text-[#1e3a5f]">
+                                [{item.brand}]
+                              </span>
                               {item.model}
                             </td>
                             <td className="px-3 py-2.5 text-right">
@@ -424,7 +458,7 @@ export default async function MetodologiPage() {
                               {formatDecimal(item.weightKg, 2)}
                             </td>
                             <td className="px-3 py-2.5 text-right">
-                              {formatDecimal(item.batteryHours, 1)}
+                              {formatBatteryValue(item, c6Metric)}
                             </td>
                           </tr>
                         ))}
@@ -435,7 +469,7 @@ export default async function MetodologiPage() {
 
                 <div className="space-y-1.5">
                   <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#64748b]">
-                    Matriks Normalisasi (R) & Skor Preferensi (V)
+                    Matriks Normalisasi (R) &amp; Skor Preferensi (V)
                   </p>
                   <div className="overflow-x-auto rounded-lg border border-[#e2e8f0] bg-white">
                     <table className="w-full min-w-[680px] border-collapse text-xs">
@@ -445,7 +479,7 @@ export default async function MetodologiPage() {
                           <th className="sticky left-0 bg-[#f8fafc] border-r border-[#e2e8f0] px-3 py-2.5">
                             Kode
                           </th>
-                          {CRITERIA.map((c) => (
+                          {activeCriteria.map((c) => (
                             <th key={c.code} className="px-2.5 py-2.5 text-right">
                               R_{c.code}
                             </th>
@@ -462,7 +496,7 @@ export default async function MetodologiPage() {
                             <td className="sticky left-0 bg-white border-r border-[#e2e8f0] px-3 py-2.5 font-semibold text-[#1e293b]">
                               {item.code}
                             </td>
-                            {CRITERIA.map((c) => (
+                            {activeCriteria.map((c) => (
                               <td
                                 key={c.code}
                                 className="px-2.5 py-2.5 text-right text-[#475569]"
@@ -470,7 +504,7 @@ export default async function MetodologiPage() {
                                 {formatDecimal(item.normalizedValues[c.code], 6)}
                               </td>
                             ))}
-                            <td className="px-3 py-2.5 text-right font-bold text-[#1e293b]">
+                            <td className="px-3 py-2.5 text-right font-bold text-[#1e3a5f]">
                               {formatDecimal(item.score, 6)}
                             </td>
                           </tr>
@@ -479,60 +513,95 @@ export default async function MetodologiPage() {
                     </table>
                   </div>
                 </div>
+
+                {evaluation && evaluation.insights.length > 0 && (
+                  <AlertBanner tone="neutral" title="Evaluasi Kesesuaian Hasil Keputusan">
+                    <ul className="list-disc pl-4 space-y-1 text-xs">
+                      {evaluation.insights.map((ins, i) => (
+                        <li key={i}>{ins}</li>
+                      ))}
+                    </ul>
+                  </AlertBanner>
+                )}
               </section>
 
-              <section id="sensitivitas" className="scroll-mt-24 space-y-4">
+              <section id="sensitivitas" className="scroll-mt-24 space-y-5">
                 <div className="space-y-1">
                   <p className="editorial-kicker">06 / Stabilitas Peringkat</p>
                   <h2 className="text-xl font-semibold tracking-[-0.02em] text-[#1e293b]">
-                    Analisis Sensitivitas Lintas Skenario
+                    Analisis Sensitivitas Bobot (37 Skenario) &amp; Pembanding Responden
                   </h2>
                   <p className="text-sm text-[#475569]">
-                    Perubahan peringkat saat seluruh 33 respons disertakan atau saat A6 & A7
-                    dikeluarkan (simulasi risiko ketersediaan stok).
+                    Menguji stabilitas pemeringkatan terhadap perubahan satu bobot kriteria pada
+                    kisaran −20%, −10%, −5%, +5%, +10%, dan +20% dengan penyesuaian proporsional
+                    lima bobot lainnya sehingga total bobot selalu tetap sama dengan 1.
                   </p>
                 </div>
 
-                <div className="overflow-x-auto rounded-lg border border-[#e2e8f0] bg-white">
-                  <table className="w-full min-w-[680px] border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[10px] uppercase text-[#64748b]">
-                        <th className="sticky left-0 bg-[#f8fafc] border-r border-[#e2e8f0] px-3 py-2.5">
-                          Kode
-                        </th>
-                        <th className="px-3 py-2.5">Alternatif</th>
-                        <th className="px-3 py-2.5 text-right">S1 (7 Alt · 17)</th>
-                        <th className="px-3 py-2.5 text-right">S2 (7 Alt · 33)</th>
-                        <th className="px-3 py-2.5 text-right">S3 (5 Alt Tanpa A6/A7)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#e2e8f0]/70 tabular-nums">
-                      {payload.sensitivity.rankComparison.map((row) => (
-                        <tr key={row.code}>
-                          <td className="sticky left-0 bg-white border-r border-[#e2e8f0] px-3 py-2.5 font-mono font-semibold text-[#1e293b]">
-                            {row.code}
-                          </td>
-                          <td className="px-3 py-2.5 text-[#1e293b]">{row.model}</td>
-                          <td className="px-3 py-2.5 text-right font-mono">
-                            {row.rankPrimary !== null
-                              ? `#${row.rankPrimary} (${formatDecimal(row.scorePrimary ?? 0, 6)})`
-                              : "—"}
-                          </td>
-                          <td className="px-3 py-2.5 text-right font-mono">
-                            {row.rankAllEligible !== null
-                              ? `#${row.rankAllEligible} (${formatDecimal(row.scoreAllEligible ?? 0, 6)})`
-                              : "—"}
-                          </td>
-                          <td className="px-3 py-2.5 text-right font-mono text-[#475569]">
-                            {row.rankWithoutA6A7 !== null
-                              ? `#${row.rankWithoutA6A7} (${formatDecimal(row.scoreWithoutA6A7 ?? 0, 6)})`
-                              : "Dikeluarkan"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                {payload.weightSensitivity && (
+                  <WeightSensitivityExplorer
+                    suite={payload.weightSensitivity}
+                    c6Metric={c6Metric}
+                  />
+                )}
+
+                {payload.sensitivity.rankComparison.some(
+                  (r) => r.rankAllEligible !== null || r.rankWithoutA6A7 !== null,
+                ) && (
+                  <div className="space-y-2 pt-2">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#64748b]">
+                      Pembanding Sensitivitas Panel Responden (17 Konsisten vs 33 Eligible)
+                    </p>
+                    <div className="overflow-x-auto max-h-[420px] overflow-y-auto rounded-lg border border-[#e2e8f0] bg-white">
+                      <table className="w-full min-w-[660px] border-collapse text-xs">
+                        <thead className="sticky top-0 z-10">
+                          <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-left font-mono text-[10px] uppercase text-[#64748b]">
+                            <th className="sticky left-0 bg-[#f8fafc] border-r border-[#e2e8f0] px-3 py-2.5">
+                              Kode
+                            </th>
+                            <th className="px-3 py-2.5">Alternatif</th>
+                            <th className="px-3 py-2.5 text-right">Utama (17 Konsisten)</th>
+                            <th className="px-3 py-2.5 text-right">Pembanding (33 Resp)</th>
+                            {payload.sensitivity.rankComparison.some(
+                              (r) => r.rankWithoutA6A7 !== null,
+                            ) && (
+                              <th className="px-3 py-2.5 text-right">Subset Tanpa A6/A7</th>
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#e2e8f0]/70 tabular-nums">
+                          {payload.sensitivity.rankComparison.map((row) => (
+                            <tr key={row.code}>
+                              <td className="sticky left-0 bg-white border-r border-[#e2e8f0] px-3 py-2.5 font-mono font-semibold text-[#1e293b]">
+                                {row.code}
+                              </td>
+                              <td className="px-3 py-2.5 text-[#1e293b]">{row.model}</td>
+                              <td className="px-3 py-2.5 text-right font-mono">
+                                {row.rankPrimary !== null
+                                  ? `#${row.rankPrimary} (${formatDecimal(row.scorePrimary ?? 0, 6)})`
+                                  : "—"}
+                              </td>
+                              <td className="px-3 py-2.5 text-right font-mono">
+                                {row.rankAllEligible !== null
+                                  ? `#${row.rankAllEligible} (${formatDecimal(row.scoreAllEligible ?? 0, 6)})`
+                                  : "—"}
+                              </td>
+                              {payload.sensitivity.rankComparison.some(
+                                (r) => r.rankWithoutA6A7 !== null,
+                              ) && (
+                                <td className="px-3 py-2.5 text-right font-mono text-[#475569]">
+                                  {row.rankWithoutA6A7 !== null
+                                    ? `#${row.rankWithoutA6A7} (${formatDecimal(row.scoreWithoutA6A7 ?? 0, 6)})`
+                                    : "Dikeluarkan"}
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
 
                 <AlertBanner tone="warning" title="Aturan Pembacaan Sensitivitas">
                   <ul className="list-disc pl-4 space-y-1 text-xs">
@@ -602,14 +671,21 @@ export default async function MetodologiPage() {
                   respons sehingga konfirmasi manual peneliti tetap diperlukan.
                 </li>
                 <li>
-                  Alternatif baseline terbatas pada 7 konfigurasi Lenovo demi keseragaman
-                  pengukuran daya tahan baterai (Lenovo PSREF video lokal 1080p @ 150 nit),
-                  dan seluruh kandidat memiliki SSD 512 GB (kontribusi C4 konstan).
+                  Pada versi penelitian UAS (33 alternatif lintas 8 merek: Lenovo, ASUS, Acer,
+                  HP, MSI, Axioo, TECNO, dan Infinix), kriteria C6 menggunakan kapasitas energi
+                  baterai (Wh) sebagai proksi daya tahan baterai — bukan durasi pemakaian aktual
+                  karena efisiensi prosesor, layar, dan beban kerja berbeda antar laptop.
+                </li>
+                <li>
+                  Sembilan kandidat yang tidak memenuhi kelengkapan spesifikasi, mengalami
+                  konflik data sumber, berada di luar rentang harga, atau berupa arsip lama
+                  (A9, A19, A24, A25, A26, A31, A32, A35, A36) dikeluarkan dari pemeringkatan
+                  utama dan disimpan semata sebagai arsip audit.
                 </li>
                 <li>
                   Harga dan ketersediaan merupakan snapshot audit bertanggal (bukan real-time),
-                  sebagian seri (A4, A6, A7) berstatus <em>withdrawn</em>, dan stok belum
-                  dikonfirmasi langsung ke penjual oleh kelompok.
+                  dan ketersediaan stok aktual belum dikonfirmasi melalui transaksi checkout
+                  langsung ke penjual.
                 </li>
               </ul>
             </div>

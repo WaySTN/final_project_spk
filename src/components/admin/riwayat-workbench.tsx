@@ -17,7 +17,10 @@ import {
   Textarea,
 } from "@/components/ui/primitives";
 import { formatDateTimeJakarta } from "@/lib/formatting";
-import { getScenarioLabel } from "@/lib/publication/sanitize";
+import {
+  buildDefaultPublicationCaveats,
+  getScenarioLabel,
+} from "@/lib/publication/sanitize";
 import type {
   PublicationRecord,
   QualityReviewChecklist,
@@ -31,7 +34,7 @@ const CHECKLIST_ITEMS = [
   ],
   [
     "sourcesAndSkuReviewed",
-    "Keempat tautan sumber, tingkat SKU, dan protokol baterai C6 telah diperiksa manual.",
+    "Keempat tautan sumber, tingkat SKU, dan protokol baterai C6 (Wh / jam) telah diperiksa manual.",
   ],
   [
     "responseIndependenceConfirmed",
@@ -43,9 +46,21 @@ const CHECKLIST_ITEMS = [
   ],
   [
     "caveatsAcknowledged",
-    "Keterbatasan merek tunggal (Lenovo), sensitivitas A7/A6, dan snapshot tanggal telah diakui.",
+    "Keterbatasan ruang lingkup merek/kandidat, proksi baterai Wh, hasil analisis sensitivitas, dan snapshot tanggal telah diakui.",
   ],
 ] as const;
+
+function defaultCaveatsForRun(run: SawRunRecord | undefined): string {
+  if (!run) {
+    return "Snapshot penelitian sementara (provisional) berdasarkan preferensi panel mahasiswa (AHP) dan data penawaran bersumber (SAW). Harga dan ketersediaan stok dapat berubah sewaktu-waktu.";
+  }
+  return buildDefaultPublicationCaveats({
+    alternativeCount: run.inputSnapshot.alternativeCodes.length,
+    brandCount: run.c6Metric === "battery_wh" ? 8 : 1,
+    observedAt: run.inputSnapshot.observedAt,
+    c6Metric: run.c6Metric ?? "battery_wh",
+  });
+}
 
 export function RiwayatWorkbench({
   initialSawRuns,
@@ -54,19 +69,18 @@ export function RiwayatWorkbench({
   initialSawRuns: SawRunRecord[];
   initialPublications: PublicationRecord[];
 }) {
+  const defaultRun =
+    initialSawRuns.find((r) => r.scenario === "primary_33_consistent") ??
+    initialSawRuns.find((r) => r.scenario === "primary_7_consistent") ??
+    initialSawRuns[0];
+
   const [publications, setPublications] =
     useState<PublicationRecord[]>(initialPublications);
-  const [selectedSawRunId, setSelectedSawRunId] = useState<string>(
-    initialSawRuns.find((r) => r.scenario === "primary_7_consistent")?.id ??
-      initialSawRuns[0]?.id ??
-      "",
-  );
+  const [selectedSawRunId, setSelectedSawRunId] = useState<string>(defaultRun?.id ?? "");
   const [intendedStatus, setIntendedStatus] = useState<"provisional" | "final">(
     "provisional",
   );
-  const [caveats, setCaveats] = useState(
-    "Snapshot penelitian terbatas pada 7 konfigurasi Lenovo dalam rentang Rp9.000.000–Rp11.000.000 pada tanggal audit 25 November 2026. Harga dan stok dapat berubah; independensi 10 respons tambahan serta konfirmasi stok ritel langsung memerlukan verifikasi lanjutan.",
-  );
+  const [caveats, setCaveats] = useState(() => defaultCaveatsForRun(defaultRun));
   const [checklist, setChecklist] = useState<QualityReviewChecklist>({
     primaryRuleVerified: true,
     sourcesAndSkuReviewed: false,
@@ -185,13 +199,18 @@ export function RiwayatWorkbench({
                   <Select
                     id="pub-saw-run"
                     value={selectedSawRunId}
-                    onChange={(e) => setSelectedSawRunId(e.target.value)}
+                    onChange={(e) => {
+                      const nextId = e.target.value;
+                      setSelectedSawRunId(nextId);
+                      const matched = initialSawRuns.find((r) => r.id === nextId);
+                      if (matched) setCaveats(defaultCaveatsForRun(matched));
+                    }}
                   >
                     {initialSawRuns.map((r) => (
                       <option key={r.id} value={r.id}>
                         {formatDateTimeJakarta(r.createdAt)} · {r.scenario} (v
                         {r.inputSnapshot.datasetVersion} ·{" "}
-                        {r.inputSnapshot.alternativeCodes.length} alt)
+                        {r.inputSnapshot.alternativeCodes.length} alt · C6 {r.c6Unit})
                       </option>
                     ))}
                   </Select>
@@ -395,8 +414,13 @@ export function RiwayatWorkbench({
                       <td className="px-4 py-3 font-mono text-[#475569]">
                         v{run.inputSnapshot.datasetVersion} ({run.inputSnapshot.observedAt})
                       </td>
-                      <td className="px-4 py-3 font-mono text-[#1e293b]">
-                        {run.inputSnapshot.alternativeCodes.join(", ")}
+                      <td
+                        className="px-4 py-3 font-mono text-[#1e293b]"
+                        title={run.inputSnapshot.alternativeCodes.join(", ")}
+                      >
+                        {run.inputSnapshot.alternativeCodes.length > 10
+                          ? `${run.inputSnapshot.alternativeCodes.length} kandidat (${run.inputSnapshot.alternativeCodes.slice(0, 3).join(", ")} … ${run.inputSnapshot.alternativeCodes[run.inputSnapshot.alternativeCodes.length - 1]})`
+                          : run.inputSnapshot.alternativeCodes.join(", ")}
                       </td>
                       <td className="px-4 py-3 font-mono text-[#64748b]">
                         {run.algorithmVersion}

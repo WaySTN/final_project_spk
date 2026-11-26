@@ -7,6 +7,7 @@ import {
   History,
   Laptop,
   Scale,
+  SlidersHorizontal,
   Users,
 } from "lucide-react";
 import {
@@ -173,7 +174,7 @@ export default async function AdminOverviewPage() {
           </p>
           <p className="mt-1.5 text-xs text-[#64748b]">
             {stats.latestDataset
-              ? `Audit ${formatDateJakarta(stats.latestDataset.observedAt)} · Withdrawn: ${stats.withdrawnCount}`
+              ? `v${stats.latestDataset.version} · C6 ${stats.latestDataset.c6Unit} · Audit ${formatDateJakarta(stats.latestDataset.observedAt)}${stats.latestDataset.excludedCandidates.length > 0 ? ` · Arsip dikeluarkan: ${stats.latestDataset.excludedCandidates.length}` : ""}`
               : "Belum ada dataset"}
           </p>
         </div>
@@ -284,7 +285,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Shortcuts Ledger */}
-      <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] sm:grid-cols-3">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/admin/perhitungan/ahp"
           className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f8fafc]"
@@ -292,6 +293,19 @@ export default async function AdminOverviewPage() {
           <div className="flex items-center gap-3">
             <Scale className="h-4 w-4 text-[#1e3a5f]" aria-hidden="true" />
             <span className="text-sm font-medium text-[#1e293b]">Audit &amp; Hitung AHP</span>
+          </div>
+          <ArrowRight
+            className="h-4 w-4 text-[#94a3b8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"
+            aria-hidden="true"
+          />
+        </Link>
+        <Link
+          href="/admin/perhitungan/sensitivitas"
+          className="group flex items-center justify-between bg-white px-5 py-4 transition-colors hover:bg-[#f8fafc]"
+        >
+          <div className="flex items-center gap-3">
+            <SlidersHorizontal className="h-4 w-4 text-[#1e3a5f]" aria-hidden="true" />
+            <span className="text-sm font-medium text-[#1e293b]">Sensitivitas 37 Skenario</span>
           </div>
           <ArrowRight
             className="h-4 w-4 text-[#94a3b8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#1e3a5f]"

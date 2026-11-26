@@ -160,10 +160,11 @@ describe("End-to-end backend workflow: repository immutability, publication gate
           C3: a.ramGb,
           C4: a.ssdGb,
           C5: a.weightKg,
-          C6: a.batteryHours,
+          C6: a.batteryHours!,
         },
       })),
       scenario: "primary_7_consistent",
+      c6Metric: "battery_hours",
       ahpMode: "consistent_only",
     });
 
@@ -172,6 +173,8 @@ describe("End-to-end backend workflow: repository immutability, publication gate
         ahpRunId: savedAhp.id,
         datasetId: ds1.id,
         scenario: sawOut.scenario,
+        c6Metric: "battery_hours",
+        c6Unit: "jam",
         algorithmVersion: sawOut.algorithmVersion,
         inputSnapshot: {
           ahpMode: savedAhp.mode,
@@ -267,7 +270,7 @@ describe("End-to-end backend workflow: repository immutability, publication gate
     expect(serialized).not.toContain("46337.422259");
     expect(publicPayload.bannerText).toContain("Validasi respons/sumber belum seluruhnya dikonfirmasi");
 
-    // 7. Verify XLSX Export generates valid 7-sheet workbook with weights, ranks, and URLs
+    // 7. Verify XLSX Export generates valid 8-sheet workbook with weights, ranks, sensitivity 37, and URLs
     const xlsxBuf = await buildCalculationReportWorkbook({
       sawRun: savedSaw,
       sawResults: sawDetail.results,
@@ -286,11 +289,12 @@ describe("End-to-end backend workflow: repository immutability, publication gate
       "Alternatif & Sumber",
       "Normalisasi SAW",
       "Kontribusi & Ranking",
+      "Sensitivitas Bobot 37",
       "Sensitivitas",
     ]);
 
     const rankSheet = parsedWb.getWorksheet("Kontribusi & Ranking")!;
     expect(rankSheet.getRow(2).getCell(2).value).toBe("A7");
-    expect(Number(rankSheet.getRow(2).getCell(10).value)).toBeCloseTo(0.953349, 5);
+    expect(Number(rankSheet.getRow(2).getCell(11).value)).toBeCloseTo(0.953349, 5);
   });
 });

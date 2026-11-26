@@ -2,6 +2,8 @@ export type CriterionCode = "C1" | "C2" | "C3" | "C4" | "C5" | "C6";
 
 export type CriterionAttribute = "cost" | "benefit";
 
+export type C6MetricType = "battery_wh" | "battery_hours";
+
 export type AllowedScaleToken =
   | "1"
   | "3"
@@ -147,6 +149,8 @@ export interface SawCriterionExtrema {
 }
 
 export type SawScenarioKey =
+  | "primary_33_consistent"
+  | "sensitivity_33_all"
   | "primary_7_consistent"
   | "sensitivity_7_all"
   | "sensitivity_5_no_a6_a7"
@@ -167,6 +171,8 @@ export interface SawAlternativeResult {
 export interface SawRunOutput {
   algorithmVersion: string;
   scenario: SawScenarioKey;
+  c6Metric: C6MetricType;
+  c6Unit: string;
   ahpMode?: AhpMode;
   alternativeCount: number;
   weights: number[];
@@ -197,4 +203,54 @@ export interface SensitivitySuiteResult {
   sawWithoutA6A7: SawRunOutput | null;
   rankComparison: SensitivityRankRow[];
   notes: string[];
+}
+
+export interface WeightSensitivityAlternativeEntry {
+  code: string;
+  model: string;
+  score: number;
+  rank: number;
+  baselineScore: number;
+  baselineRank: number;
+  /** Positive means moved UP in rank (e.g., from #2 to #1 = +1). */
+  rankDelta: number;
+  scoreDelta: number;
+  isTied: boolean;
+}
+
+export interface WeightSensitivityScenarioResult {
+  label: string;
+  criterion: CriterionCode | null;
+  relativeDelta: number;
+  baseWeights: number[];
+  baseWeightsByCode: Record<CriterionCode, number>;
+  weights: number[];
+  weightsByCode: Record<CriterionCode, number>;
+  weightSum: number;
+  winnerCode: string;
+  winnerModel: string;
+  maxScore: number;
+  winnerChangedFromBaseline: boolean;
+  results: WeightSensitivityAlternativeEntry[];
+}
+
+export interface WeightSensitivitySuiteResult {
+  baselineWinnerCode: string;
+  baselineWinnerModel: string;
+  baselineWinnerScore: number;
+  deltas: readonly number[];
+  totalScenarios: number;
+  perturbedScenarioCount: number;
+  baselineWinnerWinsCount: number;
+  baselineWinnerStabilityPct: number;
+  winnerCounts: Array<{ code: string; model: string; count: number; percentage: number }>;
+  winnerChangeScenarios: Array<{
+    label: string;
+    criterion: CriterionCode;
+    relativeDelta: number;
+    winnerCode: string;
+    winnerModel: string;
+    maxScore: number;
+  }>;
+  scenarios: WeightSensitivityScenarioResult[];
 }

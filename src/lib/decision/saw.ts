@@ -1,16 +1,18 @@
 import {
   ALGORITHM_VERSION,
-  CRITERIA,
   CRITERIA_COUNT,
   CRITERION_CODES,
   PRICE_MAX_IDR,
   PRICE_MIN_IDR,
   SAW_TIE_TOLERANCE,
   SAW_WEIGHT_SUM_TOLERANCE,
+  getC6UnitForMetric,
+  getCriteriaForMetric,
 } from "./criteria";
 import { weightsArrayToRecord } from "./ahp";
 import type {
   AhpMode,
+  C6MetricType,
   CriteriaNumericVector,
   CriterionCode,
   SawAlternativeMetricInput,
@@ -19,6 +21,15 @@ import type {
   SawRunOutput,
   SawScenarioKey,
 } from "./types";
+
+function compareCodeNaturally(a: string, b: string): number {
+  const ma = /^([A-Za-z]+)(\d+)$/.exec(a.trim());
+  const mb = /^([A-Za-z]+)(\d+)$/.exec(b.trim());
+  if (ma && mb && ma[1]!.toUpperCase() === mb[1]!.toUpperCase()) {
+    return Number(ma[2]) - Number(mb[2]);
+  }
+  return a.localeCompare(b, "en", { numeric: true });
+}
 
 export class SawComputationError extends Error {
   readonly code: string;
@@ -34,6 +45,7 @@ export interface RunSawParams {
   weights: readonly number[];
   alternatives: readonly SawAlternativeMetricInput[];
   scenario: SawScenarioKey;
+  c6Metric?: C6MetricType;
   ahpMode?: AhpMode;
   enforcePriceRange?: boolean;
 }
@@ -48,9 +60,13 @@ export function runSaw(params: RunSawParams): SawRunOutput {
     weights,
     alternatives,
     scenario,
+    c6Metric = "battery_wh",
     ahpMode,
     enforcePriceRange = true,
   } = params;
+
+  const activeCriteria = getCriteriaForMetric(c6Metric);
+  const c6Unit = getC6UnitForMetric(c6Metric);
 
   if (weights.length !== CRITERIA_COUNT) {
     throw new SawComputationError(
@@ -128,7 +144,7 @@ export function runSaw(params: RunSawParams): SawRunOutput {
     );
   }
 
-  for (const criterion of CRITERIA) {
+  for (const criterion of activeCriteria) {
     const code = criterion.code;
     let minVal = Infinity;
     let maxVal = -Infinity;
@@ -167,7 +183,7 @@ export function runSaw(params: RunSawParams): SawRunOutput {
     const weightedValues = {} as CriteriaNumericVector;
     let totalScore = 0;
 
-    for (const criterion of CRITERIA) {
+    for (const criterion of activeCriteria) {
       const code = criterion.code;
       const x = alt.criteria[code];
       const ext = extrema[code];
@@ -210,11 +226,11 @@ export function runSaw(params: RunSawParams): SawRunOutput {
     };
   });
 
-  // Step 3: Sort by full-precision descending score; tie-break deterministically by code
+  // Step 3: Sort by full-precision descending score; tie-break deterministically by natural code order
   scored.sort((a, b) => {
     const diff = b.score - a.score;
     if (Math.abs(diff) <= SAW_TIE_TOLERANCE) {
-      return a.code.localeCompare(b.code, "en");
+      return compareCodeNaturally(a.code, b.code);
     }
     return diff > 0 ? 1 : -1;
   });
@@ -239,15 +255,17 @@ export function runSaw(params: RunSawParams): SawRunOutput {
   const topMargin =
     scored.length >= 2 ? scored[0]!.score - scored[1]!.score : null;
 
-  if (topMargin !== null && topMargin > SAW_TIE_TOLERANCE && topMargin < 0.001) {
+  if (topMargin !== null && topMargin > SAW_TIE_TOLERANCE && topMargin < 0.01) {
     warnings.push(
-      `Selisih skor peringkat 1 (${scored[0]!.code}) dan peringkat 2 (${scored[1]!.code}) sangat tipis (${topMargin.toFixed(6)}). Peringkat sensitif terhadap perubahan bobot atau harga.`,
+      `Selisih skor peringkat 1 (${scored[0]!.code}) dan peringkat 2 (${scored[1]!.code}) relatif tipis (${topMargin.toFixed(6)}). Peringkat teratas sensitif terhadap perubahan bobot kriteria atau harga.`,
     );
   }
 
   return {
     algorithmVersion: ALGORITHM_VERSION,
     scenario,
+    c6Metric,
+    c6Unit,
     ahpMode,
     alternativeCount: alternatives.length,
     weights: [...weights],

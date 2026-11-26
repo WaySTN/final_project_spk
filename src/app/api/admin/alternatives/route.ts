@@ -1,16 +1,40 @@
 import { z } from "zod";
 import { apiError, apiSuccess, handleRouteError } from "@/lib/api/response";
 import { requireAdmin, verifyWriteOrigin } from "@/lib/auth/session";
-import { alternativeDraftSchema } from "@/lib/import/validation";
+import { alternativeDraftBaseSchema } from "@/lib/import/validation";
 import { getRepository } from "@/lib/repositories";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const createOrUpdateSchema = alternativeDraftSchema.extend({
+const createOrUpdateBaseSchema = alternativeDraftBaseSchema.extend({
   id: z.string().uuid().optional(),
   datasetId: z.string().uuid("ID dataset tidak valid."),
 });
+
+const createOrUpdateSchema = createOrUpdateBaseSchema.refine(
+  (data) =>
+    (typeof data.batteryWh === "number" && data.batteryWh > 0) ||
+    (typeof data.batteryHours === "number" && data.batteryHours > 0),
+  {
+    message:
+      "Minimal salah satu nilai baterai positif wajib diisi (kapasitas Wh untuk dataset UAS atau durasi jam untuk dataset historis).",
+    path: ["batteryWh"],
+  },
+);
+
+const updateExistingSchema = createOrUpdateBaseSchema
+  .extend({ id: z.string().uuid() })
+  .refine(
+    (data) =>
+      (typeof data.batteryWh === "number" && data.batteryWh > 0) ||
+      (typeof data.batteryHours === "number" && data.batteryHours > 0),
+    {
+      message:
+        "Minimal salah satu nilai baterai positif wajib diisi (kapasitas Wh untuk dataset UAS atau durasi jam untuk dataset historis).",
+      path: ["batteryWh"],
+    },
+  );
 
 const patchActionSchema = z.discriminatedUnion("action", [
   z.object({
@@ -25,7 +49,7 @@ const patchActionSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("update_alternative"),
-    payload: createOrUpdateSchema.extend({ id: z.string().uuid() }),
+    payload: updateExistingSchema,
   }),
 ]);
 
@@ -59,8 +83,28 @@ export async function POST(request: Request) {
 
     const body = createOrUpdateSchema.parse(await request.json());
     const repo = await getRepository();
+    const ds = await repo.getAlternativeDataset(body.datasetId);
+    if (!ds) {
+      return apiError(404, "DATASET_NOT_FOUND", "Dataset alternatif tidak ditemukan.");
+    }
+    if (ds.dataset.c6Metric === "battery_wh" && (!body.batteryWh || body.batteryWh <= 0)) {
+      return apiError(
+        422,
+        "MISSING_BATTERY_WH",
+        "Dataset ini menggunakan kriteria C6 Kapasitas Baterai (Wh). Isi nilai kapasitas baterai (Wh) yang positif.",
+      );
+    }
+    if (ds.dataset.c6Metric === "battery_hours" && (!body.batteryHours || body.batteryHours <= 0)) {
+      return apiError(
+        422,
+        "MISSING_BATTERY_HOURS",
+        "Dataset historis ini menggunakan kriteria C6 Daya Tahan Baterai (jam). Isi nilai durasi baterai (jam) yang positif.",
+      );
+    }
+
     const saved = await repo.upsertDraftAlternative({
       ...body,
+      batteryHours: body.batteryHours ?? null,
       batteryWh: body.batteryWh ?? null,
     });
 
@@ -126,8 +170,34 @@ export async function PATCH(request: Request) {
       return apiSuccess({ alternative: updated });
     }
 
+    const ds = await repo.getAlternativeDataset(parsed.payload.datasetId);
+    if (!ds) {
+      return apiError(404, "DATASET_NOT_FOUND", "Dataset alternatif tidak ditemukan.");
+    }
+    if (
+      ds.dataset.c6Metric === "battery_wh" &&
+      (!parsed.payload.batteryWh || parsed.payload.batteryWh <= 0)
+    ) {
+      return apiError(
+        422,
+        "MISSING_BATTERY_WH",
+        "Dataset ini menggunakan kriteria C6 Kapasitas Baterai (Wh). Isi nilai kapasitas baterai (Wh) yang positif.",
+      );
+    }
+    if (
+      ds.dataset.c6Metric === "battery_hours" &&
+      (!parsed.payload.batteryHours || parsed.payload.batteryHours <= 0)
+    ) {
+      return apiError(
+        422,
+        "MISSING_BATTERY_HOURS",
+        "Dataset historis ini menggunakan kriteria C6 Daya Tahan Baterai (jam). Isi nilai durasi baterai (jam) yang positif.",
+      );
+    }
+
     const saved = await repo.upsertDraftAlternative({
       ...parsed.payload,
+      batteryHours: parsed.payload.batteryHours ?? null,
       batteryWh: parsed.payload.batteryWh ?? null,
     });
 

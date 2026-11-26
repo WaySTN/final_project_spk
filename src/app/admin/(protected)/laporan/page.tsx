@@ -16,13 +16,14 @@ import { getRepository } from "@/lib/repositories";
 export const dynamic = "force-dynamic";
 
 const WORKBOOK_SHEETS = [
-  { num: "01", name: "Ringkasan", desc: "Identitas penelitian, versi algoritma & status" },
+  { num: "01", name: "Ringkasan", desc: "Identitas UAS, C6 metric, merek, versi algoritma & stabilitas" },
   { num: "02", name: "Bobot AHP", desc: "Eigenvector, λmaks, CI, CR (RI = 1,24)" },
   { num: "03", name: "Matriks AIJ", desc: "Matriks gabungan 6×6 rata-rata geometrik" },
-  { num: "04", name: "Alternatif & Sumber", desc: "Data mentah C1–C6 & 4 tautan bukti" },
+  { num: "04", name: "Alternatif & Sumber", desc: "Data mentah C1–C6 (merek & Wh/jam) + 4 tautan bukti" },
   { num: "05", name: "Normalisasi SAW", desc: "Nilai ekstrem min/max & matriks R" },
   { num: "06", name: "Kontribusi & Ranking", desc: "Kontribusi berbobot wⱼ·rᵢⱼ & skor V" },
-  { num: "07", name: "Sensitivitas", desc: "Perbandingan lintas skenario S1, S2 & S3" },
+  { num: "07", name: "Sensitivitas Bobot 37", desc: "1 baseline + 36 variasi bobot (±5%, ±10%, ±20%)" },
+  { num: "08", name: "Sensitivitas", desc: "Perbandingan lintas skenario responden (17 vs 33)" },
 ];
 
 export default async function AdminLaporanPage() {
@@ -42,14 +43,14 @@ export default async function AdminLaporanPage() {
           Laporan &amp; Ekspor Workbook Excel (.xlsx)
         </h1>
         <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#64748b]">
-          Unduh workbook audit lengkap berisi 7 sheet terstruktur untuk verifikasi dosen
-          pengampu dan lampiran laporan tugas akhir.
+          Unduh workbook audit lengkap berisi 8 sheet terstruktur (termasuk 37 skenario analisis
+          sensitivitas bobot) untuk verifikasi dosen pengampu dan lampiran laporan UAS.
         </p>
       </div>
 
-      {/* 7-Sheet Manifest Ledger */}
+      {/* 8-Sheet Manifest Ledger */}
       <div className="space-y-2.5">
-        <p className="editorial-kicker">Struktur 7 Sheet Workbook Audit (.xlsx)</p>
+        <p className="editorial-kicker">Struktur 8 Sheet Workbook Audit (.xlsx)</p>
         <div className="grid gap-px overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#e2e8f0] sm:grid-cols-2 lg:grid-cols-4">
           {WORKBOOK_SHEETS.map((sheet) => (
             <div key={sheet.num} className="bg-white p-3.5">
@@ -64,14 +65,6 @@ export default async function AdminLaporanPage() {
               </p>
             </div>
           ))}
-          <div className="bg-[#f8fafc] p-3.5 flex flex-col justify-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748b]">
-              Keamanan Ekspor
-            </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-[#475569]">
-              Formula-injection sanitized · tanpa baris mentah responden.
-            </p>
-          </div>
         </div>
       </div>
 

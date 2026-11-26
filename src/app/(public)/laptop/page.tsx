@@ -30,7 +30,10 @@ export default async function KatalogLaptopPage() {
       ) : (
         <>
           <PublicationBanner payload={payload} />
-          <CatalogExplorer items={payload.saw.items} />
+          <CatalogExplorer
+            items={payload.saw.items}
+            c6Metric={payload.c6Metric ?? payload.saw.c6Metric ?? "battery_wh"}
+          />
         </>
       )}
     </div>

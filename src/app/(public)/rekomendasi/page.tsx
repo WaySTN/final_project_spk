@@ -16,6 +16,8 @@ export default async function RekomendasiPage() {
   const publication = await repo.getCurrentPublication();
   const payload = publication?.publicPayload ?? null;
 
+  const c6Metric = payload?.c6Metric ?? payload?.saw.c6Metric ?? "battery_wh";
+
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:py-12 space-y-6">
       <div className="flex flex-col gap-4 border-b border-[#e2e8f0] pb-6 sm:flex-row sm:items-end sm:justify-between">
@@ -29,7 +31,10 @@ export default async function RekomendasiPage() {
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-[#475569]">
             Diurutkan berdasarkan nilai preferensi SAW presisi penuh menggunakan bobot
-            kriteria panel mahasiswa (AHP) pada rentang Rp9.000.000–Rp11.000.000.
+            kriteria panel mahasiswa (AHP) pada rentang Rp9.000.000–Rp11.000.000
+            {payload
+              ? ` (${payload.saw.items.length} alternatif lintas ${payload.researchSummary.brandCount ?? new Set(payload.saw.items.map((i) => i.brand)).size} merek).`
+              : "."}
           </p>
         </div>
 
@@ -50,19 +55,44 @@ export default async function RekomendasiPage() {
         <>
           <PublicationBanner payload={payload} />
 
-          {payload.saw.topMargin !== null && payload.saw.topMargin < 0.001 && (
+          {payload.saw.topMargin !== null && payload.saw.topMargin < 0.01 && (
             <AlertBanner tone="neutral" title="Catatan Sensitivitas Peringkat Teratas">
-              Peringkat #1 (<strong>{payload.saw.items[0]?.code}</strong>) dan #2 (
-              <strong>{payload.saw.items[1]?.code}</strong>) hanya terpaut{" "}
+              Peringkat #1 (<strong>{payload.saw.items[0]?.code}</strong> —{" "}
+              {payload.saw.items[0]?.brand}) dan #2 (
+              <strong>{payload.saw.items[1]?.code}</strong> —{" "}
+              {payload.saw.items[1]?.brand}) terpaut{" "}
               <strong className="font-mono tabular-nums">
                 {formatDecimal(payload.saw.topMargin, 6)}
               </strong>
-              . Jangan mengartikan peringkat pertama unggul jauh secara mutlak; periksa
-              kontribusi kriteria dan status stok pada halaman detail.
+              .{" "}
+              {payload.weightSensitivity && (
+                <>
+                  Pada uji sensitivitas {payload.weightSensitivity.perturbedScenarioCount}{" "}
+                  skenario bobot, <strong>{payload.weightSensitivity.baselineWinnerCode}</strong>{" "}
+                  bertahan di #1 pada{" "}
+                  <strong>
+                    {payload.weightSensitivity.baselineWinnerWinsCount}/
+                    {payload.weightSensitivity.perturbedScenarioCount}
+                  </strong>{" "}
+                  skenario.{" "}
+                </>
+              )}
+              Tinjau kontribusi kriteria di bawah atau simulasi lengkap pada{" "}
+              <Link
+                href="/metodologi#sensitivitas"
+                className="font-semibold text-[#1e3a5f] underline"
+              >
+                Analisis Sensitivitas
+              </Link>
+              .
             </AlertBanner>
           )}
 
-          <RecommendationExplorer items={payload.saw.items} />
+          <RecommendationExplorer
+            items={payload.saw.items}
+            c6Metric={c6Metric}
+            weightSensitivity={payload.weightSensitivity ?? null}
+          />
         </>
       )}
     </div>

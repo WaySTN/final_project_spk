@@ -1,12 +1,16 @@
 import {
   AHP_CR_THRESHOLD,
   RESEARCH_TARGET_CONSISTENT_COUNT,
+  getC6UnitForMetric,
+  runWeightSensitivitySuite,
+  type C6MetricType,
   type SawScenarioKey,
   type SensitivityRankRow,
 } from "@/lib/decision";
-import { formatDateJakarta, isSafeHttpUrl } from "@/lib/formatting";
+import { compareAlternativeCodes, formatDateJakarta, isSafeHttpUrl } from "@/lib/formatting";
 import type {
   AhpRunRecord,
+  AlternativeDatasetRecord,
   AlternativeRecord,
   PublicLaptopRankingItem,
   PublicRecommendationPayload,
@@ -23,15 +27,32 @@ export interface PublicationGateResult {
 
 export function getScenarioLabel(scenario: SawScenarioKey): string {
   switch (scenario) {
+    case "primary_33_consistent":
+      return "Skenario Utama UAS — 33 Alternatif Lintas 8 Merek & Responden Konsisten (CR ≤ 0,10)";
+    case "sensitivity_33_all":
+      return "Sensitivitas — 33 Alternatif & Seluruh Responden Eligible (33 Respons)";
     case "primary_7_consistent":
-      return "Skenario Utama — 7 Alternatif & Responden Konsisten (CR ≤ 0,10)";
+      return "Skenario Utama Historis — 7 Alternatif Lenovo & Responden Konsisten (CR ≤ 0,10)";
     case "sensitivity_7_all":
-      return "Sensitivitas — 7 Alternatif & Seluruh Responden Eligible";
+      return "Sensitivitas Historis — 7 Alternatif & Seluruh Responden Eligible";
     case "sensitivity_5_no_a6_a7":
-      return "Sensitivitas — 5 Alternatif Tanpa A6 & A7 (Simulasi Risiko Stok)";
+      return "Sensitivitas Historis — 5 Alternatif Tanpa A6 & A7 (Simulasi Risiko Stok)";
     default:
       return "Skenario Kustom Penelitian";
   }
+}
+
+export function buildDefaultPublicationCaveats(params: {
+  alternativeCount: number;
+  brandCount: number;
+  observedAt: string;
+  c6Metric: C6MetricType;
+}): string {
+  const formattedDate = formatDateJakarta(params.observedAt);
+  if (params.c6Metric === "battery_wh") {
+    return `Snapshot penelitian sementara (provisional) mencakup ${params.alternativeCount} konfigurasi laptop dari ${params.brandCount} merek pada rentang Rp9.000.000–Rp11.000.000 berdasarkan audit ${formattedDate}. Kriteria C6 menggunakan kapasitas energi baterai (Wh) sebagai indikator pendekatan daya tahan baterai dengan asumsi konsumsi daya setara, bukan durasi pemakaian aktual. Harga dan ketersediaan stok dapat berubah sewaktu-waktu dan belum diverifikasi melalui transaksi checkout langsung.`;
+  }
+  return `Snapshot penelitian historis sementara (provisional) mencakup ${params.alternativeCount} konfigurasi laptop pada rentang Rp9.000.000–Rp11.000.000 berdasarkan data audit ${formattedDate}. Independensi respons tambahan dan konfirmasi stok ritel langsung belum seluruhnya diverifikasi.`;
 }
 
 export function buildPublicBannerText(
@@ -145,6 +166,7 @@ export function buildSanitizedPublicPayload(params: {
   sawRun: SawRunRecord;
   sawResults: SawResultRecord[];
   alternatives: AlternativeRecord[];
+  dataset?: AlternativeDatasetRecord | null;
   sensitivityAllEligible?: {
     ahpRun: AhpRunRecord;
     sawResults: SawResultRecord[];
@@ -163,9 +185,14 @@ export function buildSanitizedPublicPayload(params: {
     sawRun,
     sawResults,
     alternatives,
+    dataset = null,
     sensitivityAllEligible,
     sensitivityWithoutA6A7,
   } = params;
+
+  const c6Metric: C6MetricType =
+    sawRun.c6Metric ?? dataset?.c6Metric ?? "battery_wh";
+  const c6Unit = sawRun.c6Unit ?? dataset?.c6Unit ?? getC6UnitForMetric(c6Metric);
 
   const altMap = new Map(alternatives.map((a) => [a.id, a]));
   const totalResponses = responses.length;
@@ -191,7 +218,7 @@ export function buildSanitizedPublicPayload(params: {
 
   const sortedResults = [...sawResults].sort((a, b) => {
     if (a.rank !== b.rank) return a.rank - b.rank;
-    return a.alternativeCode.localeCompare(b.alternativeCode, "en");
+    return compareAlternativeCodes(a.alternativeCode, b.alternativeCode);
   });
 
   const items: PublicLaptopRankingItem[] = sortedResults.map((res) => {
@@ -217,6 +244,8 @@ export function buildSanitizedPublicPayload(params: {
       evidenceStatus: alt.evidenceStatus,
       batteryProtocol: alt.batteryProtocol,
       evidenceNotes: alt.evidenceNotes,
+      sourceDateRecorded: alt.sourceDateRecorded,
+      sourceStatusRecorded: alt.sourceStatusRecorded,
       sources: alt.sources.map((s) => ({
         sourceType: s.sourceType,
         url: s.url,
@@ -232,6 +261,30 @@ export function buildSanitizedPublicPayload(params: {
       isTied: res.isTied,
     };
   });
+
+  const brands = Array.from(new Set(items.map((i) => i.brand))).sort((a, b) =>
+    a.localeCompare(b, "id"),
+  );
+  const excludedCandidateCount = dataset?.excludedCandidates?.length ?? 0;
+  const candidateCount =
+    dataset?.candidateCount ?? items.length + excludedCandidateCount;
+
+  const weightSensitivity =
+    sawRun.weightSensitivity ??
+    (items.length > 0
+      ? runWeightSensitivitySuite({
+          baseWeights: ahpRun.weights,
+          baselineItems: items.map((i) => ({
+            code: i.code,
+            model: i.model,
+            normalizedValues: i.normalizedValues,
+            weightedValues: i.weightedValues,
+            criteriaValues: i.criteriaValues,
+            score: i.score,
+            rank: i.rank,
+          })),
+        })
+      : null);
 
   const s2ByCode = new Map(
     (sensitivityAllEligible?.sawResults ?? []).map((r) => [r.alternativeCode, r]),
@@ -255,8 +308,18 @@ export function buildSanitizedPublicPayload(params: {
     };
   });
 
+  const sensitivityNotes: string[] = [
+    "Analisis sensitivitas bobot mengubah satu bobot kriteria pada kisaran ±5%, ±10%, dan ±20% dengan penyesuaian proporsional lima bobot lain sehingga total bobot selalu tetap sama dengan 1.",
+    "Skenario seluruh respons (33 respons termasuk CR > 0,10) hanya digunakan sebagai pembanding metodologis, bukan pengganti uji konsistensi individual CR ≤ 0,10.",
+  ];
+  if (sensitivityWithoutA6A7) {
+    sensitivityNotes.push(
+      "Nilai skor absolut antara skenario penuh dan skenario himpunan alternatif tereduksi tidak boleh dibandingkan langsung karena basis normalisasi min/max dihitung ulang.",
+    );
+  }
+
   return {
-    schemaVersion: "1.0",
+    schemaVersion: "2.0",
     publicationStatus: status,
     observedAt,
     publishedAt,
@@ -264,12 +327,18 @@ export function buildSanitizedPublicPayload(params: {
     caveats,
     scenario: sawRun.scenario,
     scenarioLabel: getScenarioLabel(sawRun.scenario),
+    c6Metric,
+    c6Unit,
     researchSummary: {
       totalResponses,
       eligibleResponses,
       consistentResponses,
       inconsistentResponses,
       alternativeCount: items.length,
+      brandCount: brands.length,
+      brands,
+      candidateCount,
+      excludedCandidateCount,
       useCaseBreakdown,
     },
     ahp: {
@@ -288,6 +357,8 @@ export function buildSanitizedPublicPayload(params: {
     saw: {
       runId: sawRun.id,
       algorithmVersion: sawRun.algorithmVersion,
+      c6Metric,
+      c6Unit,
       extrema: sawRun.normalizationExtrema,
       topMargin: sawRun.topMargin,
       warnings: sawRun.warnings,
@@ -298,10 +369,8 @@ export function buildSanitizedPublicPayload(params: {
       allEligibleCr: sensitivityAllEligible?.ahpRun.cr ?? null,
       allEligibleWeightsByCode: sensitivityAllEligible?.ahpRun.weightsByCode ?? null,
       rankComparison,
-      notes: [
-        "Nilai skor absolut antara skenario 7 alternatif dan skenario 5 alternatif (tanpa A6 & A7) tidak boleh dibandingkan langsung karena basis normalisasi min/max dihitung ulang.",
-        "Skenario 33 respons hanya digunakan sebagai pembanding sensitivitas, bukan pengganti uji konsistensi individual CR ≤ 0,10.",
-      ],
+      notes: sensitivityNotes,
     },
+    weightSensitivity,
   };
 }
